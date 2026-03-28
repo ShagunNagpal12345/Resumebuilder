@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  background-color: #05080A; /* Ensures no white flash on load */
+}
+/* Fix text overflow for all templates */
+.resume-preview-wrapper p, 
+.resume-preview-wrapper span, 
+.resume-preview-wrapper h1, 
+.resume-preview-wrapper h2, 
+.resume-preview-wrapper h3, 
+.resume-preview-wrapper h4 {
+    white-space: pre-wrap !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+}
+
+/* Prevent items from being sliced in half by automatic page breaks */
+.resume-preview-wrapper section, 
+.resume-preview-wrapper .experience-item,
+.resume-preview-wrapper .education-item,
+.resume-preview-wrapper .project-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+/* Manual Page Break Logic */
+.manual-page-break {
+    break-before: page;
+    page-break-before: always;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Custom Scrollbar for the Editor */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+/* Fix for the text overflow shown in Shagun's screenshot */
+.resume-preview-wrapper p, .resume-preview-wrapper span {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+}
+
+/* Page Break and Section avoid-split logic */
+.manual-page-break {
+  break-before: page;
+  page-break-before: always;
+  height: 0;
+}
+
+.resume-preview-wrapper section {
+  break-inside: avoid;
+}
+
+/* Custom Scrollbar for Editor */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+/* Multi-page PDF logic: Force a new page when a user toggles the Page Break button */
+.manual-page-break {
+  break-before: page;
+  page-break-before: always;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* Safety for templates: Ensure sections don't split awkwardly across pages */
+.resume-preview-wrapper section {
+  break-inside: avoid;
+}
+
+/* Global text safety: Prevents long strings or URLs from breaking the layout */
+.resume-preview-wrapper p, 
+.resume-preview-wrapper span, 
+.resume-preview-wrapper h1, 
+.resume-preview-wrapper h2, 
+.resume-preview-wrapper h3, 
+.resume-preview-wrapper h4 {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Thumbnail specific scale logic for Gallery */
+.resume-thumbnail-container {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
