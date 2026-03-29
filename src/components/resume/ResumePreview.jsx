@@ -394,8 +394,8 @@ import * as Tpl from './templates';
 const ResumePreview = ({ data, template }) => {
   const templatesMap = {
     // --- 1. ATS & TRADITIONAL ---
-    'academic': Tpl.Academic,
-    'ats': Tpl.Ats,
+    'Academic': Tpl.Academic,
+    'Ats': Tpl.Ats,
     'classic': Tpl.Classic,
     'formal': Tpl.Formal,
     'minimal': Tpl.Minimal,
@@ -428,7 +428,7 @@ const ResumePreview = ({ data, template }) => {
 
     // --- 4. CREATIVE, MARKETING & DESIGN ---
     'amber-visual': Tpl.AmberVisual,
-    'artistic': Tpl.Artistic,
+    'Artistic': Tpl.Artistic,
     'berlin': Tpl.Berlin,
     'bubble-header': Tpl.BubbleHeader,
     'creative': Tpl.Creative,
@@ -453,7 +453,7 @@ const ResumePreview = ({ data, template }) => {
     'sunset-slim': Tpl.SunsetSlim,
 
     // --- 6. SPECIALIZED INDUSTRY ---
-    'architect': Tpl.Architect,
+    'Architect': Tpl.Architect,
     'medical': Tpl.Medical,
     'teacher': Tpl.Teacher,
 
@@ -483,7 +483,7 @@ const ResumePreview = ({ data, template }) => {
     'info-green': Tpl.InfoGreen,
     'info-navy': Tpl.InfoNavy,
     'info-teal': Tpl.InfoTeal,
-    'mosaic': Tpl.Mosaic
+    'Mosaic': Tpl.Mosaic
   };
 
   // Fallback to Professional if template ID is missing

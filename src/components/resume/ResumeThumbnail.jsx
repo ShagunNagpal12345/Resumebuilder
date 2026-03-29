@@ -1,32 +1,3 @@
-// import React from 'react';
-// import ResumePreview from './ResumePreview';
-
-// const ResumeThumbnail = ({ data, templateId }) => {
-//   return (
-//     <div className="w-full h-full overflow-hidden relative bg-white pointer-events-none select-none">
-//       {/* A4 Aspect Ratio Container 
-//           We scale the entire A4 page (210mm) down to fit the card width.
-//           Standard Card width is ~300px, so a scale of ~0.15 to 0.2 works best.
-//       */}
-//       <div 
-//         className="absolute top-0 left-0 origin-top-left"
-//         style={{ 
-//           width: '210mm', 
-//           height: '397mm', 
-//           transform: 'scale(0.18)', // Adjust this number to fit your card size
-//         }}
-//       >
-//         <ResumePreview data={data} template={templateId} />
-//       </div>
-      
-//       {/* Overlay to prevent interaction and add a slight gradient */}
-//       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/5 z-10" />
-//     </div>
-//   );
-// };
-
-// export default ResumeThumbnail;
-
 import React, { useRef, useState, useEffect } from 'react';
 import ResumePreview from './ResumePreview';
 
