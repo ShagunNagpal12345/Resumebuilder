@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Sparkles,
   Zap,
+  Brain,
   Flame,
   TrendingUp,
   Clock
@@ -121,7 +122,7 @@ const ResumeSelection = ({ onSelect }) => {
                     <div className="relative z-10 p-10 flex flex-col justify-between h-full max-w-xl">
                         <div className="flex items-center gap-3 mb-4">
                              <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                                <Zap size={14} fill="currentColor" /> New Engine v2.0
+                                <Brain size={14} fill="currentColor" /> New Engine v2.0
                              </span>
                              <div className="flex gap-1">
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Visual_Studio_Code_1.35_icon.svg/512px-Visual_Studio_Code_1.35_icon.svg.png" className="w-6 h-6 opacity-70 grayscale hover:grayscale-0 transition-all"/>
@@ -223,7 +224,7 @@ const ResumeSelection = ({ onSelect }) => {
         {/* --- RIGHT SIDEBAR (Simplified Friends List style) --- */}
         <div className="w-20 bg-[#2d1a1e] rounded-[30px] p-4 flex flex-col items-center gap-6 border border-white/5">
              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/20 transition-all cursor-pointer">
-                <Zap size={20} />
+                <Brain size={20} />
              </div>
              <div className="w-full h-[2px] bg-white/5"></div>
              {[1,2,3,4,5].map(i => (

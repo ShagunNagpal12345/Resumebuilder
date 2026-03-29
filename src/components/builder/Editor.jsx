@@ -2987,11 +2987,428 @@
 
 
 
+// import React, { useState, useRef } from 'react';
+// import { 
+//   Download, ChevronLeft, Trash2, User, Briefcase, 
+//   GraduationCap, CheckCircle, Award, Globe, Layers,
+//   Cpu, FileText, PanelLeftClose, PanelLeftOpen, Camera, X, LayoutGrid, Sparkles
+// } from 'lucide-react';
+
+// import html2canvas from 'html2canvas';
+// import jsPDF from 'jspdf';
+// import ResumePreview from "../resume/ResumePreview"; 
+// import ResumeThumbnail from "../resume/ResumeThumbnail"; 
+// import { TEMPLATES } from './TemplateGallery'; 
+
+// // --- NEW IMPORT FOR AI FEATURE ---
+// import AIEnhanceModal from './AIEnhanceModal'; 
+
+// // --- HELPER COMPONENTS ---
+// const NavItem = ({ id, icon: Icon, label, active, onClick, isOpen }) => (
+//   <button 
+//     onClick={() => onClick(id)}
+//     title={!isOpen ? label : ''} 
+//     className={`
+//       flex items-center gap-3 py-3 text-sm font-bold transition-all duration-200
+//       ${isOpen ? 'px-4 w-full rounded-r-full mr-4' : 'px-0 w-full justify-center rounded-none'}
+//       ${active === id 
+//         ? 'bg-teal-50 text-teal-700 border-l-4 border-teal-600' 
+//         : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent'}
+//     `}
+//   >
+//     <Icon size={20} />
+//     <span className={`whitespace-nowrap transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}>
+//       {label}
+//     </span>
+//   </button>
+// );
+
+// const Input = ({ label, value, onChange, placeholder }) => (
+//   <div className="mb-4">
+//     <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">{label}</label>
+//     <input 
+//       value={value || ''}
+//       onChange={(e) => onChange(e.target.value)}
+//       placeholder={placeholder}
+//       className="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-sm font-medium focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 outline-none transition-all"
+//     />
+//   </div>
+// );
+
+// const TextArea = ({ label, value, onChange, placeholder }) => (
+//   <div className="mb-4">
+//     <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">{label}</label>
+//     <textarea 
+//       value={value || ''}
+//       onChange={(e) => onChange(e.target.value)}
+//       placeholder={placeholder}
+//       className="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 outline-none transition-all h-24 resize-none"
+//     />
+//   </div>
+// );
+
+// // --- AI ENHANCEABLE TEXT AREA ---
+// const AIEnhanceableTextArea = ({ label, value, onChange, placeholder, onEnhanceClick }) => (
+//   <div className="mb-4 relative group">
+//     <div className="flex justify-between items-end mb-1.5">
+//       <label className="block text-xs font-bold text-slate-500 uppercase">{label}</label>
+      
+//       {/* Sparkle Button (Only shows if there is text to enhance) */}
+//       {value && value.length > 10 && (
+//         <button 
+//           onClick={onEnhanceClick}
+//           className="text-[10px] font-bold uppercase tracking-widest text-teal-600 bg-teal-50 px-2 py-1 rounded border border-teal-100 hover:bg-teal-100 hover:shadow-sm transition-all flex items-center gap-1"
+//           title="Rewrite using AI"
+//         >
+//           <Sparkles size={10} /> Enhance with AI
+//         </button>
+//       )}
+//     </div>
+    
+//     <textarea 
+//       value={value || ''}
+//       onChange={(e) => onChange(e.target.value)}
+//       placeholder={placeholder}
+//       className="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 outline-none transition-all h-32 resize-none"
+//     />
+//   </div>
+// );
+
+// // --- MAIN EDITOR ---
+// const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack }) => {
+//   const [activeSection, setActiveSection] = useState('personal');
+//   const [isSidebarOpen, setIsSidebarOpen] = useState(true); 
+//   const [isFormOpen, setIsFormOpen] = useState(true); // State for hiding the form
+//   const previewRef = useRef(null);
+
+//   // --- AI MODAL STATE ---
+//   const [aiModalConfig, setAiModalConfig] = useState({
+//     isOpen: false,
+//     text: '',
+//     type: '',
+//     onApply: null
+//   });
+
+//   // --- DATA INITIALIZATION ---
+//   const initializeData = (data) => {
+//     const getList = (arr) => Array.isArray(arr) ? arr : [];
+    
+//     // Normalize skills to ensure 'core' and 'soft' are synced initially
+//     const softSkills = getList(data?.skills?.soft || data?.skills?.core);
+
+//     const safeData = {
+//       personal: { 
+//         name: '', title: '', email: '', phone: '', location: '', 
+//         summary: '', linkedin: '', photo: null,
+//         ...(data?.personal || {}) 
+//       },
+//       experience: getList(data?.experience),
+//       education: getList(data?.education),
+//       skills: { 
+//         technical: getList(data?.skills?.technical),
+//         soft: softSkills,
+//         core: softSkills // Dual mapping for compatibility
+//       },
+//       projects: getList(data?.projects),
+//       languages: getList(data?.languages),
+//       certifications: getList(data?.certifications),
+//       awards: getList(data?.awards)
+//     };
+    
+//     ['experience', 'education', 'projects', 'languages', 'certifications', 'awards'].forEach(key => {
+//       safeData[key] = safeData[key].map(item => ({ ...item, id: item.id || Date.now() + Math.random() }));
+//     });
+
+//     return safeData;
+//   };
+
+//   const [resume, setResume] = useState(initializeData(initialData));
+
+//   // --- HANDLERS ---
+//   const handlePersonalChange = (field, value) => {
+//     setResume(prev => ({ ...prev, personal: { ...prev.personal, [field]: value } }));
+//   };
+
+//   const handlePhotoUpload = (e) => {
+//     const file = e.target.files[0];
+//     if (file) {
+//       const reader = new FileReader();
+//       reader.onloadend = () => {
+//         handlePersonalChange('photo', reader.result);
+//       };
+//       reader.readAsDataURL(file);
+//     }
+//   };
+
+//   const handleSkillsChange = (type, valueString) => {
+//     const list = valueString.split(',').map(s => s.trim());
+//     if (type === 'soft' || type === 'core') {
+//         // Update both to keep templates in sync
+//         setResume(prev => ({ ...prev, skills: { ...prev.skills, soft: list, core: list } }));
+//     } else {
+//         setResume(prev => ({ ...prev, skills: { ...prev.skills, [type]: list } }));
+//     }
+//   };
+
+//   const addListItem = (section) => {
+//     const newItem = { id: Date.now(), title: '', name: '', date: '', desc: '', issuer: '', role: '', company: '' }; 
+//     setResume(prev => ({ ...prev, [section]: [...prev[section], newItem] }));
+//   };
+
+//   const updateListItem = (section, id, field, value) => {
+//     setResume(prev => ({
+//       ...prev,
+//       [section]: prev[section].map(item => item.id === id ? { ...item, [field]: value } : item)
+//     }));
+//   };
+
+//   const removeListItem = (section, id) => {
+//     setResume(prev => ({ ...prev, [section]: prev[section].filter(item => item.id !== id) }));
+//   };
+
+//   // --- PDF GENERATION ---
+//   const handleDownload = async () => {
+//     const element = previewRef.current;
+//     if (!element) return;
+
+//     const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+//     const imgData = canvas.toDataURL('image/png');
+
+//     const pdf = new jsPDF('p', 'mm', 'a4');
+//     const pageWidth = pdf.internal.pageSize.getWidth();   
+//     const pageHeight = pdf.internal.pageSize.getHeight(); 
+
+//     const imgWidth = pageWidth; 
+//     const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+//     let heightLeft = imgHeight;
+//     let position = 0;
+
+//     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+//     heightLeft -= pageHeight;
+
+//     while (heightLeft > 0) {
+//       position = heightLeft - imgHeight;
+//       pdf.addPage();
+//       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+//       heightLeft -= pageHeight;
+//     }
+
+//     pdf.save(`Resume_${resume.personal.name || 'Export'}.pdf`);
+//   };
+
+//   // --- AI ENHANCE HANDLER ---
+//   const openAIModal = (textToEnhance, type, applyCallback) => {
+//     setAiModalConfig({
+//       isOpen: true,
+//       text: textToEnhance,
+//       type: type,
+//       onApply: applyCallback
+//     });
+//   };
+
+//   return (
+//     <div className="h-screen bg-slate-50 flex flex-col font-sans text-slate-900 relative overflow-hidden">
+      
+//       {/* AI ENHANCER MODAL OVERLAY */}
+//       <AIEnhanceModal 
+//         isOpen={aiModalConfig.isOpen}
+//         currentText={aiModalConfig.text}
+//         contextType={aiModalConfig.type}
+//         jobTitle={resume.personal.title || "Professional"}
+//         onClose={() => setAiModalConfig({ ...aiModalConfig, isOpen: false })}
+//         onSelect={(newText) => {
+//           if (aiModalConfig.onApply) aiModalConfig.onApply(newText);
+//         }}
+//       />
+
+//       {/* TOP BAR */}
+//       <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-40 relative">
+//         <div className="flex items-center gap-4">
+//           <button onClick={onBack} className="p-2 rounded hover:bg-slate-100 text-slate-500"><ChevronLeft size={20}/></button>
+//           <span className="font-bold text-slate-700 flex items-center gap-2"><FileText size={18} className="text-teal-600"/> Resume Editor</span>
+//         </div>
+//         <div className="flex items-center gap-3">
+//           {/* Hide/Show Editor Toggle Button */}
+//           <button 
+//             onClick={() => setIsFormOpen(!isFormOpen)} 
+//             className="bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg text-sm font-bold flex items-center hover:bg-slate-50 transition-all shadow-sm active:scale-95"
+//           >
+//             {isFormOpen ? 'Review Resume' : 'Edit Resume'}
+//           </button>
+//           <button onClick={handleDownload} className="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-slate-800 transition-all shadow-md active:scale-95">
+//             <Download size={16}/> Download PDF
+//           </button>
+//         </div>
+//       </div>
+
+//       <div className="flex-1 flex overflow-hidden">
+        
+//         {/* SIDEBAR */}
+//         <div className={`bg-white border-r border-slate-200 py-6 overflow-y-auto shrink-0 transition-all duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'w-64' : 'w-20'} z-10 relative`}>
+//           <div className={`px-6 mb-6 flex items-center ${isSidebarOpen ? 'justify-between' : 'justify-center'}`}>
+//             {isSidebarOpen && <h2 className="text-xs font-black uppercase text-slate-400 tracking-widest">Sections</h2>}
+//             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-slate-400 hover:text-teal-600 transition-colors p-1 rounded-md hover:bg-slate-100">
+//                 {isSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={20} />}
+//             </button>
+//           </div>
+
+//           <nav className="space-y-1 flex-1">
+//             <NavItem id="templates" icon={LayoutGrid} label="Change Template" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
+//             <div className="my-4 border-t border-slate-100 mx-4"></div>
+//             <NavItem id="personal" icon={User} label="Personal Details" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
+//             <NavItem id="experience" icon={Briefcase} label="Experience" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
+//             <NavItem id="education" icon={GraduationCap} label="Education" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
+//             <NavItem id="skills" icon={Cpu} label="Skills" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
+//             <NavItem id="projects" icon={Layers} label="Projects" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
+//             <NavItem id="certifications" icon={CheckCircle} label="Certifications" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
+//             <NavItem id="awards" icon={Award} label="Awards" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
+//             <NavItem id="languages" icon={Globe} label="Languages" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
+//           </nav>
+//         </div>
+
+//         {/* EDITOR FORM AREA */}
+//         {/* Added dynamic width class logic here to open/close the form completely */}
+//         <div className={`bg-slate-50 border-r border-slate-200 overflow-y-auto shrink-0 z-0 relative transition-all duration-300 ease-in-out ${isFormOpen ? 'w-[450px] p-8 opacity-100' : 'w-0 p-0 opacity-0 border-none overflow-hidden'}`}>
+//            <div className="max-w-md mx-auto w-[386px]"> {/* Locked inner width so inputs don't squash when animating closed */}
+//             <h2 className="text-2xl font-bold text-slate-900 mb-6 capitalize">
+//                 {activeSection === 'templates' ? 'Select Template' : activeSection}
+//             </h2>
+
+//             {/* --- LIVE TEMPLATE PREVIEW PICKER --- */}
+//             {activeSection === 'templates' && (
+//                 <div className="grid grid-cols-2 gap-4">
+//                     {TEMPLATES.map(tpl => (
+//                         <div 
+//                             key={tpl.id} 
+//                             onClick={() => onChangeTemplate(tpl.id)} // This triggers the App.jsx state properly!
+//                             className={`
+//                                 cursor-pointer rounded-xl border-2 overflow-hidden relative transition-all hover:scale-[1.02] group
+//                                 ${selectedTemplate === tpl.id ? 'border-teal-600 ring-2 ring-teal-600/20' : 'border-slate-200 hover:border-teal-400'}
+//                             `}
+//                         >
+//                             {/* LIVE PREVIEW CONTAINER */}
+//                             <div className="h-40 w-full bg-slate-100 overflow-hidden relative">
+//                                 <div className="absolute top-0 left-0 w-[400%] h-[400%] transform scale-[0.25] origin-top-left pointer-events-none select-none bg-white">
+//                                     {/* Make sure Thumbnail receives the actual updated 'resume' state so previews are live */}
+//                                     <ResumeThumbnail templateId={tpl.id} data={resume} />
+//                                 </div>
+//                                 {/* Hover overlay */}
+//                                 <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors"></div>
+//                             </div>
+                            
+//                             <div className="p-3 bg-white border-t border-slate-100">
+//                                 <span className="text-xs font-bold text-slate-700 block truncate">{tpl.name}</span>
+//                             </div>
+//                         </div>
+//                     ))}
+//                 </div>
+//             )}
+            
+//             {/* PERSONAL */}
+//             {activeSection === 'personal' && (
+//               <div className="space-y-4">
+//                  <div className="mb-6">
+//                     <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Profile Picture</label>
+//                     <div className="flex items-center gap-4">
+//                         <div className="w-16 h-16 rounded-full bg-slate-200 overflow-hidden border-2 border-slate-300 flex items-center justify-center relative group">
+//                             {resume.personal.photo ? <img src={resume.personal.photo} alt="Profile" className="w-full h-full object-cover" /> : <User className="text-slate-400" />}
+//                         </div>
+//                         <label className="bg-white border border-slate-200 text-slate-700 px-3 py-1.5 rounded-md text-xs font-bold cursor-pointer hover:bg-slate-50 flex items-center gap-2">
+//                              <Camera size={14}/> Upload <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+//                         </label>
+//                     </div>
+//                 </div>
+//                 <Input label="Full Name" value={resume.personal.name} onChange={(v) => handlePersonalChange('name', v)} />
+//                 <Input label="Job Title" value={resume.personal.title} onChange={(v) => handlePersonalChange('title', v)} />
+//                 <Input label="Email" value={resume.personal.email} onChange={(v) => handlePersonalChange('email', v)} />
+//                 <Input label="Phone" value={resume.personal.phone} onChange={(v) => handlePersonalChange('phone', v)} />
+//                 <Input label="LinkedIn" value={resume.personal.linkedin} onChange={(v) => handlePersonalChange('linkedin', v)} />
+//                 <Input label="Location" value={resume.personal.location} onChange={(v) => handlePersonalChange('location', v)} />
+//                 <AIEnhanceableTextArea 
+//                   label="Professional Summary" 
+//                   value={resume.personal.summary} 
+//                   onChange={(v) => handlePersonalChange('summary', v)} 
+//                   onEnhanceClick={() => openAIModal(resume.personal.summary, "Professional Summary", (newText) => handlePersonalChange('summary', newText))}
+//                 />
+//               </div>
+//             )}
+            
+//             {/* SKILLS */}
+//             {activeSection === 'skills' && (
+//               <div className="space-y-6">
+//                 <TextArea label="Technical Skills" value={resume.skills.technical.join(', ')} onChange={(v) => handleSkillsChange('technical', v)} />
+//                 <TextArea label="Core / Soft Skills" value={resume.skills.core.join(', ')} onChange={(v) => handleSkillsChange('core', v)} />
+//               </div>
+//             )}
+
+//             {/* LISTS */}
+//             {['experience', 'education', 'projects', 'languages', 'certifications', 'awards'].includes(activeSection) && (
+//               <div className="space-y-6">
+//                 {resume[activeSection].map((item) => (
+//                   <div key={item.id} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative group">
+//                     <button onClick={() => removeListItem(activeSection, item.id)} className="absolute top-3 right-3 text-slate-300 hover:text-rose-500"><Trash2 size={16}/></button>
+                    
+//                     {activeSection === 'experience' && (
+//                       <>
+//                         <Input label="Role" value={item.role} onChange={(v) => updateListItem('experience', item.id, 'role', v)} />
+//                         <Input label="Company" value={item.company} onChange={(v) => updateListItem('experience', item.id, 'company', v)} />
+//                         <Input label="Date" value={item.date} onChange={(v) => updateListItem('experience', item.id, 'date', v)} />
+//                         <AIEnhanceableTextArea 
+//                           label="Description (Bullet Points)" 
+//                           value={item.desc} 
+//                           onChange={(v) => updateListItem('experience', item.id, 'desc', v)}
+//                           onEnhanceClick={() => openAIModal(item.desc, "Work Experience Bullet Points", (newText) => updateListItem('experience', item.id, 'desc', newText))}
+//                         />
+//                       </>
+//                     )}
+                    
+//                     {activeSection === 'education' && (<><Input label="School" value={item.school} onChange={(v) => updateListItem('education', item.id, 'school', v)} /><Input label="Degree" value={item.degree} onChange={(v) => updateListItem('education', item.id, 'degree', v)} /><Input label="Date" value={item.date} onChange={(v) => updateListItem('education', item.id, 'date', v)} /></>)}
+                    
+//                     {activeSection === 'projects' && (
+//                       <>
+//                         <Input label="Project Name" value={item.name} onChange={(v) => updateListItem('projects', item.id, 'name', v)} />
+//                         <AIEnhanceableTextArea 
+//                           label="Project Description" 
+//                           value={item.desc} 
+//                           onChange={(v) => updateListItem('projects', item.id, 'desc', v)} 
+//                           onEnhanceClick={() => openAIModal(item.desc, "Project Details", (newText) => updateListItem('projects', item.id, 'desc', newText))}
+//                         />
+//                       </>
+//                     )}
+                    
+//                     {activeSection === 'awards' && (<><Input label="Award Name" value={item.name} onChange={(v) => updateListItem('awards', item.id, 'name', v)} /><Input label="Issuer" value={item.issuer} onChange={(v) => updateListItem('awards', item.id, 'issuer', v)} /><Input label="Date" value={item.date} onChange={(v) => updateListItem('awards', item.id, 'date', v)} /></>)}
+//                     {activeSection === 'certifications' && (<><Input label="Certificate Name" value={item.name} onChange={(v) => updateListItem('certifications', item.id, 'name', v)} /><Input label="Issuer" value={item.issuer} onChange={(v) => updateListItem('certifications', item.id, 'issuer', v)} /><Input label="Date" value={item.date} onChange={(v) => updateListItem('certifications', item.id, 'date', v)} /></>)}
+//                     {activeSection === 'languages' && (<div className="grid grid-cols-2 gap-4"><Input label="Language" value={item.name} onChange={(v) => updateListItem('languages', item.id, 'name', v)} /><Input label="Level" value={item.level} onChange={(v) => updateListItem('languages', item.id, 'level', v)} /></div>)}
+//                   </div>
+//                 ))}
+//                 <button onClick={() => addListItem(activeSection)} className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-bold hover:border-teal-500 hover:text-teal-600 hover:bg-teal-50 transition-all"> + Add Item </button>
+//               </div>
+//             )}
+//            </div>
+//         </div>
+
+//         {/* PREVIEW AREA */}
+//         <div className="flex-1 bg-slate-200 overflow-y-auto p-12 flex justify-center z-0 relative">
+//             <div 
+//                 ref={previewRef} 
+//                 className="w-[210mm] min-h-[297mm] h-auto bg-white shadow-2xl origin-top scale-[0.85] transition-all duration-300"
+//             >
+//                 <ResumePreview data={resume} template={selectedTemplate} />
+//             </div>
+//         </div>
+
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Editor;
 import React, { useState, useRef } from 'react';
 import { 
   Download, ChevronLeft, Trash2, User, Briefcase, 
   GraduationCap, CheckCircle, Award, Globe, Layers,
-  Cpu, FileText, PanelLeftClose, PanelLeftOpen, Camera, X, LayoutGrid, Sparkles
+  Cpu, FileText, PanelLeftClose, PanelLeftOpen, Camera, X, LayoutGrid, Sparkles, Target, ScanLine, MessageSquare
 } from 'lucide-react';
 
 import html2canvas from 'html2canvas';
@@ -3000,8 +3417,10 @@ import ResumePreview from "../resume/ResumePreview";
 import ResumeThumbnail from "../resume/ResumeThumbnail"; 
 import { TEMPLATES } from './TemplateGallery'; 
 
-// --- NEW IMPORT FOR AI FEATURE ---
+// --- IMPORTS FOR AI FEATURES ---
 import AIEnhanceModal from './AIEnhanceModal'; 
+import ATSScoreModal from './ATSScoreModal'; 
+import InterviewPrepModal from './InterviewPrepModal'; 
 
 // --- HELPER COMPONENTS ---
 const NavItem = ({ id, icon: Icon, label, active, onClick, isOpen }) => (
@@ -3035,59 +3454,100 @@ const Input = ({ label, value, onChange, placeholder }) => (
   </div>
 );
 
-const TextArea = ({ label, value, onChange, placeholder }) => (
-  <div className="mb-4">
-    <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">{label}</label>
-    <textarea 
-      value={value || ''}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 outline-none transition-all h-24 resize-none"
-    />
-  </div>
-);
+// --- STANDARD TEXT AREA (WITH SMART BULLETS) ---
+const TextArea = ({ label, value, onChange, placeholder }) => {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const cursorPosition = e.target.selectionStart;
+      const textBefore = (value || '').substring(0, cursorPosition);
+      const textAfter = (value || '').substring(cursorPosition);
+      onChange(textBefore + '\n• ' + textAfter);
+    }
+  };
 
-// --- AI ENHANCEABLE TEXT AREA ---
-const AIEnhanceableTextArea = ({ label, value, onChange, placeholder, onEnhanceClick }) => (
-  <div className="mb-4 relative group">
-    <div className="flex justify-between items-end mb-1.5">
-      <label className="block text-xs font-bold text-slate-500 uppercase">{label}</label>
-      
-      {/* Sparkle Button (Only shows if there is text to enhance) */}
-      {value && value.length > 10 && (
-        <button 
-          onClick={onEnhanceClick}
-          className="text-[10px] font-bold uppercase tracking-widest text-teal-600 bg-teal-50 px-2 py-1 rounded border border-teal-100 hover:bg-teal-100 hover:shadow-sm transition-all flex items-center gap-1"
-          title="Rewrite using AI"
-        >
-          <Sparkles size={10} /> Enhance with AI
-        </button>
-      )}
+  const handleChange = (e) => {
+    let val = e.target.value;
+    if (val.length === 1 && val !== '•') val = '• ' + val;
+    onChange(val);
+  };
+
+  return (
+    <div className="mb-4">
+      <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">{label}</label>
+      <textarea 
+        value={value || ''}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder || "• Start typing..."}
+        className="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 outline-none transition-all h-24 resize-none custom-scrollbar"
+      />
     </div>
-    
-    <textarea 
-      value={value || ''}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 outline-none transition-all h-32 resize-none"
-    />
-  </div>
-);
+  );
+};
+
+// --- AI ENHANCEABLE TEXT AREA (WITH SMART BULLETS) ---
+const AIEnhanceableTextArea = ({ label, value, onChange, placeholder, onEnhanceClick }) => {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const cursorPosition = e.target.selectionStart;
+      const textBefore = (value || '').substring(0, cursorPosition);
+      const textAfter = (value || '').substring(cursorPosition);
+      onChange(textBefore + '\n• ' + textAfter);
+    }
+  };
+
+  const handleChange = (e) => {
+    let val = e.target.value;
+    if (val.length === 1 && val !== '•') val = '• ' + val;
+    onChange(val);
+  };
+
+  return (
+    <div className="mb-4 relative group">
+      <div className="flex justify-between items-end mb-1.5">
+        <label className="block text-xs font-bold text-slate-500 uppercase">{label}</label>
+        
+        {/* Sparkle Button */}
+        {value && value.length > 10 && (
+          <button 
+            onClick={onEnhanceClick}
+            className="text-[10px] font-bold uppercase tracking-widest text-teal-600 bg-teal-50 px-2 py-1 rounded border border-teal-100 hover:bg-teal-100 hover:shadow-sm transition-all flex items-center gap-1"
+            title="Rewrite using AI"
+          >
+            <Sparkles size={10} /> Enhance with AI
+          </button>
+        )}
+      </div>
+      
+      <textarea 
+        value={value || ''}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder || "• Describe your achievements..."}
+        className="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 outline-none transition-all h-32 resize-none custom-scrollbar"
+      />
+    </div>
+  );
+};
+
 
 // --- MAIN EDITOR ---
-const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack }) => {
+// Note: added the 'mode' prop here
+const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode }) => {
   const [activeSection, setActiveSection] = useState('personal');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); 
-  const [isFormOpen, setIsFormOpen] = useState(true); // State for hiding the form
+  const [isFormOpen, setIsFormOpen] = useState(true); 
   const previewRef = useRef(null);
 
-  // --- AI MODAL STATE ---
-  const [aiModalConfig, setAiModalConfig] = useState({
-    isOpen: false,
-    text: '',
-    type: '',
-    onApply: null
-  });
+  // --- NEW STATE: TARGET JOB DESCRIPTION ---
+  const [jdText, setJdText] = useState('');
+
+  // --- AI MODAL STATES ---
+  const [aiModalConfig, setAiModalConfig] = useState({ isOpen: false, text: '', type: '', onApply: null });
+  const [isAtsModalOpen, setIsAtsModalOpen] = useState(false);
+  const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
 
   // --- DATA INITIALIZATION ---
   const initializeData = (data) => {
@@ -3143,7 +3603,6 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack }) => 
   const handleSkillsChange = (type, valueString) => {
     const list = valueString.split(',').map(s => s.trim());
     if (type === 'soft' || type === 'core') {
-        // Update both to keep templates in sync
         setResume(prev => ({ ...prev, skills: { ...prev.skills, soft: list, core: list } }));
     } else {
         setResume(prev => ({ ...prev, skills: { ...prev.skills, [type]: list } }));
@@ -3207,19 +3666,39 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack }) => 
     });
   };
 
+  // Check if JD is required for action
+  const handleATSClick = () => {
+    if (!jdText.trim()) { setActiveSection('target-jd'); setIsFormOpen(true); } 
+    else { setIsAtsModalOpen(true); }
+  };
+  const handleInterviewClick = () => {
+    if (!jdText.trim()) { setActiveSection('target-jd'); setIsFormOpen(true); } 
+    else { setIsInterviewModalOpen(true); }
+  };
+
   return (
     <div className="h-screen bg-slate-50 flex flex-col font-sans text-slate-900 relative overflow-hidden">
       
-      {/* AI ENHANCER MODAL OVERLAY */}
+      {/* --- ALL MODALS OVERLAYS --- */}
       <AIEnhanceModal 
         isOpen={aiModalConfig.isOpen}
         currentText={aiModalConfig.text}
         contextType={aiModalConfig.type}
         jobTitle={resume.personal.title || "Professional"}
         onClose={() => setAiModalConfig({ ...aiModalConfig, isOpen: false })}
-        onSelect={(newText) => {
-          if (aiModalConfig.onApply) aiModalConfig.onApply(newText);
-        }}
+        onSelect={(newText) => { if (aiModalConfig.onApply) aiModalConfig.onApply(newText); }}
+      />
+      <ATSScoreModal 
+        isOpen={isAtsModalOpen} 
+        onClose={() => setIsAtsModalOpen(false)} 
+        resumeData={resume} 
+        jdText={jdText} 
+      />
+      <InterviewPrepModal 
+        isOpen={isInterviewModalOpen} 
+        onClose={() => setIsInterviewModalOpen(false)} 
+        resumeData={resume} 
+        jdText={jdText} 
       />
 
       {/* TOP BAR */}
@@ -3228,14 +3707,37 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack }) => 
           <button onClick={onBack} className="p-2 rounded hover:bg-slate-100 text-slate-500"><ChevronLeft size={20}/></button>
           <span className="font-bold text-slate-700 flex items-center gap-2"><FileText size={18} className="text-teal-600"/> Resume Editor</span>
         </div>
+        
         <div className="flex items-center gap-3">
+          
+          {/* PREMIUM BUTTONS: ONLY SHOW IN TAILOR MODE */}
+          {mode === 'tailor' && (
+            <>
+              <button 
+                onClick={handleATSClick} 
+                className="hidden md:flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-100 hover:shadow-sm transition-all"
+                title="Scan resume against Job Description"
+              >
+                <ScanLine size={16} /> ATS Scan
+              </button>
+              <button 
+                onClick={handleInterviewClick} 
+                className="hidden md:flex items-center gap-2 bg-indigo-50 text-indigo-700 border border-indigo-200 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-100 hover:shadow-sm transition-all mr-2"
+                title="Generate Interview Questions"
+              >
+                <MessageSquare size={16} /> AI Interview Prep
+              </button>
+            </>
+          )}
+
           {/* Hide/Show Editor Toggle Button */}
           <button 
             onClick={() => setIsFormOpen(!isFormOpen)} 
             className="bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg text-sm font-bold flex items-center hover:bg-slate-50 transition-all shadow-sm active:scale-95"
           >
-            {isFormOpen ? 'Review Resume' : 'Edit Resume'}
+            {isFormOpen ? 'Hide Editor' : 'Show Editor'}
           </button>
+          
           <button onClick={handleDownload} className="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-slate-800 transition-all shadow-md active:scale-95">
             <Download size={16}/> Download PDF
           </button>
@@ -3256,6 +3758,12 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack }) => 
           <nav className="space-y-1 flex-1">
             <NavItem id="templates" icon={LayoutGrid} label="Change Template" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
             <div className="my-4 border-t border-slate-100 mx-4"></div>
+            
+            {/* TARGET JD NAV ITEM: ONLY SHOW IN TAILOR MODE */}
+            {mode === 'tailor' && (
+               <NavItem id="target-jd" icon={Target} label="Target Job (JD)" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
+            )}
+            
             <NavItem id="personal" icon={User} label="Personal Details" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
             <NavItem id="experience" icon={Briefcase} label="Experience" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
             <NavItem id="education" icon={GraduationCap} label="Education" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} />
@@ -3268,12 +3776,29 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack }) => 
         </div>
 
         {/* EDITOR FORM AREA */}
-        {/* Added dynamic width class logic here to open/close the form completely */}
-        <div className={`bg-slate-50 border-r border-slate-200 overflow-y-auto shrink-0 z-0 relative transition-all duration-300 ease-in-out ${isFormOpen ? 'w-[450px] p-8 opacity-100' : 'w-0 p-0 opacity-0 border-none overflow-hidden'}`}>
-           <div className="max-w-md mx-auto w-[386px]"> {/* Locked inner width so inputs don't squash when animating closed */}
+        <div className={`bg-slate-50 border-r border-slate-200 overflow-y-auto custom-scrollbar shrink-0 z-0 relative transition-all duration-300 ease-in-out ${isFormOpen ? 'w-[450px] p-8 opacity-100' : 'w-0 p-0 opacity-0 border-none overflow-hidden'}`}>
+           <div className="max-w-md mx-auto w-[386px]"> 
             <h2 className="text-2xl font-bold text-slate-900 mb-6 capitalize">
-                {activeSection === 'templates' ? 'Select Template' : activeSection}
+                {activeSection === 'templates' ? 'Select Template' : activeSection === 'target-jd' ? 'Target Job' : activeSection}
             </h2>
+
+            {/* --- TARGET JOB DESCRIPTION AREA --- */}
+            {activeSection === 'target-jd' && (
+                <div className="space-y-4">
+                  <div className="bg-teal-50 border border-teal-100 p-4 rounded-xl mb-6 text-sm text-teal-800 leading-relaxed">
+                    Paste the description of the job you are applying for here. This allows the AI to calculate your <strong>ATS Match Score</strong> and generate customized <strong>Interview Prep</strong> questions!
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Job Description</label>
+                    <textarea 
+                      value={jdText}
+                      onChange={(e) => setJdText(e.target.value)}
+                      placeholder="Paste full job description here..."
+                      className="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 outline-none transition-all h-[400px] resize-none custom-scrollbar"
+                    />
+                  </div>
+                </div>
+            )}
 
             {/* --- LIVE TEMPLATE PREVIEW PICKER --- */}
             {activeSection === 'templates' && (
@@ -3281,19 +3806,16 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack }) => 
                     {TEMPLATES.map(tpl => (
                         <div 
                             key={tpl.id} 
-                            onClick={() => onChangeTemplate(tpl.id)} // This triggers the App.jsx state properly!
+                            onClick={() => onChangeTemplate(tpl.id)} 
                             className={`
                                 cursor-pointer rounded-xl border-2 overflow-hidden relative transition-all hover:scale-[1.02] group
                                 ${selectedTemplate === tpl.id ? 'border-teal-600 ring-2 ring-teal-600/20' : 'border-slate-200 hover:border-teal-400'}
                             `}
                         >
-                            {/* LIVE PREVIEW CONTAINER */}
                             <div className="h-40 w-full bg-slate-100 overflow-hidden relative">
                                 <div className="absolute top-0 left-0 w-[400%] h-[400%] transform scale-[0.25] origin-top-left pointer-events-none select-none bg-white">
-                                    {/* Make sure Thumbnail receives the actual updated 'resume' state so previews are live */}
                                     <ResumeThumbnail templateId={tpl.id} data={resume} />
                                 </div>
-                                {/* Hover overlay */}
                                 <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors"></div>
                             </div>
                             
@@ -3389,7 +3911,7 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack }) => 
         </div>
 
         {/* PREVIEW AREA */}
-        <div className="flex-1 bg-slate-200 overflow-y-auto p-12 flex justify-center z-0 relative">
+        <div className="flex-1 bg-slate-200 overflow-y-auto custom-scrollbar p-12 flex justify-center z-0 relative">
             <div 
                 ref={previewRef} 
                 className="w-[210mm] min-h-[297mm] h-auto bg-white shadow-2xl origin-top scale-[0.85] transition-all duration-300"

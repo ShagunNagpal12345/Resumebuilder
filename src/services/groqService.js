@@ -528,3 +528,81 @@ Original Text:
     throw error;
   }
 };
+// ===============================
+// 4. LIVE ATS SCORE & KEYWORD CHECKER
+// ===============================
+export const calculateATSScore = async (resumeData, jdText) => {
+  try {
+    const prompt = `
+You are an expert Applicant Tracking System (ATS) algorithm. 
+Compare the Candidate's Resume to the Target Job Description.
+
+Analyze the match and return exactly this JSON structure:
+{
+  "score": 0, // A number between 0 and 100 representing the match percentage
+  "feedback": "", // 2-3 sentences of overall strategic advice
+  "matched_keywords": [], // Array of important hard/soft skills found in BOTH
+  "missing_keywords": [] // Array of critical skills in the JD that are MISSING from the resume
+}
+
+Target Job Description:
+"${jdText}"
+
+Candidate Resume:
+${JSON.stringify(resumeData)}
+`;
+
+    const completion = await groqEnhance.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.1, // Low temperature for analytical precision
+      response_format: { type: "json_object" }
+    });
+
+    return JSON.parse(completion.choices[0].message.content);
+  } catch (error) {
+    console.error("ATS Scoring failed:", error);
+    throw error;
+  }
+};
+
+// ===============================
+// 5. TARGETED INTERVIEW PREP
+// ===============================
+export const generateInterviewPrep = async (resumeData, jdText) => {
+  try {
+    const prompt = `
+You are an elite Executive Interview Coach.
+Based on the Candidate's Resume and the Target Job Description, predict the 5 most difficult or likely interview questions they will be asked.
+
+Return exactly this JSON structure:
+{
+  "questions": [
+    {
+      "question": "The predicted interview question...",
+      "why_they_ask_this": "Brief explanation of what the interviewer is actually looking for...",
+      "suggested_strategy": "How the candidate should answer this using the STAR method based on their specific resume experience..."
+    }
+  ]
+}
+
+Target Job Description:
+"${jdText}"
+
+Candidate Resume:
+${JSON.stringify(resumeData)}
+`;
+
+    const completion = await groqEnhance.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.4, 
+      response_format: { type: "json_object" }
+    });
+
+    return JSON.parse(completion.choices[0].message.content);
+  } catch (error) {
+    console.error("Interview Prep generation failed:", error);
+    throw error;
+  }
+};

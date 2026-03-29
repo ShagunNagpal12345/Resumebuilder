@@ -223,10 +223,28 @@ const ResumeUpload = ({ onFileUpload }) => { // <--- Receive Prop
 
   // Mock Panelists representing "Who reads your resume"
   const interviewers = [
-    { name: "ATS System", role: "Automated Gatekeeper", img: "https://images.unsplash.com/photo-1531297424005-06342e7f3947?auto=format&fit=crop&q=80&w=200", focus: "Keywords & Formatting" },
-    { name: "Senior Recruiter", role: "Talent Acquisition", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200", focus: "Relevance & Clarity" },
-    { name: "Hiring Manager", role: "Team Lead", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200", focus: "Skills & Impact" }
-  ];
+    { 
+      name: "ATS System", 
+      role: "Automated Gatekeeper", 
+      // Stable Unsplash image of a glowing server/tech system
+      img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=200&fit=crop&q=80", 
+      focus: "Keywords & Formatting" 
+    },
+    { 
+      name: "Senior Recruiter", 
+      role: "Talent Acquisition", 
+      // Stable Pravatar image (Professional Woman)
+      img: "https://i.pravatar.cc/200?img=47", 
+      focus: "Relevance & Clarity" 
+    },
+    { 
+      name: "Hiring Manager", 
+      role: "Team Lead", 
+      // Stable Pravatar image (Professional Man)
+      img: "https://i.pravatar.cc/200?img=14", 
+      focus: "Skills & Impact" 
+    }
+];
 
   return (
     <div className="min-h-screen w-full bg-[#0f172a] text-white flex flex-col items-center justify-center relative overflow-hidden font-sans selection:bg-teal-500/30">
@@ -241,9 +259,9 @@ const ResumeUpload = ({ onFileUpload }) => { // <--- Receive Prop
         {/* LEFT COLUMN */}
         <div className="lg:col-span-7 flex flex-col justify-center space-y-12">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-bold uppercase tracking-wider">
+            {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-bold uppercase tracking-wider">
               <Sparkles size={12} /> CareerSense AI Parsing Engine
-            </div>
+            </div> */}
             <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">
               Your Resume is <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">
@@ -272,7 +290,7 @@ const ResumeUpload = ({ onFileUpload }) => { // <--- Receive Prop
                     </div>
                   </div>
                   <div className="text-xs text-slate-500 border-t border-slate-700/50 pt-3 flex items-center gap-1.5">
-                    <Zap size={12} className="text-teal-500" /> Focus: <span className="text-slate-300">{person.focus}</span>
+                    <Brain size={12} className="text-teal-500" /> Focus: <span className="text-slate-300">{person.focus}</span>
                   </div>
                 </div>
               ))}

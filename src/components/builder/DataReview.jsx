@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   User, Briefcase, GraduationCap, Cpu, FileText, 
-  CheckCircle2, ChevronRight, ArrowLeft, ArrowRight, Plus, Trash2, Zap, MapPin, Calendar, Globe, Award
+  CheckCircle2, ChevronRight, ArrowLeft, ArrowRight, Plus, Trash2, Zap,Brain, MapPin, Calendar, Globe, Award
 } from 'lucide-react';
 import { enhanceResumeData } from '../../services/groqService';
 
@@ -117,7 +117,7 @@ const DataReview = ({ extractedData, onComplete }) => {
             <div className="relative">
                 <div className="w-24 h-24 border-4 border-blue-100 rounded-full animate-spin border-t-blue-600"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <Zap className="text-blue-600 fill-blue-600 animate-pulse" size={32} />
+                    <Brain className="text-blue-600 fill-blue-600 animate-pulse" size={32} />
                 </div>
             </div>
             <h2 className="mt-8 text-2xl font-black text-slate-900">Polishing Your Profile</h2>
@@ -238,7 +238,7 @@ const DataReview = ({ extractedData, onComplete }) => {
                 {activeStep === 3 && (
                     <div className="space-y-6">
                         <div className="bg-blue-50 p-4 rounded-xl flex items-start gap-3 text-blue-800 text-sm mb-6">
-                            <Zap className="shrink-0 mt-0.5" size={18}/>
+                            <Brain className="shrink-0 mt-0.5" size={18}/>
                             <p>Our AI has grouped your skills. Please verify them below.</p>
                         </div>
                         <FormTextArea label="Technical Skills" value={formData.skills?.technical?.join(', ')} onChange={(v) => setFormData(prev => ({...prev, skills: {...prev.skills, technical: v.split(',')}}))} placeholder="Python, Java, React..." />

@@ -15,7 +15,7 @@ const JDUpload = ({ onSubmit }) => { // <--- Receive Prop
     {
       title: "Keyword Matching",
       desc: "Checking resume vs job description...",
-      icon: <Zap size={18} className="text-yellow-400" />,
+      icon: <Brain size={18} className="text-yellow-400" />,
       color: "border-yellow-500/20 bg-yellow-500/5 text-yellow-200"
     },
     {

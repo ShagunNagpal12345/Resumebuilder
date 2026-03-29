@@ -694,7 +694,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   ArrowLeft, Search, Layout, Image, Palette, CheckCircle2, SlidersHorizontal, 
-  Star, Zap, Shield, MousePointer2
+  Star, Zap, Shield, MousePointer2, Brain
 } from 'lucide-react';
 import ResumeThumbnail from "../resume/ResumeThumbnail"; 
 
@@ -1020,7 +1020,7 @@ const TemplateGallery = ({ onSelectTemplate, onBack }) => {
           <div className="mt-8 pt-8 border-t border-slate-800">
              <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
                 <div className="flex items-center gap-2 text-teal-400 font-bold text-xs uppercase mb-2">
-                    <Zap size={14}/> Pro Tip
+                    <Brain size={14}/> Pro Tip
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">
                     ATS systems prefer simple, single-column layouts for high-volume corporate jobs.
@@ -1067,7 +1067,7 @@ const TemplateGallery = ({ onSelectTemplate, onBack }) => {
                     { icon: Shield, label: "ATS Optimized", sub: "100% Readable", color: "text-emerald-700", bg: "bg-emerald-100", border: "border-emerald-200" },
                     { icon: Layout, label: "70+ Layouts", sub: "For every role", color: "text-blue-700", bg: "bg-blue-100", border: "border-blue-200" },
                     { icon: MousePointer2, label: "Click to Edit", sub: "Live Preview", color: "text-purple-700", bg: "bg-purple-100", border: "border-purple-200" },
-                    { icon: Zap, label: "AI Powered", sub: "Smart Formatting", color: "text-orange-700", bg: "bg-orange-100", border: "border-orange-200" },
+                    { icon: Brain, label: "AI Powered", sub: "Smart Enhancements", color: "text-orange-700", bg: "bg-orange-100", border: "border-orange-200" },
                 ].map((stat, i) => (
                     <div key={i} className={`p-4 rounded-2xl border ${stat.border} ${stat.bg} flex items-center gap-4 shadow-sm`}>
                         <div className={`p-2 bg-white rounded-xl ${stat.color} shadow-sm`}><stat.icon size={20}/></div>
