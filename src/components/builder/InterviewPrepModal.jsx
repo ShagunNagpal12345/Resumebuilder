@@ -1,29 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Loader2, X, AlertCircle, HelpCircle, Lightbulb } from 'lucide-react';
+import { MessageSquare, Loader2, X, AlertCircle, HelpCircle, Lightbulb, History, RotateCcw } from 'lucide-react';
 import { generateInterviewPrep } from '../../services/groqService'; 
 
-const InterviewPrepModal = ({ isOpen, onClose, resumeData, jdText }) => {
+const formatDateTime = (value) => {
+  if (!value) return '';
+
+  try {
+    return new Date(value).toLocaleString([], {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  } catch (error) {
+    return value;
+  }
+};
+
+const InterviewPrepModal = ({ isOpen, onClose, resumeData, jdText, onResults, existingEntry = null, allowRerun = true }) => {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
+      if (existingEntry?.result) {
+        setResults(existingEntry.result);
+        setError('');
+        setLoading(false);
+        return;
+      }
       if (!jdText || jdText.trim() === '') {
         setError("Please paste a Job Description in the Editor first to generate targeted interview questions.");
         return;
       }
       runPrep();
     }
-  }, [isOpen]);
+  }, [existingEntry, isOpen, jdText]);
 
   const runPrep = async () => {
+    if (!jdText || jdText.trim() === '') {
+      setError("Please paste a Job Description in the Editor first to generate targeted interview questions.");
+      return;
+    }
+
     setLoading(true);
     setError('');
     setResults(null);
     try {
       const data = await generateInterviewPrep(resumeData, jdText);
       setResults(data);
+      onResults?.(data);
     } catch (err) {
       setError("Failed to generate Interview Prep. Please try again.");
     } finally {
@@ -32,6 +57,8 @@ const InterviewPrepModal = ({ isOpen, onClose, resumeData, jdText }) => {
   };
 
   if (!isOpen) return null;
+
+  const latestResultLabel = existingEntry?.createdAt ? `Latest saved prep from ${formatDateTime(existingEntry.createdAt)}` : '';
 
   return (
     <div className="fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 font-sans">
@@ -70,6 +97,22 @@ const InterviewPrepModal = ({ isOpen, onClose, resumeData, jdText }) => {
             </div>
           ) : results?.questions ? (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {existingEntry?.result && (
+                <div className="rounded-2xl border border-indigo-100 bg-indigo-50/80 px-4 py-3 text-sm text-indigo-900">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 rounded-xl bg-white p-2 text-indigo-600 shadow-sm">
+                      <History size={16} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-black tracking-tight">Showing your latest saved interview prep</div>
+                      <p className="mt-1 leading-relaxed text-indigo-800">
+                        {latestResultLabel || 'These questions were already generated for the current resume and job description.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {results.questions.map((q, i) => (
                 <div key={i} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
                   <h4 className="text-lg font-black text-slate-800 mb-4 flex items-start gap-3">
@@ -94,6 +137,19 @@ const InterviewPrepModal = ({ isOpen, onClose, resumeData, jdText }) => {
                   </div>
                 </div>
               ))}
+
+              {allowRerun && jdText?.trim() && (
+                <div className="flex justify-center pt-2">
+                  <button
+                    type="button"
+                    onClick={runPrep}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-bold text-indigo-700 transition-all hover:bg-indigo-100 hover:shadow-sm"
+                  >
+                    <RotateCcw size={16} />
+                    {existingEntry?.result ? 'Generate Interview Prep Again' : 'Refresh Interview Prep'}
+                  </button>
+                </div>
+              )}
             </div>
           ) : null}
         </div>

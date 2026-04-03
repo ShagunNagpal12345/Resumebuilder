@@ -96,6 +96,7 @@
 // };
 
 import Groq from "groq-sdk";
+import { recordAiTokenUsage } from "./resumeRepositoryService";
 
 // Initialize 3 separate Groq clients with 3 separate keys to distribute load and bypass rate limits
 const groqExtract = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY_1, dangerouslyAllowBrowser: true });
@@ -103,6 +104,17 @@ const groqAnalyzeJD = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY_2, da
 const groqTailor = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY_4, dangerouslyAllowBrowser: true }); // <--- NOW USING KEY 4
 
 const MODEL = "llama-3.3-70b-versatile";
+
+const recordGroqUsage = (operation, completion, metadata = {}) => {
+  recordAiTokenUsage({
+    provider: 'groq',
+    source: 'jobTailorService',
+    operation,
+    model: completion?.model || MODEL,
+    usage: completion?.usage,
+    metadata,
+  });
+};
 
 // PHASE 1: Extract Resume to JSON
 export const phase1_ExtractResume = async (rawText) => {
@@ -127,6 +139,7 @@ export const phase1_ExtractResume = async (rawText) => {
     temperature: 0,
     response_format: { type: "json_object" }
   });
+  recordGroqUsage('tailor_phase_extract_resume', completion);
   return JSON.parse(completion.choices[0].message.content);
 };
 
@@ -151,6 +164,7 @@ export const phase2_AnalyzeJD = async (jdText) => {
     temperature: 0.1,
     response_format: { type: "json_object" }
   });
+  recordGroqUsage('tailor_phase_analyze_jd', completion);
   return JSON.parse(completion.choices[0].message.content);
 };
 
@@ -179,6 +193,7 @@ export const phase3_TailorResume = async (resumeJson, jdAnalysisJson) => {
     temperature: 0.3,
     response_format: { type: "json_object" }
   });
+  recordGroqUsage('tailor_phase_rewrite_resume', completion);
   
   const tailoredData = JSON.parse(completion.choices[0].message.content);
 

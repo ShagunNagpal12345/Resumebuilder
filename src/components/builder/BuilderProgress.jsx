@@ -17,7 +17,7 @@ const BuilderProgress = ({ current = 'review', className = '', compact = false, 
 
   if (inline) {
     return (
-      <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
+      <div className={`flex items-center gap-1.5 whitespace-nowrap ${className}`}>
         {STUDIO_STEPS.map((step, index) => {
           const isCurrent = index === currentIndex;
           const isCompleted = index < currentIndex;
@@ -26,7 +26,7 @@ const BuilderProgress = ({ current = 'review', className = '', compact = false, 
           return (
             <div
               key={step.id}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[11px] font-bold whitespace-nowrap transition-all ${
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.8rem] font-black uppercase tracking-[0.12em] whitespace-nowrap transition-all ${
                 isCurrent
                   ? 'border-teal-200 bg-gradient-to-r from-teal-50 to-emerald-50 text-teal-900'
                   : isCompleted
@@ -35,7 +35,7 @@ const BuilderProgress = ({ current = 'review', className = '', compact = false, 
               }`}
             >
               <span
-                className={`flex h-5 w-5 items-center justify-center rounded-full ${
+                className={`flex h-4.5 w-4.5 items-center justify-center rounded-full ${
                   isCurrent
                     ? 'bg-white text-teal-700'
                     : isCompleted
@@ -43,14 +43,14 @@ const BuilderProgress = ({ current = 'review', className = '', compact = false, 
                       : 'bg-slate-50 text-slate-400'
                 }`}
               >
-                <Icon size={12} />
+                <Icon size={11} />
               </span>
-              <span className="tracking-tight">{step.label}</span>
+              <span>{step.label}</span>
             </div>
           );
         })}
         {showCounter ? (
-          <div className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-teal-700">
+          <div className="rounded-full border border-teal-100 bg-teal-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-teal-700">
             Step {Math.min(currentIndex + 1, STUDIO_STEPS.length)} of {STUDIO_STEPS.length}
           </div>
         ) : null}

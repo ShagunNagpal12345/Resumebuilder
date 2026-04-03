@@ -1,17 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Sparkles, Menu, X, ArrowRight } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Sparkles, Menu, X, FolderOpen, Coins, ReceiptText } from 'lucide-react';
 import { scrollToLandingSection } from './scrollToLandingSection';
 import ThemeToggleButton from '../ui/ThemeToggleButton';
+import { getRepositoryStats } from '../../services/resumeRepositoryService';
 
-const Navbar = ({ onStart }) => {
+const Navbar = ({ onStart, onOpenRepository }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [repositoryStats, setRepositoryStats] = useState(() => getRepositoryStats());
   const navItems = [
     { id: 'features', label: 'Features' },
     { id: 'templates', label: 'Templates' },
     { id: 'reviews', label: 'Reviews' },
     { id: 'faq', label: 'FAQ' },
   ];
+
+  const formatNumber = (value) => new Intl.NumberFormat().format(Number(value || 0));
+
+  const refreshRepositoryStats = useCallback(() => {
+    setRepositoryStats(getRepositoryStats());
+  }, []);
 
   const handleNavClick = (sectionId) => {
     scrollToLandingSection(sectionId);
@@ -27,6 +35,30 @@ const Navbar = ({ onStart }) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    refreshRepositoryStats();
+
+    const intervalId = window.setInterval(refreshRepositoryStats, 15000);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshRepositoryStats();
+      }
+    };
+
+    const handleStorageChange = () => {
+      refreshRepositoryStats();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [refreshRepositoryStats]);
 
   return (
     <nav 
@@ -65,21 +97,28 @@ const Navbar = ({ onStart }) => {
         </div>
 
         {/* CTA Buttons */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-2 text-[11px] font-bold text-slate-600 shadow-sm">
+            <Coins size={14} className="text-teal-600" />
+            <span className="uppercase tracking-[0.14em] text-slate-400">Career Points</span>
+            <span className="font-black text-slate-900">{formatNumber(repositoryStats.totalCareerPoints)}</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50/90 px-3 py-2 text-[11px] font-bold text-teal-700 shadow-sm">
+            <ReceiptText size={14} />
+            <span className="uppercase tracking-[0.14em] text-teal-600">Total Bill</span>
+            <span className="font-black">{repositoryStats.totalBillUsdFormatted}</span>
+          </div>
           <ThemeToggleButton />
-          <button
-            type="button"
-            onClick={() => handleNavClick('templates')}
-            className="theme-nav-link font-bold text-sm transition-colors"
-          >
-            View Templates
-          </button>
-          <button 
-            onClick={onStart}
-            className="theme-nav-cta group rounded-full px-5 py-2.5 font-bold text-sm transition-all flex items-center gap-2"
-          >
-            Get Started <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform"/>
-          </button>
+          {onOpenRepository && (
+            <button
+              type="button"
+              onClick={onOpenRepository}
+              className="theme-nav-link inline-flex items-center gap-2 font-bold text-sm transition-colors"
+            >
+              <FolderOpen size={16} />
+              My Repository
+            </button>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -94,6 +133,16 @@ const Navbar = ({ onStart }) => {
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="theme-nav-surface md:hidden absolute top-full left-0 w-full border-b p-6 flex flex-col gap-4 shadow-2xl">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Career Points</div>
+              <div className="mt-2 text-lg font-black tracking-tight text-slate-900">{formatNumber(repositoryStats.totalCareerPoints)}</div>
+            </div>
+            <div className="rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3">
+              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-teal-600">Total Bill</div>
+              <div className="mt-2 text-lg font-black tracking-tight text-teal-800">{repositoryStats.totalBillUsdFormatted}</div>
+            </div>
+          </div>
           <div className="mb-2">
             <ThemeToggleButton showLabel />
           </div>
@@ -115,9 +164,19 @@ const Navbar = ({ onStart }) => {
           >
             View Templates
           </button>
-          <button onClick={onStart} className="theme-nav-cta rounded-xl px-5 py-3 font-bold text-center">
-            Create Resume
-          </button>
+          {onOpenRepository && (
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenRepository();
+              }}
+              className="theme-nav-link inline-flex items-center gap-2 text-left font-bold"
+            >
+              <FolderOpen size={16} />
+              My Repository
+            </button>
+          )}
         </div>
       )}
     </nav>

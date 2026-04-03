@@ -306,7 +306,7 @@
 // export default App;
 
 import React, { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { FolderOpen, Loader2 } from 'lucide-react';
 
 // --- LANDING COMPONENTS (The Dark UI) ---
 // Adjust these paths if your file names are different
@@ -324,10 +324,12 @@ import ResumeImportOptions from './components/builder/ResumeImportOptions';
 import TemplateGallery from './components/builder/TemplateGallery';
 import Editor from './components/builder/Editor';
 import DataReview from './components/builder/DataReview';
+import ResumeRepository from './components/builder/ResumeRepository';
 import ThemeToggleButton from './components/ui/ThemeToggleButton';
 
 // --- LOGIC ---
 import { enhanceResumeData, extractResumeData, extractResumeDataVerbatim } from './services/groqService';
+import { upsertProfileFromResume } from './services/resumeRepositoryService';
 import { extractTextFromFile } from './utils/fileParser';
 
 const App = () => {
@@ -340,9 +342,34 @@ const App = () => {
   const [resumeUploadSource, setResumeUploadSource] = useState('upload');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [activeResumeRecordId, setActiveResumeRecordId] = useState(null);
+  const [currentJDText, setCurrentJDText] = useState('');
+  const [repositoryReturnView, setRepositoryReturnView] = useState('landing');
+  const [builderReturnView, setBuilderReturnView] = useState('gallery');
+
+  const resetRepositoryTracking = () => {
+    setActiveResumeRecordId(null);
+    setCurrentJDText('');
+    setBuilderReturnView('gallery');
+  };
+
+  const openRepository = (returnView = view) => {
+    setRepositoryReturnView(returnView);
+    setView('repository');
+  };
 
   // 1. Navigation Helpers
   const handleBack = () => {
+    if (view === 'repository') {
+      setView(repositoryReturnView || 'landing');
+      return;
+    }
+
+    if (view === 'builder') {
+      setView(builderReturnView || 'gallery');
+      return;
+    }
+
     if (view === 'upload-options') {
       setPendingResumeFile(null);
       setView(resumeUploadSource === 'landing' ? 'landing' : 'upload');
@@ -366,6 +393,7 @@ const App = () => {
     if (!file) return;
 
     setSelectedMode('upload');
+    resetRepositoryTracking();
     setPendingResumeFile(file);
     setResumeUploadSource(source);
     setView('upload-options');
@@ -396,7 +424,9 @@ const App = () => {
       }
       
       if (jsonData) {
+        upsertProfileFromResume(jsonData);
         setResumeData(jsonData);
+        setCurrentJDText('');
         setView('review'); // Move to Review Screen
       }
     } catch (error) {
@@ -410,8 +440,18 @@ const App = () => {
 
   return (
     <div className="theme-app-shell min-h-screen font-sans text-slate-900 relative">
-      {view !== 'landing' && (
-        <div className="fixed right-4 top-4 z-[9998] sm:right-6 sm:top-6">
+      {view !== 'landing' && view !== 'builder' && (
+        <div className="fixed right-4 top-4 z-[9998] flex items-center gap-2 sm:right-6 sm:top-6">
+          {view !== 'repository' && view !== 'builder' && (
+            <button
+              type="button"
+              onClick={() => openRepository(view)}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/95 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-slate-600 shadow-sm shadow-slate-200/70 transition-all hover:-translate-y-0.5 hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700"
+            >
+              <FolderOpen size={14} />
+              <span className="hidden sm:inline">My Repository</span>
+            </button>
+          )}
           <ThemeToggleButton />
         </div>
       )}
@@ -419,9 +459,21 @@ const App = () => {
       {/* VIEW: LANDING */}
       {view === 'landing' && (
         <ResumeBuilderLanding 
-          onStart={() => setView('selection')} 
+          onStart={() => {
+            resetRepositoryTracking();
+            setResumeData(null);
+            setSelectedMode(null);
+            setView('selection');
+          }} 
           onFileSelect={(f) => openResumeImportOptions(f, 'landing')} 
-          onViewTemplates={() => setView('gallery')} 
+          onViewTemplates={() => {
+            resetRepositoryTracking();
+            setResumeData(null);
+            setSelectedMode('scratch');
+            setResumeImportMode('ai-enhanced');
+            setView('gallery');
+          }}
+          onOpenRepository={() => openRepository('landing')}
         />
       )}
 
@@ -430,13 +482,16 @@ const App = () => {
         <ResumeSelection onSelect={(mode) => {
           setSelectedMode(mode);
           if (mode === 'scratch') { 
+            resetRepositoryTracking();
             setResumeImportMode('ai-enhanced');
             setResumeData(null); 
             setView('gallery'); 
           } else if (mode === 'tailor') { 
+            resetRepositoryTracking();
             setResumeImportMode('ai-enhanced');
             setView('tailor'); // Route to new Targeted Resume Engine
           } else { 
+            resetRepositoryTracking();
             setView('upload'); 
           }
         }} />
@@ -463,10 +518,12 @@ const App = () => {
       {view === 'tailor' && (
         <TargetedResumeUI 
           onCancel={handleBack}
-          onComplete={(finalTailoredJson) => {
+          onComplete={(finalTailoredJson, jdText) => {
             // Once the 3-step AI finishes, save the data and send them to the review screen
             setResumeImportMode('ai-enhanced');
+            upsertProfileFromResume(finalTailoredJson);
             setResumeData(finalTailoredJson);
+            setCurrentJDText(jdText || '');
             setView('review'); 
           }}
         />
@@ -482,7 +539,11 @@ const App = () => {
         <DataReview 
           extractedData={resumeData} 
           importMode={resumeImportMode}
-          onComplete={(data) => { setResumeData(data); setView('gallery'); }} 
+          onComplete={(data) => {
+            upsertProfileFromResume(data);
+            setResumeData(data);
+            setView('gallery');
+          }} 
         />
       )}
 
@@ -491,8 +552,34 @@ const App = () => {
         <TemplateGallery 
           resumeData={resumeData}
           mode={selectedMode}
-          onSelectTemplate={(tpl) => { setSelectedTemplate(tpl); setView('builder'); }} 
+          onSelectTemplate={(tpl) => {
+            setBuilderReturnView('gallery');
+            setSelectedTemplate(tpl);
+            setView('builder');
+          }} 
           onBack={handleBack} 
+        />
+      )}
+
+      {view === 'repository' && (
+        <ResumeRepository
+          onBack={handleBack}
+          onStartNew={() => {
+            resetRepositoryTracking();
+            setResumeData(null);
+            setSelectedMode(null);
+            setView('selection');
+          }}
+          onOpenResume={(record) => {
+            setResumeData(record.resumeData || null);
+            setSelectedTemplate(record.selectedTemplate || 'professional');
+            setSelectedMode(record.mode || 'scratch');
+            setResumeImportMode(record.importMode || 'ai-enhanced');
+            setCurrentJDText(record.jdText || '');
+            setActiveResumeRecordId(record.id);
+            setBuilderReturnView('repository');
+            setView('builder');
+          }}
         />
       )}
 
@@ -504,6 +591,18 @@ const App = () => {
           onChangeTemplate={setSelectedTemplate}
           onBack={handleBack}
           mode={selectedMode} // <--- ADDED RESTRICTION PROP HERE
+          importMode={resumeImportMode}
+          initialJDText={currentJDText}
+          resumeRecordId={activeResumeRecordId}
+          onResumeRecordChange={setActiveResumeRecordId}
+          onOpenRepository={() => openRepository('builder')}
+          onWorkspaceSnapshotChange={({ resume, jdText, selectedTemplate: nextTemplate }) => {
+            setResumeData(resume);
+            setCurrentJDText(jdText || '');
+            if (nextTemplate) {
+              setSelectedTemplate(nextTemplate);
+            }
+          }}
         />
       )}
 

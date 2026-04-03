@@ -347,6 +347,7 @@
 
 import Groq from "groq-sdk";
 import { applyResumeSourceCorrections } from "../utils/resumeSourceCorrections";
+import { recordAiTokenUsage } from "./resumeRepositoryService";
 
 // --- API KEY 1: EXTRACTION ---
 const groqExtract = new Groq({
@@ -359,6 +360,17 @@ const groqEnhance = new Groq({
   apiKey: import.meta.env.VITE_GROQ_API_KEY_2,
   dangerouslyAllowBrowser: true
 });
+
+const recordGroqCompletionUsage = (operation, completion, metadata = {}) => {
+  recordAiTokenUsage({
+    provider: 'groq',
+    source: 'groqService',
+    operation,
+    model: completion?.model || 'llama-3.3-70b-versatile',
+    usage: completion?.usage,
+    metadata,
+  });
+};
 
 
 // ===============================
@@ -391,6 +403,10 @@ ${rawText.substring(0, 15000)}
     model: "llama-3.3-70b-versatile",
     temperature: 0,
     response_format: { type: "json_object" }
+  });
+
+  recordGroqCompletionUsage('extract_resume_data', completion, {
+    variant: 'standard',
   });
 
   const parsedData = JSON.parse(completion.choices[0].message.content);
@@ -447,6 +463,10 @@ ${rawText.substring(0, 18000)}
     model: "llama-3.3-70b-versatile",
     temperature: 0,
     response_format: { type: "json_object" }
+  });
+
+  recordGroqCompletionUsage('extract_resume_data_verbatim', completion, {
+    variant: 'verbatim',
   });
 
   const exactData = JSON.parse(completion.choices[0].message.content);
@@ -547,6 +567,8 @@ ${JSON.stringify(jsonData, null, 2)}
       response_format: { type: "json_object" }
     });
 
+    recordGroqCompletionUsage('enhance_resume_data', completion);
+
     const enhancedData = JSON.parse(completion.choices[0].message.content);
 
     // ===============================
@@ -607,6 +629,11 @@ Original Text:
       response_format: { type: "json_object" }
     });
 
+    recordGroqCompletionUsage('generate_text_variations', completion, {
+      contextType,
+      jobTitle,
+    });
+
     const parsed = JSON.parse(completion.choices[0].message.content);
     return parsed.variations || [];
 
@@ -645,6 +672,8 @@ ${JSON.stringify(resumeData)}
       temperature: 0.1, // Low temperature for analytical precision
       response_format: { type: "json_object" }
     });
+
+    recordGroqCompletionUsage('calculate_ats_score', completion);
 
     return JSON.parse(completion.choices[0].message.content);
   } catch (error) {
@@ -686,6 +715,8 @@ ${JSON.stringify(resumeData)}
       temperature: 0.4, 
       response_format: { type: "json_object" }
     });
+
+    recordGroqCompletionUsage('generate_interview_prep', completion);
 
     return JSON.parse(completion.choices[0].message.content);
   } catch (error) {

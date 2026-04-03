@@ -3408,7 +3408,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { 
   Download, ChevronLeft, Trash2, User, Briefcase, 
   GraduationCap, CheckCircle, Award, Globe, Layers,
-  Cpu, FileText, PanelLeftClose, PanelLeftOpen, Camera, X, Eye, LayoutGrid, Sparkles, Target, ScanLine, MessageSquare, PencilLine, Scissors, ZoomIn, ZoomOut, Maximize2, RotateCcw
+  Cpu, FileText, PanelLeftClose, PanelLeftOpen, Camera, X, Eye, LayoutGrid, Sparkles, Target, ScanLine, MessageSquare, PencilLine, Scissors, ZoomIn, ZoomOut, Maximize2, RotateCcw, Save, FolderOpen
 } from 'lucide-react';
 
 import ResumePreview from "../resume/ResumePreview";
@@ -3416,6 +3416,7 @@ import ResumeThumbnail from "../resume/ResumeThumbnail";
 import { TEMPLATES } from './TemplateGallery'; 
 import poojaImage from '../../assets/Pooja.png';
 import BuilderProgress from './BuilderProgress';
+import ThemeToggleButton from '../ui/ThemeToggleButton';
 
 // --- IMPORTS FOR AI FEATURES ---
 import AIEnhanceModal from './AIEnhanceModal'; 
@@ -3432,6 +3433,13 @@ import {
   stripListPrefix,
 } from '../../utils/listTextFormatting';
 import { getResumeInsights, getTemplateRecommendations } from '../../utils/resumeInsights';
+import {
+  appendATSResult,
+  appendInterviewPrepResult,
+  getResumeRecord,
+  markResumePrinted,
+  saveResumeRecord,
+} from '../../services/resumeRepositoryService';
 
 const DESKTOP_PREVIEW_SCALE = 0.85;
 const A4_PREVIEW_WIDTH_PX = 794;
@@ -4287,10 +4295,23 @@ const AIEnhanceableTextArea = ({
 
 // --- MAIN EDITOR ---
 // Note: added the 'mode' prop here
-const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode }) => {
+const Editor = ({
+  initialData,
+  selectedTemplate,
+  onChangeTemplate,
+  onBack,
+  mode,
+  importMode = 'ai-enhanced',
+  initialJDText = '',
+  resumeRecordId = null,
+  onResumeRecordChange,
+  onWorkspaceSnapshotChange,
+  onOpenRepository,
+}) => {
   const [activeSection, setActiveSection] = useState('personal');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); 
   const [isFormOpen, setIsFormOpen] = useState(true); 
+  const [mobileWorkspaceView, setMobileWorkspaceView] = useState('edit');
   const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
   const previewRef = useRef(null);
   const previewStageRef = useRef(null);
@@ -4300,9 +4321,10 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
   const previousDocumentTitleRef = useRef('');
   const autosaveTimerRef = useRef(null);
   const hasMountedAutosaveRef = useRef(false);
+  const persistedResumeIdRef = useRef(resumeRecordId || null);
 
   // --- NEW STATE: TARGET JOB DESCRIPTION ---
-  const [jdText, setJdText] = useState('');
+  const [jdText, setJdText] = useState(initialJDText || '');
   const [manualPageBreaks, setManualPageBreaks] = useState([]);
   const [previewPageBreaks, setPreviewPageBreaks] = useState([]);
   const [previewMetrics, setPreviewMetrics] = useState({ pageHeight: 0, contentHeight: 0 });
@@ -4314,11 +4336,14 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
   const [previewZoomLevel, setPreviewZoomLevel] = useState(1);
   const [autosaveState, setAutosaveState] = useState('saved');
   const [lastSavedAt, setLastSavedAt] = useState(() => new Date());
+  const [persistedResumeId, setPersistedResumeId] = useState(resumeRecordId || null);
 
   // --- AI MODAL STATES ---
   const [aiModalConfig, setAiModalConfig] = useState({ isOpen: false, text: '', type: '', onApply: null });
   const [isAtsModalOpen, setIsAtsModalOpen] = useState(false);
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
+  const [latestAtsEntry, setLatestAtsEntry] = useState(null);
+  const [latestInterviewEntry, setLatestInterviewEntry] = useState(null);
   const exportPreviewRef = useRef(null);
 
   // --- DATA INITIALIZATION ---
@@ -4389,6 +4414,14 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
     });
   }, [previewMetrics.contentHeight, previewMetrics.pageHeight, previewPageBreaks]);
   const isMobileLayout = viewportWidth < 1024;
+  const mobileWorkspaceTabs = useMemo(
+    () => [
+      { id: 'sections', label: 'Sections', icon: LayoutGrid },
+      { id: 'edit', label: 'Edit', icon: PencilLine },
+      { id: 'preview', label: 'Preview', icon: Eye },
+    ],
+    []
+  );
   const basePreviewScale = isMobileLayout
     ? Math.min(
         0.72,
@@ -4567,7 +4600,7 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
       },
       {
         key: 'sections',
-        label: criticalSectionGaps === 0 ? 'Core sections filled' : `${criticalSectionGaps} core section${criticalSectionGaps === 1 ? '' : 's'} to review`,
+        label: criticalSectionGaps === 0 ? 'Core sections filled' : `${criticalSectionGaps} section${criticalSectionGaps === 1 ? '' : 's'} to review`,
         pass: criticalSectionGaps === 0,
       },
       {
@@ -4579,12 +4612,49 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
     [criticalSectionGaps, previewMetrics.pageHeight, previewPages.length]
   );
   const autosaveLabel = useMemo(() => {
-    if (autosaveState === 'saving') return 'Saving...';
+    if (autosaveState === 'saving') return 'Saving to repository...';
     return `Saved ${lastSavedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
   }, [autosaveState, lastSavedAt]);
   const workspaceSnapshot = useMemo(
     () => JSON.stringify({ resume, jdText, manualPageBreaks, selectedTemplate }),
     [jdText, manualPageBreaks, resume, selectedTemplate]
+  );
+  const persistWorkspaceToRepository = useCallback(() => {
+    const savedRecord = saveResumeRecord({
+      resumeId: persistedResumeIdRef.current,
+      resumeData: resume,
+      selectedTemplate,
+      mode: mode || 'scratch',
+      importMode,
+      jdText,
+    });
+
+    if (savedRecord?.id) {
+      persistedResumeIdRef.current = savedRecord.id;
+      setPersistedResumeId(savedRecord.id);
+      onResumeRecordChange?.(savedRecord.id);
+    }
+
+    onWorkspaceSnapshotChange?.({
+      resume,
+      jdText,
+      selectedTemplate,
+      resumeRecordId: savedRecord?.id || persistedResumeIdRef.current,
+    });
+
+    return savedRecord;
+  }, [importMode, jdText, mode, onResumeRecordChange, onWorkspaceSnapshotChange, resume, selectedTemplate]);
+
+  const handleSectionSelect = useCallback(
+    (sectionId) => {
+      setActiveSection(sectionId);
+      if (isMobileLayout) {
+        setMobileWorkspaceView('edit');
+        setIsSidebarOpen(true);
+        setIsFormOpen(true);
+      }
+    },
+    [isMobileLayout]
   );
 
   // --- HANDLERS ---
@@ -4703,8 +4773,33 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
   }, []);
 
   useEffect(() => {
+    if (!isMobileLayout) return;
+
+    setIsSidebarOpen(true);
+    setIsFormOpen(true);
+  }, [isMobileLayout]);
+
+  useEffect(() => {
+    persistedResumeIdRef.current = resumeRecordId || null;
+    setPersistedResumeId(resumeRecordId || null);
+  }, [resumeRecordId]);
+
+  useEffect(() => {
+    if (!persistedResumeId) {
+      setLatestAtsEntry(null);
+      setLatestInterviewEntry(null);
+      return;
+    }
+
+    const record = getResumeRecord(persistedResumeId);
+    setLatestAtsEntry(record?.atsHistory?.[0] || null);
+    setLatestInterviewEntry(record?.interviewPrepHistory?.[0] || null);
+  }, [persistedResumeId]);
+
+  useEffect(() => {
     if (!hasMountedAutosaveRef.current) {
       hasMountedAutosaveRef.current = true;
+      persistWorkspaceToRepository();
       setAutosaveState('saved');
       setLastSavedAt(new Date());
       return undefined;
@@ -4719,6 +4814,7 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
     autosaveTimerRef.current = window.setTimeout(() => {
       try {
         window.sessionStorage.setItem('resume_builder_workspace_snapshot', workspaceSnapshot);
+        persistWorkspaceToRepository();
       } catch (error) {
         console.warn('Unable to cache editor snapshot', error);
       }
@@ -4732,7 +4828,7 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
         window.clearTimeout(autosaveTimerRef.current);
       }
     };
-  }, [workspaceSnapshot]);
+  }, [persistWorkspaceToRepository, workspaceSnapshot]);
 
   useEffect(() => () => {
     if (autosaveTimerRef.current) {
@@ -4767,6 +4863,9 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
 
   useEffect(() => {
     const handleAfterPrint = () => {
+      if (persistedResumeIdRef.current) {
+        markResumePrinted(persistedResumeIdRef.current);
+      }
       setIsPrinting(false);
       if (previousDocumentTitleRef.current) {
         document.title = previousDocumentTitleRef.current;
@@ -5092,12 +5191,34 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
 
   // Check if JD is required for action
   const handleATSClick = () => {
-    if (!jdText.trim()) { setActiveSection('target-jd'); setIsFormOpen(true); } 
-    else { setIsAtsModalOpen(true); }
+    if (!jdText.trim()) {
+      setActiveSection('target-jd');
+      setIsFormOpen(true);
+      if (isMobileLayout) {
+        setMobileWorkspaceView('edit');
+      }
+    } else {
+      persistWorkspaceToRepository();
+      setIsAtsModalOpen(true);
+    }
   };
   const handleInterviewClick = () => {
-    if (!jdText.trim()) { setActiveSection('target-jd'); setIsFormOpen(true); } 
-    else { setIsInterviewModalOpen(true); }
+    if (!jdText.trim()) {
+      setActiveSection('target-jd');
+      setIsFormOpen(true);
+      if (isMobileLayout) {
+        setMobileWorkspaceView('edit');
+      }
+    } else {
+      persistWorkspaceToRepository();
+      setIsInterviewModalOpen(true);
+    }
+  };
+  const handleSaveResume = () => {
+    setAutosaveState('saving');
+    persistWorkspaceToRepository();
+    setAutosaveState('saved');
+    setLastSavedAt(new Date());
   };
 
   return (
@@ -5165,12 +5286,36 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
         onClose={() => setIsAtsModalOpen(false)} 
         resumeData={resume} 
         jdText={jdText} 
+        existingEntry={latestAtsEntry}
+        onResults={(result) => {
+          const savedRecord = persistWorkspaceToRepository();
+          if (savedRecord?.id) {
+            const entry = appendATSResult({
+              resumeId: savedRecord.id,
+              jdText,
+              result,
+            });
+            setLatestAtsEntry(entry);
+          }
+        }}
       />
       <InterviewPrepModal 
         isOpen={isInterviewModalOpen} 
         onClose={() => setIsInterviewModalOpen(false)} 
         resumeData={resume} 
         jdText={jdText} 
+        existingEntry={latestInterviewEntry}
+        onResults={(result) => {
+          const savedRecord = persistWorkspaceToRepository();
+          if (savedRecord?.id) {
+            const entry = appendInterviewPrepResult({
+              resumeId: savedRecord.id,
+              jdText,
+              result,
+            });
+            setLatestInterviewEntry(entry);
+          }
+        }}
       />
       {isPreviewModalOpen && (
         <div className="fixed inset-0 z-[9999] bg-[color:var(--theme-surface-glass)] backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
@@ -5237,102 +5382,148 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
 
       {/* TOP BAR */}
       <div className="shrink-0 border-b border-slate-200/80 bg-white/85 px-4 py-3 backdrop-blur sm:px-6">
-        <div className="mx-auto max-w-[1520px]">
-          <div className="rounded-[1.5rem] border border-slate-200/80 bg-white/92 px-4 py-3 shadow-sm shadow-slate-200/70">
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <button onClick={onBack} className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-900">
+        <div className="mx-auto w-full">
+          <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/95 px-4 py-4 shadow-sm shadow-slate-200/70 sm:px-5 sm:py-5">
+            <div className="grid gap-4">
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between xl:flex-nowrap">
+                <div className="flex min-w-0 shrink-0 items-center gap-3">
+                  <button
+                    onClick={() => {
+                      handleSaveResume();
+                      onBack();
+                    }}
+                    className="rounded-2xl border border-slate-200 bg-white p-3 text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-900"
+                  >
                     <ChevronLeft size={20} />
                   </button>
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <span className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-teal-700">
-                      Resume Studio
-                    </span>
-                    <h1 className="truncate text-[1.45rem] font-black tracking-tight text-slate-900 leading-none">Editor Workspace</h1>
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">
+                    <h1 className="truncate text-[1.55rem] font-black tracking-tight text-slate-900 leading-none">Editor Workspace</h1>
+                    <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
                       {selectedTemplateMeta?.name || 'Template'}
                     </span>
                     {selectedTemplateRank && (
-                      <span className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-teal-700">
+                      <span className="shrink-0 rounded-full border border-teal-100 bg-teal-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-teal-700">
                         Recommended #{selectedTemplateRank}
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-                  <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] ${
+                <div className="flex min-w-0 flex-1 items-center gap-1.5 xl:flex-nowrap xl:justify-end">
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.2em] ${
                     autosaveState === 'saving'
                       ? 'border border-amber-200 bg-amber-50 text-amber-700'
                       : 'border border-emerald-100 bg-emerald-50 text-emerald-700'
                   }`}>
                     {autosaveLabel}
                   </span>
-                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">
-                    Step 4 of 5
-                  </span>
-                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">
+                  <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
                     {resumeInsights.readinessScore}% ready
                   </span>
-                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">
+                  <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
                     {previewPages.length} page{previewPages.length === 1 ? '' : 's'}
                   </span>
-                  <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] ${
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.2em] ${
                     isPreviewEditMode
                       ? 'border border-teal-100 bg-teal-50 text-teal-700'
                       : 'border border-slate-200 bg-white text-slate-500'
                   }`}>
                     {isPreviewEditMode ? 'Live Edit On' : 'Live Edit Off'}
                   </span>
+                  {exportChecklist.map((item) => (
+                    <span
+                      key={item.key}
+                      className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] ${
+                        item.pass
+                          ? 'border border-emerald-100 bg-emerald-50 text-emerald-700'
+                          : 'border border-amber-100 bg-amber-50 text-amber-700'
+                      }`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${item.pass ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex justify-end xl:shrink-0">
+                  <ThemeToggleButton
+                    iconOnly
+                    className="!border-blue-200 !bg-white !shadow-sm hover:!border-blue-400 !text-teal-700"
+                  />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
-                <BuilderProgress current="edit" inline showCounter={false} className="xl:min-w-0" />
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between xl:flex-nowrap">
+                <div className="flex min-w-0 items-center gap-2 xl:flex-nowrap">
+                  {!isMobileLayout && (
+                    <BuilderProgress current="edit" inline showCounter={false} className="min-w-0 shrink-0" />
+                  )}
+                  {isMobileLayout && (
+                    <div className="grid w-full grid-cols-3 gap-2">
+                      {mobileWorkspaceTabs.map(({ id, label, icon: Icon }) => {
+                        const isActive = mobileWorkspaceView === id;
 
-                <div className="flex flex-wrap items-center gap-2 xl:flex-nowrap xl:justify-end">
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => setMobileWorkspaceView(id)}
+                            className={`flex items-center justify-center gap-1.5 rounded-xl border px-2.5 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition-all sm:gap-2 sm:px-3 ${
+                              isActive
+                                ? 'border-teal-200 bg-teal-50 text-teal-700 shadow-sm'
+                                : 'border-slate-200 bg-white text-slate-500'
+                            }`}
+                          >
+                            <Icon size={14} />
+                            <span>{label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                   {mode === 'tailor' && (
-                    <>
+                    <div className="flex items-center gap-2 xl:flex-nowrap">
                       <button
                         onClick={handleATSClick}
-                        className="hidden xl:flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 text-sm font-bold text-blue-700 transition-all hover:bg-blue-100 hover:shadow-sm whitespace-nowrap"
+                        className="flex shrink-0 items-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-[0.85rem] font-bold text-blue-700 transition-all hover:bg-blue-100 hover:shadow-sm whitespace-nowrap"
                         title="Scan resume against Job Description"
                       >
                         <ScanLine size={16} /> ATS Scan
                       </button>
                       <button
                         onClick={handleInterviewClick}
-                        className="hidden xl:flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-sm font-bold text-indigo-700 transition-all hover:bg-indigo-100 hover:shadow-sm whitespace-nowrap"
+                        className="flex shrink-0 items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-[0.85rem] font-bold text-indigo-700 transition-all hover:bg-indigo-100 hover:shadow-sm whitespace-nowrap"
                         title="Generate Interview Questions"
                       >
                         <MessageSquare size={16} /> AI Interview Prep
                       </button>
-                    </>
+                    </div>
                   )}
-                  <div className="hidden xl:flex flex-col items-end gap-1">
-                    <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
-                      Export Confidence
-                    </div>
-                    <div className="flex flex-wrap justify-end gap-1.5 max-w-[360px]">
-                      {exportChecklist.map((item) => (
-                        <span
-                          key={item.key}
-                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${
-                            item.pass
-                              ? 'border border-emerald-100 bg-emerald-50 text-emerald-700'
-                              : 'border border-amber-100 bg-amber-50 text-amber-700'
-                          }`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${item.pass ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                          {item.label}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 xl:shrink-0 xl:flex-nowrap xl:justify-end">
+                  <button
+                    onClick={handleSaveResume}
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-[0.85rem] font-bold text-teal-700 shadow-sm transition-all hover:bg-teal-100 active:scale-95 whitespace-nowrap sm:w-auto xl:shrink-0"
+                  >
+                    <Save size={16} />
+                    {persistedResumeId ? 'Update Resume' : 'Save Resume'}
+                  </button>
+                  {onOpenRepository && (
+                    <button
+                      onClick={() => {
+                        handleSaveResume();
+                        onOpenRepository();
+                      }}
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-[0.85rem] font-bold text-slate-600 shadow-sm transition-all hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700 active:scale-95 whitespace-nowrap sm:w-auto xl:shrink-0"
+                    >
+                      <FolderOpen size={16} />
+                      My Repository
+                    </button>
+                  )}
                   <button
                     onClick={handleDownload}
-                    className="theme-primary-button flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-bold shadow-md transition-all active:scale-95 whitespace-nowrap"
+                    className="theme-primary-button flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-[0.85rem] font-bold shadow-md transition-all active:scale-95 whitespace-nowrap sm:w-auto xl:shrink-0"
                   >
                     <Download size={16} /> Print / Save PDF
                   </button>
@@ -5344,17 +5535,38 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
       </div>
 
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col lg:flex-row lg:h-full">
+        {isMobileLayout && (
+          <div className="border-b border-slate-200/80 bg-white/92 px-4 py-3 shadow-sm lg:hidden">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Mobile Workspace</div>
+                <div className="mt-1 text-sm font-bold text-slate-900">
+                  {mobileWorkspaceView === 'sections'
+                    ? 'Choose a section'
+                    : mobileWorkspaceView === 'edit'
+                      ? `Editing ${sectionOverview.heading}`
+                      : 'Preview and export'}
+                </div>
+              </div>
+              <div className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-teal-700">
+                {mobileWorkspaceView}
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* SIDEBAR */}
-        <div className={`bg-white/85 border-b lg:border-b-0 lg:border-r border-slate-200/80 py-4 lg:py-5 overflow-y-auto overscroll-y-contain shrink-0 min-h-0 lg:h-full transition-all duration-300 ease-in-out flex flex-col backdrop-blur ${isSidebarOpen ? 'w-full lg:w-64' : 'w-full lg:w-20'} z-10 relative`}>
-          <div className={`px-6 mb-6 flex items-center ${isSidebarOpen ? 'justify-between' : 'justify-center'}`}>
-            {isSidebarOpen && <h2 className="text-xs font-black uppercase text-slate-400 tracking-widest">Sections</h2>}
-            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-slate-400 hover:text-teal-600 transition-colors p-1 rounded-md hover:bg-slate-100">
-                {isSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={20} />}
-            </button>
+        <div className={`bg-white/85 border-b lg:border-b-0 lg:border-r border-slate-200/80 py-4 lg:py-5 overflow-y-auto overscroll-y-contain shrink-0 min-h-0 lg:h-full transition-all duration-300 ease-in-out flex flex-col backdrop-blur z-10 relative ${isMobileLayout ? (mobileWorkspaceView === 'sections' ? 'flex-1 w-full' : 'hidden') : isSidebarOpen ? 'w-full lg:w-64' : 'w-full lg:w-20'}`}>
+          <div className={`px-6 mb-6 flex items-center ${(isMobileLayout || isSidebarOpen) ? 'justify-between' : 'justify-center'}`}>
+            {(isMobileLayout || isSidebarOpen) && <h2 className="text-xs font-black uppercase text-slate-400 tracking-widest">Sections</h2>}
+            {!isMobileLayout && (
+              <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-slate-400 hover:text-teal-600 transition-colors p-1 rounded-md hover:bg-slate-100">
+                  {isSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={20} />}
+              </button>
+            )}
           </div>
 
-          {isSidebarOpen && (
+          {isSidebarOpen && !isMobileLayout && (
             <div className="theme-strong-panel mx-4 mb-4 rounded-[1.5rem] px-4 py-4 shadow-xl shadow-slate-900/10">
               <div className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-[color:var(--theme-accent)]">Workspace Snapshot</div>
               <div className="text-base font-black tracking-tight text-[color:var(--theme-strong-text)]">{selectedTemplateMeta?.name || 'Template selected'}</div>
@@ -5374,31 +5586,31 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
             </div>
           )}
 
-          <nav className={`space-y-1 flex-1 ${isMobileLayout && isSidebarOpen ? 'grid grid-cols-2 sm:grid-cols-3 gap-1 px-2' : ''}`}>
-            <NavItem id="document" icon={FileText} label="Document Style" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} status={sectionStatusMap.document} />
-            <NavItem id="templates" icon={LayoutGrid} label="Change Template" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} status={sectionStatusMap.templates} />
+          <nav className={`space-y-1 flex-1 ${isMobileLayout ? 'grid grid-cols-2 sm:grid-cols-3 gap-1 px-2 pb-4' : ''}`}>
+            <NavItem id="document" icon={FileText} label="Document Style" active={activeSection} onClick={handleSectionSelect} isOpen={isMobileLayout ? true : isSidebarOpen} status={sectionStatusMap.document} />
+            <NavItem id="templates" icon={LayoutGrid} label="Change Template" active={activeSection} onClick={handleSectionSelect} isOpen={isMobileLayout ? true : isSidebarOpen} status={sectionStatusMap.templates} />
             <div className={`my-4 border-t border-slate-100 mx-4 ${isMobileLayout ? 'col-span-full' : ''}`}></div>
             
             {/* TARGET JD NAV ITEM: ONLY SHOW IN TAILOR MODE */}
             {mode === 'tailor' && (
-               <NavItem id="target-jd" icon={Target} label="Target Job (JD)" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} status={sectionStatusMap['target-jd']} />
+               <NavItem id="target-jd" icon={Target} label="Target Job (JD)" active={activeSection} onClick={handleSectionSelect} isOpen={isMobileLayout ? true : isSidebarOpen} status={sectionStatusMap['target-jd']} />
             )}
             
-            <NavItem id="personal" icon={User} label="Personal Details" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} status={sectionStatusMap.personal} />
-            <NavItem id="experience" icon={Briefcase} label="Experience" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} status={sectionStatusMap.experience} />
-            <NavItem id="education" icon={GraduationCap} label="Education" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} status={sectionStatusMap.education} />
-            <NavItem id="skills" icon={Cpu} label="Skills" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} status={sectionStatusMap.skills} />
-            <NavItem id="projects" icon={Layers} label="Projects" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} status={sectionStatusMap.projects} />
-            <NavItem id="certifications" icon={CheckCircle} label="Certifications" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} status={sectionStatusMap.certifications} />
-            <NavItem id="awards" icon={Award} label="Awards" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} status={sectionStatusMap.awards} />
-            <NavItem id="languages" icon={Globe} label="Languages" active={activeSection} onClick={setActiveSection} isOpen={isSidebarOpen} status={sectionStatusMap.languages} />
+            <NavItem id="personal" icon={User} label="Personal Details" active={activeSection} onClick={handleSectionSelect} isOpen={isMobileLayout ? true : isSidebarOpen} status={sectionStatusMap.personal} />
+            <NavItem id="experience" icon={Briefcase} label="Experience" active={activeSection} onClick={handleSectionSelect} isOpen={isMobileLayout ? true : isSidebarOpen} status={sectionStatusMap.experience} />
+            <NavItem id="education" icon={GraduationCap} label="Education" active={activeSection} onClick={handleSectionSelect} isOpen={isMobileLayout ? true : isSidebarOpen} status={sectionStatusMap.education} />
+            <NavItem id="skills" icon={Cpu} label="Skills" active={activeSection} onClick={handleSectionSelect} isOpen={isMobileLayout ? true : isSidebarOpen} status={sectionStatusMap.skills} />
+            <NavItem id="projects" icon={Layers} label="Projects" active={activeSection} onClick={handleSectionSelect} isOpen={isMobileLayout ? true : isSidebarOpen} status={sectionStatusMap.projects} />
+            <NavItem id="certifications" icon={CheckCircle} label="Certifications" active={activeSection} onClick={handleSectionSelect} isOpen={isMobileLayout ? true : isSidebarOpen} status={sectionStatusMap.certifications} />
+            <NavItem id="awards" icon={Award} label="Awards" active={activeSection} onClick={handleSectionSelect} isOpen={isMobileLayout ? true : isSidebarOpen} status={sectionStatusMap.awards} />
+            <NavItem id="languages" icon={Globe} label="Languages" active={activeSection} onClick={handleSectionSelect} isOpen={isMobileLayout ? true : isSidebarOpen} status={sectionStatusMap.languages} />
           </nav>
         </div>
 
         {/* EDITOR FORM AREA */}
-        <div className={`bg-transparent lg:border-r border-slate-200/80 overflow-y-auto overscroll-y-contain custom-scrollbar shrink-0 min-h-0 lg:h-full z-0 relative transition-all duration-300 ease-in-out ${isFormOpen ? 'w-full lg:w-[430px] p-4 sm:p-5 lg:p-6 opacity-100' : 'w-full lg:w-[92px] p-3 sm:p-4 lg:p-3 opacity-100'}`}>
-          {isFormOpen ? (
-            <div className="max-w-[420px] mx-auto w-full"> 
+        <div className={`bg-transparent lg:border-r border-slate-200/80 overflow-y-auto overscroll-y-contain custom-scrollbar shrink-0 min-h-0 lg:h-full z-0 relative transition-all duration-300 ease-in-out ${isMobileLayout ? (mobileWorkspaceView === 'edit' ? 'flex-1 w-full p-4 sm:p-5' : 'hidden') : isFormOpen ? 'w-full lg:w-[430px] p-4 sm:p-5 lg:p-6 opacity-100' : 'w-full lg:w-[92px] p-3 sm:p-4 lg:p-3 opacity-100'}`}>
+          {isMobileLayout || isFormOpen ? (
+            <div className="mx-auto w-full max-w-[420px] pb-6"> 
               <div className="mb-5 rounded-[1.5rem] border border-slate-200/80 bg-white/92 p-4 shadow-sm shadow-slate-200/70">
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2">
@@ -5410,12 +5622,31 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
                       {sectionOverview.primaryLabel}: {sectionOverview.primaryValue}
                     </span>
                   </div>
-                  <WorkspaceIconButton
-                    icon={PanelLeftClose}
-                    label="Minimize editor"
-                    onClick={() => setIsFormOpen(false)}
-                    className="shrink-0"
-                  />
+                  {isMobileLayout ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setMobileWorkspaceView('sections')}
+                        className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 transition-all hover:border-teal-200 hover:text-teal-700"
+                      >
+                        Sections
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMobileWorkspaceView('preview')}
+                        className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-teal-700 transition-all hover:bg-teal-100"
+                      >
+                        Preview
+                      </button>
+                    </div>
+                  ) : (
+                    <WorkspaceIconButton
+                      icon={PanelLeftClose}
+                      label="Minimize editor"
+                      onClick={() => setIsFormOpen(false)}
+                      className="shrink-0"
+                    />
+                  )}
                 </div>
                 <h2 className="text-[1.65rem] font-black tracking-tight text-slate-900 leading-tight">{sectionOverview.heading}</h2>
                 <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{sectionOverview.description}</p>
@@ -5524,7 +5755,7 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
                       <div className="rounded-2xl border border-teal-100 bg-gradient-to-r from-teal-50 to-emerald-50 p-4 text-sm text-teal-900">
                         {selectedTemplateRecommendation?.reasons?.[0] || 'Switch templates freely. Your content, spacing, and live preview settings stay with you.'}
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       {rankedTemplates.map(tpl => (
                           <div 
                               key={tpl.id} 
@@ -5652,7 +5883,7 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
                       
                       {activeSection === 'awards' && (<><Input label="Award Name" value={item.name} onChange={(v) => updateListItem('awards', item.id, 'name', v)} /><Input label="Issuer" value={item.issuer} onChange={(v) => updateListItem('awards', item.id, 'issuer', v)} /><Input label="Date" value={item.date} onChange={(v) => updateListItem('awards', item.id, 'date', v)} /></>)}
                       {activeSection === 'certifications' && (<><Input label="Certificate Name" value={item.name} onChange={(v) => updateListItem('certifications', item.id, 'name', v)} /><Input label="Issuer" value={item.issuer} onChange={(v) => updateListItem('certifications', item.id, 'issuer', v)} /><Input label="Date" value={item.date} onChange={(v) => updateListItem('certifications', item.id, 'date', v)} /></>)}
-                      {activeSection === 'languages' && (<div className="grid grid-cols-2 gap-4"><Input label="Language" value={item.name} onChange={(v) => updateListItem('languages', item.id, 'name', v)} /><Input label="Level" value={item.level} onChange={(v) => updateListItem('languages', item.id, 'level', v)} /></div>)}
+                      {activeSection === 'languages' && (<div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><Input label="Language" value={item.name} onChange={(v) => updateListItem('languages', item.id, 'name', v)} /><Input label="Level" value={item.level} onChange={(v) => updateListItem('languages', item.id, 'level', v)} /></div>)}
                     </div>
                   ))}
                   {activeSection === 'experience' && (
@@ -5703,7 +5934,7 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
         </div>
 
 	        {/* PREVIEW AREA */}
-	        <div className="flex-1 min-h-0 lg:h-full bg-[linear-gradient(180deg,rgba(226,232,240,0.55)_0%,rgba(241,245,249,0.9)_100%)] overflow-y-auto overscroll-y-contain custom-scrollbar p-4 sm:p-5 lg:p-7 flex justify-center z-0 relative">
+	        <div className={`min-h-0 lg:h-full bg-[linear-gradient(180deg,rgba(226,232,240,0.55)_0%,rgba(241,245,249,0.9)_100%)] overflow-y-auto overscroll-y-contain custom-scrollbar p-4 sm:p-5 lg:p-7 justify-center z-0 relative ${isMobileLayout ? (mobileWorkspaceView === 'preview' ? 'flex flex-1 w-full overflow-x-auto' : 'hidden') : 'flex flex-1'}`}>
 	            <div className="flex flex-col items-center w-full">
                 <div className="mb-4 w-full max-w-[820px] rounded-[1.5rem] border border-slate-200/80 bg-white/92 p-4 shadow-sm shadow-slate-200/70 backdrop-blur">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -5718,8 +5949,8 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
                           : 'Use this preview to judge spacing, scan flow, and page endings before you export.'}
                       </p>
                     </div>
-                    <div className="flex flex-col items-start gap-3 lg:items-end">
-                      <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                    <div className="flex w-full flex-col items-start gap-3 lg:w-auto lg:items-end">
+                      <div className="flex w-full flex-wrap items-center gap-2 lg:justify-end">
                         <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">
                           A4 Preview
                         </span>
@@ -5737,7 +5968,7 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
                           {manualPageBreaks.length > 0 ? `${manualPageBreaks.length} manual breaks` : 'Auto page flow'}
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-slate-50/90 p-1.5">
+                      <div className="flex w-full flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-slate-50/90 p-1.5 lg:w-auto">
                         <WorkspaceIconButton
                           icon={PencilLine}
                           label={isPreviewEditMode ? 'Turn off live edit' : 'Turn on live edit'}
@@ -5790,7 +6021,9 @@ const Editor = ({ initialData, selectedTemplate, onChangeTemplate, onBack, mode 
                   <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-2.5 text-xs leading-relaxed text-slate-600">
                     {isPreviewEditMode
                       ? 'Live edit is active. Hover highlighted text to see the edit hint, then click any section you want to update directly.'
-                      : selectedTemplateRecommendation?.reasons?.[0] || 'This preview reflects the same content, spacing, and print behavior used for your final PDF.'}
+                      : isMobileLayout
+                        ? 'Preview your resume here, then use Print / Save PDF when the layout looks right.'
+                        : selectedTemplateRecommendation?.reasons?.[0] || 'This preview reflects the same content, spacing, and print behavior used for your final PDF.'}
                   </div>
                 </div>
                 {isPreviewEditMode && activePreviewField && (

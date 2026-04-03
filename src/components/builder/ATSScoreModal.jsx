@@ -1,29 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { ScanLine, Loader2, X, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
+import { ScanLine, Loader2, X, CheckCircle2, AlertCircle, TrendingUp, History, RotateCcw } from 'lucide-react';
 import { calculateATSScore } from '../../services/groqService'; 
 
-const ATSScoreModal = ({ isOpen, onClose, resumeData, jdText }) => {
+const formatDateTime = (value) => {
+  if (!value) return '';
+
+  try {
+    return new Date(value).toLocaleString([], {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  } catch (error) {
+    return value;
+  }
+};
+
+const ATSScoreModal = ({ isOpen, onClose, resumeData, jdText, onResults, existingEntry = null, allowRerun = true }) => {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
+      if (existingEntry?.result) {
+        setResults(existingEntry.result);
+        setError('');
+        setLoading(false);
+        return;
+      }
       if (!jdText || jdText.trim() === '') {
         setError("Please paste a Job Description in the Editor first to calculate your match score.");
         return;
       }
       runScan();
     }
-  }, [isOpen]);
+  }, [existingEntry, isOpen, jdText]);
 
   const runScan = async () => {
+    if (!jdText || jdText.trim() === '') {
+      setError("Please paste a Job Description in the Editor first to calculate your match score.");
+      return;
+    }
+
     setLoading(true);
     setError('');
     setResults(null);
     try {
       const data = await calculateATSScore(resumeData, jdText);
       setResults(data);
+      onResults?.(data);
     } catch (err) {
       setError("Failed to run ATS Scan. Please try again.");
     } finally {
@@ -33,9 +58,11 @@ const ATSScoreModal = ({ isOpen, onClose, resumeData, jdText }) => {
 
   if (!isOpen) return null;
 
+  const latestResultLabel = existingEntry?.createdAt ? `Latest saved scan from ${formatDateTime(existingEntry.createdAt)}` : '';
+
   return (
     <div className="fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
         
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -54,14 +81,14 @@ const ATSScoreModal = ({ isOpen, onClose, resumeData, jdText }) => {
         </div>
 
         {/* Content */}
-        <div className="p-8 bg-white min-h-[300px] flex flex-col justify-center">
+        <div className="flex-1 overflow-y-auto custom-scrollbar bg-white p-6 sm:p-8">
           {error ? (
-            <div className="text-center text-rose-500 font-medium flex flex-col items-center gap-2">
+            <div className="min-h-[300px] text-center text-rose-500 font-medium flex flex-col items-center justify-center gap-2">
               <AlertCircle size={32} className="mb-2" />
               {error}
             </div>
           ) : loading ? (
-            <div className="flex flex-col items-center justify-center text-blue-600">
+            <div className="min-h-[300px] flex flex-col items-center justify-center text-blue-600">
               <div className="relative mb-6">
                  <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full animate-pulse"></div>
                  <Loader2 size={48} className="animate-spin relative z-10" />
@@ -70,6 +97,22 @@ const ATSScoreModal = ({ isOpen, onClose, resumeData, jdText }) => {
             </div>
           ) : results ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {existingEntry?.result && (
+                <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50/80 px-4 py-3 text-sm text-blue-900">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 rounded-xl bg-white p-2 text-blue-600 shadow-sm">
+                      <History size={16} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-black tracking-tight">Showing your latest saved ATS result</div>
+                      <p className="mt-1 leading-relaxed text-blue-800">
+                        {latestResultLabel || 'This score was already generated for the current resume and job description.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Score Display */}
               <div className="flex flex-col items-center text-center mb-8">
                 <div className="relative w-32 h-32 flex items-center justify-center mb-4">
@@ -102,6 +145,19 @@ const ATSScoreModal = ({ isOpen, onClose, resumeData, jdText }) => {
                   </div>
                 </div>
               </div>
+
+              {allowRerun && jdText?.trim() && (
+                <div className="mt-8 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={runScan}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 transition-all hover:bg-blue-100 hover:shadow-sm"
+                  >
+                    <RotateCcw size={16} />
+                    {existingEntry?.result ? 'Run ATS Scan Again' : 'Refresh ATS Scan'}
+                  </button>
+                </div>
+              )}
             </div>
           ) : null}
         </div>

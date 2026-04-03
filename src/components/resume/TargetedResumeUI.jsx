@@ -82,7 +82,7 @@ const TargetedResumeUI = ({ onComplete, onCancel }) => {
       const finalTailoredResume = await phase3_TailorResume(parsedResume, parsedJD);
 
       setProgressMsg('Complete! Loading your targeted resume...');
-      setTimeout(() => onComplete(finalTailoredResume), 1200);
+      setTimeout(() => onComplete(finalTailoredResume, jdText), 1200);
     } catch (error) {
       console.error(error);
       setStatus('error');
