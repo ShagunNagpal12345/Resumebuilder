@@ -1,240 +1,88 @@
-// import React, { useState, useRef } from 'react';
-// import { UploadCloud, Target, ArrowRight, CheckCircle, Loader2, FileText, AlertCircle } from 'lucide-react';
-// import { extractTextFromFile } from '../../services/fileParser'; // Adjust path if needed
-// import { phase1_ExtractResume, phase2_AnalyzeJD, phase3_TailorResume } from '../../services/jobTailorService'; // Adjust path if needed
-
-// const TargetedResumeUI = ({ onComplete, onCancel }) => {
-//   const [file, setFile] = useState(null);
-//   const [jdText, setJdText] = useState('');
-//   const [status, setStatus] = useState('idle'); // idle, processing, error
-//   const [progressMsg, setProgressMsg] = useState('');
-//   const fileInputRef = useRef(null);
-
-//   const handleFileChange = (e) => {
-//     const selected = e.target.files[0];
-//     if (selected && (selected.type === "application/pdf" || selected.name.endsWith(".docx"))) {
-//       setFile(selected);
-//     } else {
-//       alert("Please upload a valid PDF or DOCX file.");
-//     }
-//   };
-
-//   const handleStartAlignment = async () => {
-//     if (!file) return alert("Please upload your resume first.");
-//     if (!jdText.trim()) return alert("Please paste the Job Description.");
-
-//     setStatus('processing');
-    
-//     try {
-//       // Step 0: Read File
-//       setProgressMsg('Extracting text from your document...');
-//       const rawResumeText = await extractTextFromFile(file);
-
-//       // Step 1: Parse Resume
-//       setProgressMsg('Phase 1: AI parsing your resume data...');
-//       const parsedResume = await phase1_ExtractResume(rawResumeText);
-
-//       // Step 2: Parse JD
-//       setProgressMsg('Phase 2: Deep analyzing Job Description requirements...');
-//       const parsedJD = await phase2_AnalyzeJD(jdText);
-
-//       // Step 3: Tailor Resume
-//       setProgressMsg('Phase 3: Tailoring bullet points and rewriting summary...');
-//       const finalTailoredResume = await phase3_TailorResume(parsedResume, parsedJD);
-
-//       setProgressMsg('Complete! Loading your targeted resume...');
-      
-//       // Pass the fully tailored data back to your main Resume Builder
-//       setTimeout(() => onComplete(finalTailoredResume), 1000);
-
-//     } catch (error) {
-//       console.error(error);
-//       setStatus('error');
-//       setProgressMsg('An error occurred during the AI alignment process. Please try again.');
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-[#0b0f19] flex flex-col items-center justify-center p-6 relative font-sans text-white">
-//       {/* Background FX */}
-//       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-//       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-teal-500/10 blur-[100px] rounded-full pointer-events-none"></div>
-
-//       <div className="relative z-10 w-full max-w-4xl bg-[#1e293b]/40 border border-slate-700/50 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
-        
-//         <div className="text-center mb-8">
-//           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 mb-4 shadow-lg shadow-teal-500/20">
-//             <Target size={32} className="text-white" />
-//           </div>
-//           <h2 className="text-3xl font-black mb-2">Job Alignment Engine</h2>
-//           <p className="text-slate-400 text-sm max-w-lg mx-auto">Upload your base resume and paste the target job description. Our 3-node AI system will automatically rewrite your profile to match the role.</p>
-//         </div>
-
-//         {status === 'idle' || status === 'error' ? (
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-//             {/* Left Box: File Upload */}
-//             <div className="bg-slate-900/60 rounded-2xl p-6 border border-slate-700/50 flex flex-col">
-//               <h3 className="text-xs font-bold uppercase tracking-widest text-teal-400 mb-4">1. Base Resume</h3>
-//               <div 
-//                 className={`flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 transition-all ${file ? 'border-teal-500 bg-teal-500/5' : 'border-slate-600 hover:border-teal-500/50 hover:bg-slate-800'}`}
-//                 onClick={() => fileInputRef.current.click()}
-//               >
-//                 {file ? (
-//                   <>
-//                     <FileText size={40} className="text-teal-400 mb-3" />
-//                     <p className="font-bold text-sm text-white">{file.name}</p>
-//                     <p className="text-xs text-slate-400 mt-1">Click to change file</p>
-//                   </>
-//                 ) : (
-//                   <>
-//                     <UploadCloud size={40} className="text-slate-400 mb-3" />
-//                     <p className="font-bold text-sm text-slate-300">Upload PDF or DOCX</p>
-//                     <p className="text-xs text-slate-500 mt-1">Drag & drop or click to browse</p>
-//                   </>
-//                 )}
-//                 <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".pdf,.docx" className="hidden" />
-//               </div>
-//             </div>
-
-//             {/* Right Box: Job Description */}
-//             <div className="bg-slate-900/60 rounded-2xl p-6 border border-slate-700/50 flex flex-col">
-//               <h3 className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-4">2. Target Job Description</h3>
-//               <textarea 
-//                 className="flex-1 w-full bg-slate-950/50 border border-slate-700 rounded-xl p-4 text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all resize-none"
-//                 placeholder="Paste the full job description here (responsibilities, requirements, about the role)..."
-//                 value={jdText}
-//                 onChange={(e) => setJdText(e.target.value)}
-//               ></textarea>
-//             </div>
-
-//           </div>
-//         ) : (
-//           // PROCESSING STATE
-//           <div className="py-12 flex flex-col items-center justify-center">
-//             <Loader2 size={48} className="text-teal-400 animate-spin mb-6" />
-//             <h3 className="text-xl font-bold text-white mb-2">Aligning Your Career Profile</h3>
-//             <p className="text-sm text-teal-400 font-mono">{progressMsg}</p>
-            
-//             {/* Visual Progress Steps */}
-//             <div className="flex gap-4 mt-8 text-xs font-bold text-slate-500 uppercase tracking-widest">
-//                <span className={progressMsg.includes('Phase 1') || progressMsg.includes('Phase 2') || progressMsg.includes('Phase 3') || progressMsg.includes('Complete') ? 'text-white' : ''}>Extraction</span>
-//                <span>➔</span>
-//                <span className={progressMsg.includes('Phase 2') || progressMsg.includes('Phase 3') || progressMsg.includes('Complete') ? 'text-white' : ''}>JD Analysis</span>
-//                <span>➔</span>
-//                <span className={progressMsg.includes('Phase 3') || progressMsg.includes('Complete') ? 'text-white' : ''}>AI Tailoring</span>
-//             </div>
-//           </div>
-//         )}
-
-//         {status === 'error' && (
-//           <div className="mt-6 bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl flex items-center gap-3 text-sm">
-//              <AlertCircle size={16} /> {progressMsg}
-//           </div>
-//         )}
-
-//         {/* Action Buttons */}
-//         {status !== 'processing' && (
-//           <div className="mt-8 flex justify-between items-center">
-//             <button onClick={onCancel} className="text-slate-400 hover:text-white text-sm font-medium transition-colors">
-//               ← Back to Selection
-//             </button>
-//             <button 
-//               onClick={handleStartAlignment}
-//               disabled={!file || !jdText.trim()}
-//               className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-bold text-sm uppercase tracking-widest flex items-center gap-2 hover:shadow-lg hover:shadow-teal-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-//             >
-//               Initiate Alignment <ArrowRight size={16} />
-//             </button>
-//           </div>
-//         )}
-
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default TargetedResumeUI;
-
-import React, { useState, useRef } from 'react';
-import { UploadCloud, Target, ArrowRight, Loader2, FileText, AlertCircle, X, CheckCircle2 } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  FileText,
+  Loader2,
+  Target,
+  UploadCloud,
+  X,
+} from 'lucide-react';
 import { extractTextFromFile } from '../../utils/fileParser';
-import { phase1_ExtractResume, phase2_AnalyzeJD, phase3_TailorResume } from '../../services/jobTailorService'; 
+import { phase1_ExtractResume, phase2_AnalyzeJD, phase3_TailorResume } from '../../services/jobTailorService';
 
 const TargetedResumeUI = ({ onComplete, onCancel }) => {
   const [file, setFile] = useState(null);
   const [jdText, setJdText] = useState('');
-  const [status, setStatus] = useState('idle'); // idle, processing, error
+  const [status, setStatus] = useState('idle');
   const [progressMsg, setProgressMsg] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
-  // --- DRAG AND DROP HANDLERS ---
-  const handleDragOver = (e) => {
-    e.preventDefault();
+  const handleDragOver = (event) => {
+    event.preventDefault();
     setIsDragging(true);
   };
 
-  const handleDragLeave = (e) => {
-    e.preventDefault();
+  const handleDragLeave = (event) => {
+    event.preventDefault();
     setIsDragging(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const droppedFile = e.dataTransfer.files[0];
-    validateAndSetFile(droppedFile);
-  };
-
-  const handleFileChange = (e) => {
-    const selected = e.target.files[0];
-    validateAndSetFile(selected);
   };
 
   const validateAndSetFile = (selectedFile) => {
-    if (selectedFile && (selectedFile.type === "application/pdf" || selectedFile.name.endsWith(".docx"))) {
+    if (selectedFile && (selectedFile.type === 'application/pdf' || selectedFile.name.endsWith('.docx'))) {
       setFile(selectedFile);
-    } else {
-      alert("Please upload a valid PDF or DOCX file.");
+      return;
     }
+
+    alert('Please upload a valid PDF or DOCX file.');
   };
 
-  const clearFile = (e) => {
-    e.stopPropagation(); // Prevent opening the file dialog
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setIsDragging(false);
+    validateAndSetFile(event.dataTransfer.files[0]);
+  };
+
+  const handleFileChange = (event) => {
+    validateAndSetFile(event.target.files[0]);
+  };
+
+  const clearFile = (event) => {
+    event.stopPropagation();
     setFile(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // --- AI ALIGNMENT PROCESS ---
   const handleStartAlignment = async () => {
-    if (!file) return alert("Please upload your base resume first.");
-    if (!jdText.trim()) return alert("Please paste the Job Description.");
+    if (!file) {
+      alert('Please upload your base resume first.');
+      return;
+    }
+
+    if (!jdText.trim()) {
+      alert('Please paste the Job Description.');
+      return;
+    }
 
     setStatus('processing');
-    
+
     try {
-      // Step 0: Read File
       setProgressMsg('Extracting text from document...');
       const rawResumeText = await extractTextFromFile(file);
 
-      // Step 1: Parse Resume
       setProgressMsg('Phase 1: AI parsing your base profile...');
       const parsedResume = await phase1_ExtractResume(rawResumeText);
 
-      // Step 2: Parse JD
       setProgressMsg('Phase 2: Deep analyzing Job Description requirements...');
       const parsedJD = await phase2_AnalyzeJD(jdText);
 
-      // Step 3: Tailor Resume
       setProgressMsg('Phase 3: Tailoring bullet points and rewriting summary...');
       const finalTailoredResume = await phase3_TailorResume(parsedResume, parsedJD);
 
       setProgressMsg('Complete! Loading your targeted resume...');
-      
-      // Pass the fully tailored data back to your main Resume Builder
       setTimeout(() => onComplete(finalTailoredResume), 1200);
-
     } catch (error) {
       console.error(error);
       setStatus('error');
@@ -242,153 +90,183 @@ const TargetedResumeUI = ({ onComplete, onCancel }) => {
     }
   };
 
-  // Calculate Progress Bar Width
   let progressPct = 10;
-  if (progressMsg.includes('Phase 1')) progressPct = 30;
-  if (progressMsg.includes('Phase 2')) progressPct = 60;
+  if (progressMsg.includes('Phase 1')) progressPct = 32;
+  if (progressMsg.includes('Phase 2')) progressPct = 62;
   if (progressMsg.includes('Phase 3')) progressPct = 90;
   if (progressMsg.includes('Complete')) progressPct = 100;
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] flex flex-col items-center justify-center p-6 relative font-sans text-white selection:bg-teal-500/30">
-      
-      {/* Background FX */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-teal-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+    <div className="theme-app-shell relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-4 py-8 font-sans sm:p-6">
+      <div className="theme-grid-overlay absolute inset-0 pointer-events-none" />
+      <div className="pointer-events-none absolute -left-20 top-8 h-[320px] w-[320px] rounded-full bg-teal-400/12 blur-[110px]" />
+      <div className="pointer-events-none absolute -bottom-10 right-[-4%] h-[340px] w-[340px] rounded-full bg-sky-300/16 blur-[120px]" />
 
-      <div className="relative z-10 w-full max-w-5xl bg-[#1e293b]/40 border border-slate-700/50 rounded-[2rem] p-8 md:p-12 backdrop-blur-xl shadow-2xl">
-        
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 mb-6 shadow-lg shadow-teal-500/20">
-            <Target size={32} className="text-white" />
+      <div className="theme-section-glass relative z-10 w-full max-w-5xl rounded-[2.2rem] p-2 shadow-2xl">
+        <div className="theme-section-surface rounded-[1.9rem] p-5 sm:p-8 md:p-10">
+          <div className="mb-10 text-center">
+            <div className="mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-lg shadow-teal-500/20">
+              <Target size={32} />
+            </div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-teal-100 bg-teal-50 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.24em] text-teal-700">
+              <CheckCircle2 size={12} />
+              AI Job Alignment
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-[color:var(--theme-text-primary)] md:text-4xl">
+              Target Your Resume For The Role
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[color:var(--theme-text-secondary)]">
+              Upload your base resume and paste the target job description. We will extract your profile, analyze the role, and generate a tailored draft before it enters the editor.
+            </p>
           </div>
-          <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">Job Alignment Engine</h2>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto leading-relaxed">
-            Upload your base resume and paste the target job description. Our 3-node AI system will extract your data, analyze the employer's needs, and rewrite your profile to match.
-          </p>
-        </div>
 
-        {status === 'idle' || status === 'error' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            {/* Left Box: File Upload */}
-            <div className="bg-slate-900/60 rounded-2xl p-6 border border-slate-700/50 flex flex-col h-[350px]">
-              <div className="flex justify-between items-center mb-4">
-                 <h3 className="text-xs font-bold uppercase tracking-widest text-teal-400 flex items-center gap-2">
-                   <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span> 1. Base Resume
-                 </h3>
-              </div>
-              
-              <div 
-                className={`flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 transition-all cursor-pointer relative overflow-hidden group
-                  ${isDragging ? 'border-teal-400 bg-teal-500/10 scale-[1.02]' : ''}
-                  ${file ? 'border-teal-500/50 bg-teal-500/5' : 'border-slate-600 hover:border-teal-500/50 hover:bg-slate-800'}
-                `}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current.click()}
-              >
-                {file ? (
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-teal-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <FileText size={32} className="text-teal-400" />
+          {status === 'idle' || status === 'error' ? (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="theme-section-muted flex min-h-[320px] flex-col rounded-[1.75rem] p-5 sm:p-6">
+                <div className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-teal-700">
+                  <span className="h-2 w-2 rounded-full bg-teal-500" />
+                  1. Base Resume
+                </div>
+
+                <div
+                  className={`flex flex-1 cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border-2 border-dashed p-6 text-center transition-all ${
+                    file
+                      ? 'border-teal-300 bg-teal-50/70'
+                      : isDragging
+                        ? 'border-teal-400 bg-teal-50 scale-[1.01]'
+                        : 'border-[color:var(--theme-border-soft)] bg-white hover:border-teal-300 hover:bg-teal-50/40'
+                  }`}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  {file ? (
+                    <div className="relative flex flex-col items-center">
+                      <button
+                        type="button"
+                        onClick={clearFile}
+                        className="absolute right-[-18px] top-[-14px] rounded-lg bg-white p-1.5 text-[color:var(--theme-text-secondary)] shadow-sm transition-colors hover:bg-rose-50 hover:text-rose-500"
+                        title="Remove file"
+                      >
+                        <X size={16} />
+                      </button>
+                      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-teal-100 text-teal-700">
+                        <FileText size={30} />
+                      </div>
+                      <p className="max-w-[220px] truncate text-sm font-bold text-[color:var(--theme-text-primary)]">{file.name}</p>
+                      <p className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-teal-700">
+                        <CheckCircle2 size={12} />
+                        Ready for parsing
+                      </p>
                     </div>
-                    <p className="font-bold text-sm text-white truncate max-w-[200px]">{file.name}</p>
-                    <p className="text-xs text-teal-500 mt-2 font-medium flex items-center gap-1"><CheckCircle2 size={12}/> Ready for parsing</p>
-                    
-                    <button 
-                      onClick={clearFile}
-                      className="absolute top-4 right-4 p-1.5 bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-lg transition-colors"
+                  ) : (
+                    <div className="pointer-events-none flex flex-col items-center">
+                      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[color:var(--theme-accent-soft)] text-teal-700">
+                        <UploadCloud size={30} />
+                      </div>
+                      <p className="text-sm font-bold text-[color:var(--theme-text-primary)]">Upload PDF or DOCX</p>
+                      <p className="mt-2 text-xs text-[color:var(--theme-text-secondary)]">Drag and drop or click to browse</p>
+                    </div>
+                  )}
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.docx"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+
+              <div className="theme-section-muted flex min-h-[320px] flex-col rounded-[1.75rem] p-5 sm:p-6">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-emerald-700">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    2. Target Job Description
+                  </div>
+                  {jdText ? (
+                    <button
+                      type="button"
+                      onClick={() => setJdText('')}
+                      className="text-xs font-semibold text-[color:var(--theme-text-secondary)] transition-colors hover:text-[color:var(--theme-text-primary)]"
                     >
-                      <X size={16} />
+                      Clear
                     </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center text-center pointer-events-none">
-                    <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4 group-hover:bg-slate-700 transition-colors">
-                      <UploadCloud size={32} className="text-slate-400 group-hover:text-teal-400 transition-colors" />
-                    </div>
-                    <p className="font-bold text-sm text-slate-300 mb-1">Upload PDF or DOCX</p>
-                    <p className="text-xs text-slate-500">Drag & drop or click to browse</p>
-                  </div>
-                )}
-                <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".pdf,.docx" className="hidden" />
+                  ) : null}
+                </div>
+
+                <textarea
+                  value={jdText}
+                  onChange={(event) => setJdText(event.target.value)}
+                  placeholder="Paste the full job description here, including responsibilities, requirements, and role context..."
+                  className="custom-scrollbar flex-1 resize-none rounded-[1.4rem] border border-[color:var(--theme-border-soft)] bg-white px-4 py-4 text-sm leading-7 text-[color:var(--theme-text-primary)] outline-none transition-all placeholder:text-[color:var(--theme-text-muted)] focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/10"
+                />
               </div>
             </div>
+          ) : (
+            <div className="py-16">
+              <div className="mx-auto flex max-w-xl flex-col items-center text-center">
+                <div className="relative mb-8">
+                  <div className="absolute inset-0 rounded-full bg-teal-400/20 blur-xl" />
+                  <Loader2 size={64} className="relative z-10 animate-spin text-teal-600" />
+                </div>
 
-            {/* Right Box: Job Description */}
-            <div className="bg-slate-900/60 rounded-2xl p-6 border border-slate-700/50 flex flex-col h-[350px]">
-              <div className="flex justify-between items-center mb-4">
-                 <h3 className="text-xs font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-2">
-                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 2. Target Job Description
-                 </h3>
-                 {jdText && (
-                   <button onClick={() => setJdText('')} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">Clear</button>
-                 )}
+                <h3 className="text-2xl font-black text-[color:var(--theme-text-primary)]">Aligning Your Career Profile</h3>
+                <p className="mt-3 text-sm font-semibold text-teal-700">{progressMsg}</p>
+
+                <div className="mt-8 w-full rounded-full border border-[color:var(--theme-border-soft)] bg-[color:var(--theme-surface-subtle)] p-1">
+                  <div
+                    className="h-2.5 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-500"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+
+                <div className="mt-5 grid w-full grid-cols-3 gap-3 text-[10px] font-black uppercase tracking-[0.22em] text-[color:var(--theme-text-muted)]">
+                  <span className={progressPct >= 32 ? 'text-teal-700' : ''}>Extraction</span>
+                  <span className={progressPct >= 62 ? 'text-teal-700' : ''}>JD Analysis</span>
+                  <span className={progressPct >= 90 ? 'text-teal-700' : ''}>AI Tailoring</span>
+                </div>
               </div>
-              <textarea 
-                className="flex-1 w-full bg-slate-950/50 border border-slate-700 rounded-xl p-4 text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all resize-none shadow-inner"
-                placeholder="Paste the full job description here (responsibilities, requirements, about the role)..."
-                value={jdText}
-                onChange={(e) => setJdText(e.target.value)}
-              ></textarea>
             </div>
+          )}
 
-          </div>
-        ) : (
-          // PROCESSING STATE
-          <div className="py-16 flex flex-col items-center justify-center">
-            
-            <div className="relative mb-8">
-               <div className="absolute inset-0 bg-teal-500/20 blur-xl rounded-full animate-pulse"></div>
-               <Loader2 size={64} className="text-teal-400 animate-spin relative z-10" />
+          {status === 'error' ? (
+            <div className="mt-8 flex items-start gap-3 rounded-[1.4rem] border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-700">
+              <AlertCircle size={18} className="mt-0.5 shrink-0" />
+              <p>{progressMsg}</p>
             </div>
+          ) : null}
 
-            <h3 className="text-2xl font-bold text-white mb-3">Aligning Your Career Profile</h3>
-            <p className="text-sm text-teal-400 font-mono mb-8">{progressMsg}</p>
-            
-            {/* Progress Bar */}
-            <div className="w-full max-w-md bg-slate-800 rounded-full h-2 mb-6 overflow-hidden border border-slate-700">
-               <div 
-                 className="bg-gradient-to-r from-teal-500 to-emerald-400 h-2 rounded-full transition-all duration-500 ease-out" 
-                 style={{ width: `${progressPct}%` }}
-               ></div>
+          {status !== 'processing' ? (
+            <div className="mt-10 flex flex-col-reverse items-stretch justify-between gap-4 border-t border-[color:var(--theme-border-soft)] pt-8 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={onCancel}
+                className="theme-secondary-button rounded-full px-6 py-3 text-sm font-bold"
+              >
+                Back to Selection
+              </button>
+
+              <button
+                type="button"
+                onClick={handleStartAlignment}
+                disabled={!file || !jdText.trim()}
+                className={`rounded-full px-8 py-3.5 text-sm font-black uppercase tracking-[0.2em] transition-all ${
+                  file && jdText.trim()
+                    ? 'theme-primary-button hover:-translate-y-0.5'
+                    : 'cursor-not-allowed border border-[color:var(--theme-border-soft)] bg-[color:var(--theme-surface-subtle)] text-[color:var(--theme-text-muted)]'
+                }`}
+              >
+                <span className="flex items-center justify-center gap-3">
+                  Initiate Alignment
+                  <ArrowRight size={18} />
+                </span>
+              </button>
             </div>
-            
-            {/* Visual Progress Steps */}
-            <div className="flex justify-between w-full max-w-md text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-               <span className={progressPct >= 30 ? 'text-teal-400 transition-colors' : ''}>Extraction</span>
-               <span className={progressPct >= 60 ? 'text-teal-400 transition-colors' : ''}>JD Analysis</span>
-               <span className={progressPct >= 90 ? 'text-teal-400 transition-colors' : ''}>AI Tailoring</span>
-            </div>
-
-          </div>
-        )}
-
-        {status === 'error' && (
-          <div className="mt-8 bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl flex items-center gap-3 text-sm animate-in fade-in slide-in-from-bottom-4">
-             <AlertCircle size={20} className="shrink-0" /> 
-             <p>{progressMsg}</p>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        {status !== 'processing' && (
-          <div className="mt-10 flex flex-col-reverse sm:flex-row justify-between items-center gap-4 border-t border-slate-800/50 pt-8">
-            <button onClick={onCancel} className="text-slate-400 hover:text-white text-sm font-medium transition-colors w-full sm:w-auto text-center">
-              ← Back to Selection
-            </button>
-            <button 
-              onClick={handleStartAlignment}
-              disabled={!file || !jdText.trim()}
-              className="w-full sm:w-auto bg-gradient-to-r from-teal-500 to-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:shadow-lg hover:shadow-teal-500/20 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-            >
-              Initiate Alignment <ArrowRight size={18} />
-            </button>
-          </div>
-        )}
-
+          ) : null}
+        </div>
       </div>
     </div>
   );

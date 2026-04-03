@@ -245,6 +245,8 @@
 
 
 import React from 'react';
+import FormattedTextBlock from '../FormattedTextBlock';
+import PreviewEditableField from '../PreviewEditableField';
 
 const Professional = ({ data }) => {
   // Safe Data Access
@@ -266,8 +268,12 @@ const Professional = ({ data }) => {
       {/* HEADER */}
       <header className="border-b-2 border-slate-800 pb-6 mb-8 flex justify-between items-start">
         <div>
-          <h1 className="text-4xl font-extrabold uppercase tracking-tight text-slate-900">{personal.name || 'Your Name'}</h1>
-          <p className="text-xl text-slate-600 mt-1 font-medium">{personal.title || 'Professional Title'}</p>
+          <PreviewEditableField path="personal.name" label="Full Name" as="h1" className="text-4xl font-extrabold uppercase tracking-tight text-slate-900">
+            {personal.name || 'Your Name'}
+          </PreviewEditableField>
+          <PreviewEditableField path="personal.title" label="Job Title" as="p" className="text-xl text-slate-600 mt-1 font-medium">
+            {personal.title || 'Professional Title'}
+          </PreviewEditableField>
           
           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4 text-sm text-slate-500 font-medium">
             {personal.email && <span>{personal.email}</span>}
@@ -286,7 +292,14 @@ const Professional = ({ data }) => {
       {personal.summary && (
         <section className="mb-8">
           <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Professional Summary</h3>
-          <p className="text-sm leading-relaxed text-slate-700">{personal.summary}</p>
+          <FormattedTextBlock
+            text={personal.summary}
+            editablePath="personal.summary"
+            editableLabel="Professional Summary"
+            plainClassName="text-sm leading-relaxed text-slate-700 whitespace-pre-wrap"
+            unorderedListClassName="ml-4 list-disc space-y-1.5 text-sm leading-relaxed text-slate-700"
+            orderedListClassName="ml-4 list-decimal space-y-1.5 text-sm leading-relaxed text-slate-700"
+          />
         </section>
       )}
 
@@ -305,14 +318,27 @@ const Professional = ({ data }) => {
         <section className="mb-8">
           <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Experience</h3>
           <div className="space-y-6">
-            {experience.map((exp) => (
+            {experience.map((exp, index) => (
               <div key={exp.id || Math.random()}>
                 <div className="flex justify-between items-baseline">
-                  <h4 className="font-bold text-lg text-slate-900">{exp.role}</h4>
-                  <span className="text-sm font-bold text-slate-400">{exp.date}</span>
+                  <PreviewEditableField path={`experience[${index}].role`} label="Experience Role" as="h4" className="font-bold text-lg text-slate-900">
+                    {exp.role}
+                  </PreviewEditableField>
+                  <PreviewEditableField path={`experience[${index}].date`} label="Experience Date" className="text-sm font-bold text-slate-400">
+                    {exp.date}
+                  </PreviewEditableField>
                 </div>
-                <div className="text-sm font-semibold text-teal-700 mb-2">{exp.company}</div>
-                <p className="text-sm text-slate-600 whitespace-pre-line leading-relaxed">{exp.desc}</p>
+                <PreviewEditableField path={`experience[${index}].company`} label="Experience Company" as="div" className="text-sm font-semibold text-teal-700 mb-2">
+                  {exp.company}
+                </PreviewEditableField>
+                <FormattedTextBlock
+                  text={exp.desc}
+                  editablePath={`experience[${index}].desc`}
+                  editableLabel="Experience Description"
+                  plainClassName="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed"
+                  unorderedListClassName="ml-4 list-disc space-y-1.5 text-sm text-slate-600 leading-relaxed"
+                  orderedListClassName="ml-4 list-decimal space-y-1.5 text-sm text-slate-600 leading-relaxed"
+                />
               </div>
             ))}
           </div>

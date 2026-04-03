@@ -915,6 +915,7 @@ import {
   PenTool, GraduationCap, Building2, ShoppingBag, Wrench 
 } from 'lucide-react';
 import ResumePreview from '../resume/ResumePreview'; 
+import poojaImage from '../../assets/Pooja.png';
 
 const CATEGORIES = [
   { id: 'bi', templateId: 'business-analyst', label: 'Business Intelligence', icon: BarChart3, color: 'text-emerald-600', bg: 'bg-emerald-100' },
@@ -1066,6 +1067,13 @@ const ResumeExamples = ({ onStart }) => {
   
   // Get content and determine which template to render
   const activeContent = EXAMPLE_CONTENT[activeTab];
+  const activePreviewContent = {
+    ...activeContent,
+    personal: {
+      ...activeContent.personal,
+      photo: activeContent.personal.photo || poojaImage,
+    },
+  };
   // Map category IDs to specific Template IDs
   const activeTemplateId = CATEGORIES.find(c => c.id === activeTab)?.templateId || 'professional';
 
@@ -1134,7 +1142,7 @@ const ResumeExamples = ({ onStart }) => {
                 */}
                 <div className="w-[210mm] h-[297mm] origin-top-left transform scale-[0.6] sm:scale-[0.55] lg:scale-[0.60] p-0 bg-white pointer-events-none select-none">
                     <ResumePreview 
-                        data={activeContent} 
+                        data={activePreviewContent} 
                         template={activeTemplateId} 
                     />
                 </div>

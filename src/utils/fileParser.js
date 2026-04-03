@@ -143,109 +143,149 @@ import workerSrc from "pdfjs-dist/build/pdf.worker.min.js?url";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
+const MIN_EXTRACTED_TEXT_LENGTH = 50;
+const MIN_PAGE_TEXT_LENGTH = 20;
+const OCR_RENDER_SCALE = 2;
+
+const normalizeExtractedText = (text = "") =>
+  text
+    .replace(/-\n/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/([a-z])\n([a-z])/gi, "$1 $2")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+
+const getPageTextFromTextLayer = async (page) => {
+  const content = await page.getTextContent();
+
+  const items = content.items
+    .filter((item) => typeof item?.str === "string" && item.str.trim())
+    .map((item) => ({
+      text: item.str,
+      x: item.transform?.[4] ?? 0,
+      y: item.transform?.[5] ?? 0,
+    }));
+
+  if (!items.length) return "";
+
+  items.sort((a, b) => {
+    if (Math.abs(a.y - b.y) > 5) return b.y - a.y;
+    return a.x - b.x;
+  });
+
+  let pageText = "";
+  let lastY = null;
+
+  for (const item of items) {
+    if (lastY !== null && Math.abs(item.y - lastY) > 8) {
+      pageText += "\n";
+    }
+
+    pageText += `${item.text} `;
+    lastY = item.y;
+  }
+
+  return normalizeExtractedText(pageText);
+};
+
+const renderPdfPageToCanvas = async (page) => {
+  const viewport = page.getViewport({ scale: OCR_RENDER_SCALE });
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+
+  if (!context) {
+    throw new Error("Canvas rendering is not available in this browser.");
+  }
+
+  canvas.width = Math.ceil(viewport.width);
+  canvas.height = Math.ceil(viewport.height);
+
+  await page.render({
+    canvasContext: context,
+    viewport,
+    background: "white",
+  }).promise;
+
+  return canvas;
+};
+
+const performPageOcr = async (page) => {
+  const canvas = await renderPdfPageToCanvas(page);
+
+  try {
+    const { data } = await Tesseract.recognize(canvas, "eng");
+    return normalizeExtractedText(data?.text || "");
+  } finally {
+    canvas.width = 0;
+    canvas.height = 0;
+  }
+};
+
+const extractPdfText = async (file) => {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pageTexts = [];
+
+  try {
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+
+      try {
+        let pageText = await getPageTextFromTextLayer(page);
+
+        if (pageText.replace(/\s/g, "").length < MIN_PAGE_TEXT_LENGTH) {
+          console.log(`Using OCR fallback for PDF page ${i}...`);
+          pageText = await performPageOcr(page);
+        }
+
+        if (pageText) {
+          pageTexts.push(pageText);
+        }
+      } finally {
+        page.cleanup();
+      }
+    }
+  } finally {
+    pdf.cleanup();
+    await pdf.destroy();
+  }
+
+  const text = normalizeExtractedText(pageTexts.join("\n\n"));
+
+  if (text.replace(/\s/g, "").length < MIN_EXTRACTED_TEXT_LENGTH) {
+    throw new Error("We couldn't extract enough readable text from that PDF.");
+  }
+
+  return text;
+};
+
+const extractDocxText = async (file) => {
+  const arrayBuffer = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer });
+
+  return normalizeExtractedText(result.value);
+};
+
 export const extractTextFromFile = async (file) => {
   if (!file) throw new Error("No file provided");
 
   try {
     const fileType = file.type;
+    const fileName = file.name?.toLowerCase() || "";
 
-    // ===============================
-    // HANDLE PDF FILES
-    // ===============================
-    if (fileType === "application/pdf") {
-
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
-      let text = "";
-
-      for (let i = 1; i <= pdf.numPages; i++) {
-
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-
-        // Get text items with coordinates
-        const items = content.items.map((item) => ({
-          text: item.str,
-          x: item.transform[4],
-          y: item.transform[5]
-        }));
-
-        // Sort top-to-bottom then left-to-right
-        items.sort((a, b) => {
-          if (Math.abs(a.y - b.y) > 5) return b.y - a.y;
-          return a.x - b.x;
-        });
-
-        let pageText = "";
-        let lastY = null;
-
-        for (const item of items) {
-
-          // detect line breaks
-          if (lastY !== null && Math.abs(item.y - lastY) > 8) {
-            pageText += "\n";
-          }
-
-          pageText += item.text + " ";
-          lastY = item.y;
-        }
-
-        text += pageText + "\n";
-      }
-
-      // ===============================
-      // OCR FALLBACK FOR IMAGE PDFs
-      // ===============================
-      if (text.replace(/\s/g, "").length < 50) {
-
-        console.log("Using OCR fallback...");
-
-        const { data } = await Tesseract.recognize(file, "eng");
-
-        text = data.text;
-      }
-
-      // ===============================
-      // CLEAN BROKEN TEXT
-      // ===============================
-      text = text
-        .replace(/-\n/g, "")              // remove hyphen breaks
-        .replace(/\n{3,}/g, "\n\n")       // normalize spacing
-        .replace(/([a-z])\n([a-z])/gi, "$1 $2") // fix broken sentences
-        .replace(/\s{2,}/g, " ")
-        .trim();
-
-      return text;
-    }
-
-    // ===============================
-    // HANDLE DOCX FILES
-    // ===============================
-    else if (
+    if (fileType === "application/pdf" || fileName.endsWith(".pdf")) {
+      return await extractPdfText(file);
+    } else if (
       fileType ===
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-      file.name.endsWith(".docx")
+      fileName.endsWith(".docx")
     ) {
-
-      const arrayBuffer = await file.arrayBuffer();
-      const result = await mammoth.extractRawText({ arrayBuffer });
-
-      return result.value
-        .replace(/\n{3,}/g, "\n\n")
-        .replace(/\s{2,}/g, " ")
-        .trim();
-    }
-
-    // ===============================
-    // UNSUPPORTED FILE
-    // ===============================
-    else {
+      return await extractDocxText(file);
+    } else {
       throw new Error("Unsupported format. Please upload PDF or DOCX.");
     }
-
   } catch (err) {
     console.error("File parsing error:", err);
-    throw new Error("Failed to read file content.");
+    throw new Error(err?.message || "Failed to read file content.");
   }
 };

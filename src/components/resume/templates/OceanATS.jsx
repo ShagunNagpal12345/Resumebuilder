@@ -145,6 +145,7 @@
 // export default OceanATS;
 
 import React from 'react';
+import FormattedTextBlock from '../FormattedTextBlock';
 
 const OceanATS = ({ data }) => {
   const {
@@ -178,7 +179,12 @@ const OceanATS = ({ data }) => {
       {personal.summary && (
           <section className="mb-8">
               <h3 className="text-md font-bold text-blue-900 uppercase border-b-2 border-blue-900 mb-3 pb-1">Professional Summary</h3>
-              <p className="text-sm leading-relaxed text-slate-700">{personal.summary}</p>
+              <FormattedTextBlock
+                text={personal.summary}
+                plainClassName="text-sm leading-relaxed text-slate-700 whitespace-pre-wrap"
+                unorderedListClassName="ml-4 list-disc space-y-1 text-sm leading-relaxed text-slate-700"
+                orderedListClassName="ml-4 list-decimal space-y-1 text-sm leading-relaxed text-slate-700"
+              />
           </section>
       )}
 
@@ -203,12 +209,12 @@ const OceanATS = ({ data }) => {
                               <span className="text-sm font-bold text-slate-500">{exp.date}</span>
                           </div>
                           <div className="text-sm font-bold text-blue-700 mb-2">{exp.company}</div>
-                          <ul className="list-disc list-outside ml-4 text-sm text-slate-700 space-y-1">
-                              {/* Attempt to split by newline if user typed paragraphs, otherwise just show text */}
-                              {exp.desc.split('\n').map((line, i) => (
-                                  line.trim() && <li key={i}>{line}</li>
-                              ))}
-                          </ul>
+                          <FormattedTextBlock
+                            text={exp.desc}
+                            plainClassName="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap"
+                            unorderedListClassName="ml-4 list-disc list-outside space-y-1 text-sm text-slate-700"
+                            orderedListClassName="ml-4 list-decimal list-outside space-y-1 text-sm text-slate-700"
+                          />
                       </div>
                   ))}
               </div>

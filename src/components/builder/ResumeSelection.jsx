@@ -1,838 +1,275 @@
-// // import React from 'react';
-// // import { 
-// //   PenTool, 
-// //   UploadCloud, 
-// //   Cpu, 
-// //   ArrowRight, 
-// //   Zap, 
-// //   Sparkles, 
-// //   Target
-// // } from 'lucide-react';
-
-// // // --- REUSABLE FEATURE ROW ---
-// // const FeatureItem = ({ text }) => (
-// //   <div className="flex items-center gap-2 text-[10px] text-slate-400 mb-1.5">
-// //     <div className="w-1 h-1 rounded-full bg-teal-500 shadow-[0_0_6px_rgba(20,184,166,0.6)]"></div>
-// //     <span className="tracking-wide">{text}</span>
-// //   </div>
-// // );
-
-// // // --- SELECTION CARD COMPONENT ---
-// // const SelectionCard = ({ title, subTitle, description, icon: Icon, onClick, badge, features = [] }) => (
-// //   <div 
-// //     onClick={onClick}
-// //     className="group relative bg-[#1e293b]/40 border border-slate-700/50 hover:border-teal-500/50 rounded-[1.5rem] p-1 shadow-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-teal-900/20 backdrop-blur-sm flex flex-col h-full cursor-pointer"
-// //   >
-// //     {/* Hover Glow Effect */}
-// //     <div className="absolute inset-0 bg-gradient-to-br from-teal-500/0 via-teal-500/0 to-teal-500/5 group-hover:via-teal-500/10 rounded-[1.5rem] transition-all duration-500"></div>
-
-// //     <div className="relative bg-[#0f1522]/90 rounded-[1.3rem] p-6 flex flex-col h-full overflow-hidden">
-        
-// //         {/* Background Decor Icon (Large Faded) */}
-// //         <div className="absolute -top-4 -right-4 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-700 transform group-hover:scale-125 group-hover:rotate-12 pointer-events-none">
-// //             <Icon size={120} />
-// //         </div>
-
-// //         {/* Header Section */}
-// //         <div className="flex justify-between items-start mb-6 relative z-10">
-// //             <div className={`p-3 rounded-xl border border-white/5 transition-all duration-500 group-hover:scale-110 shadow-inner bg-gradient-to-br from-slate-800 to-slate-900 group-hover:from-teal-900/50 group-hover:to-slate-900`}>
-// //                 <Icon size={24} className="text-slate-400 group-hover:text-teal-400 transition-colors" />
-// //             </div>
-// //             {badge && (
-// //                 <span className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-teal-500/20 flex items-center gap-1 animate-pulse">
-// //                     <Sparkles size={8} /> {badge}
-// //                 </span>
-// //             )}
-// //         </div>
-
-// //         {/* Title & Description */}
-// //         <div className="mb-6 relative z-10">
-// //             <h3 className="text-xl font-black text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-teal-400 group-hover:to-emerald-400 transition-all duration-300">
-// //                 {title}
-// //             </h3>
-// //             <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-3">{subTitle}</p>
-// //             <p className="text-xs text-slate-400 leading-relaxed border-l-2 border-slate-700 pl-3 group-hover:border-teal-500/50 transition-colors line-clamp-3">
-// //                 {description}
-// //             </p>
-// //         </div>
-
-// //         {/* AI Capabilities List */}
-// //         <div className="mb-6 flex-grow relative z-10">
-// //             <div className="text-[9px] font-bold text-slate-600 uppercase mb-3 flex items-center gap-2">
-// //                 <Cpu size={12} className="text-teal-500" /> System Capabilities
-// //             </div>
-// //             <div className="bg-slate-900/80 rounded-xl p-3 border border-slate-800/50 group-hover:border-teal-500/20 transition-colors">
-// //                 {features.map((f, i) => <FeatureItem key={i} text={f} />)}
-// //             </div>
-// //         </div>
-
-// //         {/* Action Button */}
-// //         <button 
-// //           className="w-full py-3 rounded-lg font-bold text-[10px] uppercase tracking-[0.15em] flex items-center justify-center gap-2 transition-all relative overflow-hidden bg-slate-800 text-slate-300 group-hover:bg-gradient-to-r group-hover:from-teal-600 group-hover:to-emerald-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-teal-500/25 z-10"
-// //         >
-// //             <span>Initialize Module</span>
-// //             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform"/>
-// //         </button>
-
-// //     </div>
-// //   </div>
-// // );
-
-// // // --- MAIN PAGE COMPONENT ---
-// // const ResumeSelection = ({ onSelect }) => {
-// //   return (
-// //     <div className="h-screen bg-[#0b0f19] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-teal-500/30">
-      
-// //       {/* --- BACKGROUND FX --- */}
-// //       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-// //       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-// //         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-teal-500/5 blur-[100px] rounded-full animate-pulse"></div>
-// //         <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/5 blur-[100px] rounded-full animate-pulse delay-1000"></div>
-// //       </div>
-
-// //       <div className="relative z-10 w-full max-w-[1200px] flex flex-col h-full justify-center">
-        
-// //         {/* Header Section */}
-// //         <div className="text-center mb-8 sm:mb-10 space-y-4">
-// //           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-md text-slate-300 text-[9px] font-black uppercase tracking-[0.2em] mb-1 shadow-xl">
-// //             <Zap size={10} className="text-teal-400 fill-teal-400" /> CareerSense Engine Active
-// //           </div>
-// //           <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-// //             Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Path.</span>
-// //           </h1>
-// //           <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto leading-relaxed font-medium">
-// //             Select an initialization protocol below. Our AI agents will adapt their processing logic based on your source material.
-// //           </p>
-// //         </div>
-
-// //         {/* Cards Grid */}
-// //         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 px-4 mb-8">
-            
-// //             {/* OPTION 1: BUILD FROM SCRATCH */}
-// //             <SelectionCard 
-// //               title="Build from Scratch"
-// //               subTitle="Manual Construction"
-// //               description="Start with a blank canvas. Use our step-by-step wizard to manually input your details."
-// //               icon={PenTool}
-// //               onClick={() => onSelect('scratch')} 
-// //               features={[
-// //                   "Step-by-Step Wizard",
-// //                   "Real-time Preview",
-// //                   "Drag & Drop Sections",
-// //                   "PDF Export"
-// //               ]}
-// //             />
-
-// //             {/* OPTION 2: UPDATE RESUME */}
-// //             <SelectionCard 
-// //               title="Update Resume"
-// //               subTitle="AI Extraction"
-// //               description="Upload your existing resume (PDF/Docx). Our AI will extract your data instantly."
-// //               icon={UploadCloud}
-// //               onClick={() => onSelect('upload')} 
-// //               features={[
-// //                   "PDF/Docx Parsing",
-// //                   "Auto-fill Forms",
-// //                   "Format Standardization",
-// //                   "Instant Redesign"
-// //               ]}
-// //             />
-
-// //             {/* OPTION 3: TAILOR TO JOB */}
-// //             <SelectionCard 
-// //               title="Targeted Resume"
-// //               subTitle="Job Alignment Engine"
-// //               description="Upload your Resume AND a Job Description. AI will rewrite your resume to match the role."
-// //               icon={Target}
-// //               badge="AI Recommended"
-// //               onClick={() => onSelect('tailor')} 
-// //               features={[
-// //                   "Resume + JD Analysis",
-// //                   "Keyword Optimization",
-// //                   "Summary Rewriting",
-// //                   "Match Score Calculation"
-// //               ]}
-// //             />
-
-// //         </div>
-
-// //         {/* Footer Note */}
-// //         <div className="text-center">
-// //             <p className="text-[9px] text-slate-600 font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-// //                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Protected by End-to-End Encryption
-// //             </p>
-// //         </div>
-
-// //       </div>
-// //     </div>
-// //   );
-// // };
-
-// // export default ResumeSelection;
-
-// import React from 'react';
-// import { 
-//   PenTool, 
-//   UploadCloud, 
-//   Cpu, 
-//   ArrowRight, 
-//   Zap, 
-//   Sparkles, 
-//   Target
-// } from 'lucide-react';
-
-// // --- REUSABLE FEATURE ROW ---
-// const FeatureItem = ({ text }) => (
-//   <div className="flex items-center gap-2 text-[10px] text-slate-400 mb-1.5">
-//     <div className="w-1 h-1 rounded-full bg-teal-500 shadow-[0_0_6px_rgba(20,184,166,0.6)]"></div>
-//     <span className="tracking-wide">{text}</span>
-//   </div>
-// );
-
-// // --- SELECTION CARD COMPONENT ---
-// const SelectionCard = ({ title, subTitle, description, icon: Icon, onClick, badge, features = [] }) => (
-//   <div 
-//     onClick={onClick}
-//     className="group relative bg-[#1e293b]/40 border border-slate-700/50 hover:border-teal-500/50 rounded-[1.5rem] p-1 shadow-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-teal-900/20 backdrop-blur-sm flex flex-col h-full cursor-pointer"
-//   >
-//     {/* Hover Glow Effect */}
-//     <div className="absolute inset-0 bg-gradient-to-br from-teal-500/0 via-teal-500/0 to-teal-500/5 group-hover:via-teal-500/10 rounded-[1.5rem] transition-all duration-500"></div>
-
-//     <div className="relative bg-[#0f1522]/90 rounded-[1.3rem] p-6 flex flex-col h-full overflow-hidden">
-        
-//         {/* Background Decor Icon (Large Faded) */}
-//         <div className="absolute -top-4 -right-4 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-700 transform group-hover:scale-125 group-hover:rotate-12 pointer-events-none">
-//             <Icon size={120} />
-//         </div>
-
-//         {/* Header Section */}
-//         <div className="flex justify-between items-start mb-6 relative z-10">
-//             <div className={`p-3 rounded-xl border border-white/5 transition-all duration-500 group-hover:scale-110 shadow-inner bg-gradient-to-br from-slate-800 to-slate-900 group-hover:from-teal-900/50 group-hover:to-slate-900`}>
-//                 <Icon size={24} className="text-slate-400 group-hover:text-teal-400 transition-colors" />
-//             </div>
-//             {badge && (
-//                 <span className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-teal-500/20 flex items-center gap-1 animate-pulse">
-//                     <Sparkles size={8} /> {badge}
-//                 </span>
-//             )}
-//         </div>
-
-//         {/* Title & Description */}
-//         <div className="mb-6 relative z-10">
-//             <h3 className="text-xl font-black text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-teal-400 group-hover:to-emerald-400 transition-all duration-300">
-//                 {title}
-//             </h3>
-//             <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-3">{subTitle}</p>
-//             <p className="text-xs text-slate-400 leading-relaxed border-l-2 border-slate-700 pl-3 group-hover:border-teal-500/50 transition-colors line-clamp-3">
-//                 {description}
-//             </p>
-//         </div>
-
-//         {/* AI Capabilities List */}
-//         <div className="mb-6 flex-grow relative z-10">
-//             <div className="text-[9px] font-bold text-slate-600 uppercase mb-3 flex items-center gap-2">
-//                 <Cpu size={12} className="text-teal-500" /> System Capabilities
-//             </div>
-//             <div className="bg-slate-900/80 rounded-xl p-3 border border-slate-800/50 group-hover:border-teal-500/20 transition-colors">
-//                 {features.map((f, i) => <FeatureItem key={i} text={f} />)}
-//             </div>
-//         </div>
-
-//         {/* Action Button */}
-//         <button 
-//           className="w-full py-3 rounded-lg font-bold text-[10px] uppercase tracking-[0.15em] flex items-center justify-center gap-2 transition-all relative overflow-hidden bg-slate-800 text-slate-300 group-hover:bg-gradient-to-r group-hover:from-teal-600 group-hover:to-emerald-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-teal-500/25 z-10"
-//         >
-//             <span>Initialize Module</span>
-//             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform"/>
-//         </button>
-
-//     </div>
-//   </div>
-// );
-
-// // --- MAIN PAGE COMPONENT ---
-// const ResumeSelection = ({ onSelect }) => {
-//   return (
-//     <div className="h-screen bg-[#0b0f19] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-teal-500/30">
-      
-//       {/* --- BACKGROUND FX --- */}
-//       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-//       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-//         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-teal-500/5 blur-[100px] rounded-full animate-pulse"></div>
-//         <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/5 blur-[100px] rounded-full animate-pulse delay-1000"></div>
-//       </div>
-
-//       <div className="relative z-10 w-full max-w-[1200px] flex flex-col h-full justify-center">
-        
-//         {/* Header Section */}
-//         <div className="text-center mb-8 sm:mb-10 space-y-4">
-//           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-md text-slate-300 text-[9px] font-black uppercase tracking-[0.2em] mb-1 shadow-xl">
-//             <Zap size={10} className="text-teal-400 fill-teal-400" /> CareerSense Engine Active
-//           </div>
-//           <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-//             Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Path.</span>
-//           </h1>
-//           <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto leading-relaxed font-medium">
-//             Select an initialization protocol below. Our AI agents will adapt their processing logic based on your source material.
-//           </p>
-//         </div>
-
-//         {/* Cards Grid */}
-//         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 px-4 mb-8">
-            
-//             {/* OPTION 1: BUILD FROM SCRATCH */}
-//             <SelectionCard 
-//               title="Build from Scratch"
-//               subTitle="Manual Construction"
-//               description="Start with a blank canvas. Use our step-by-step wizard to manually input your details."
-//               icon={PenTool}
-//               onClick={() => onSelect('scratch')} 
-//               features={[
-//                   "Step-by-Step Wizard",
-//                   "Real-time Preview",
-//                   "Drag & Drop Sections",
-//                   "PDF Export"
-//               ]}
-//             />
-
-//             {/* OPTION 2: UPDATE RESUME */}
-//             <SelectionCard 
-//               title="Update Resume"
-//               subTitle="AI Extraction"
-//               description="Upload your existing resume (PDF/Docx). Our AI will extract your data instantly."
-//               icon={UploadCloud}
-//               onClick={() => onSelect('upload')} 
-//               features={[
-//                   "PDF/Docx Parsing",
-//                   "Auto-fill Forms",
-//                   "Format Standardization",
-//                   "Instant Redesign"
-//               ]}
-//             />
-
-//             {/* OPTION 3: TAILOR TO JOB */}
-//             <SelectionCard 
-//               title="Targeted Resume"
-//               subTitle="Job Alignment Engine"
-//               description="Upload your Resume AND a Job Description. AI will rewrite your resume to match the role."
-//               icon={Target}
-//               badge="AI Recommended"
-//               onClick={() => onSelect('tailor')} 
-//               features={[
-//                   "Resume + JD Analysis",
-//                   "Keyword Optimization",
-//                   "Summary Rewriting",
-//                   "Match Score Calculation"
-//               ]}
-//             />
-
-//         </div>
-
-//         {/* Footer Note */}
-//         <div className="text-center">
-//             <p className="text-[9px] text-slate-600 font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-//                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Protected by End-to-End Encryption
-//             </p>
-//         </div>
-
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default ResumeSelection;
-
-// import React from 'react';
-// import { 
-//   PenTool, 
-//   UploadCloud, 
-//   Cpu, 
-//   ArrowRight, 
-//   Zap, 
-//   Sparkles, 
-//   Target
-// } from 'lucide-react';
-
-// // --- REUSABLE FEATURE ROW ---
-// const FeatureItem = ({ text }) => (
-//   <div className="flex items-center gap-2 text-[10px] text-slate-400 mb-1.5">
-//     <div className="w-1 h-1 rounded-full bg-teal-500 shadow-[0_0_6px_rgba(20,184,166,0.6)]"></div>
-//     <span className="tracking-wide">{text}</span>
-//   </div>
-// );
-
-// // --- PRICING TIER BADGE ---
-// const TierBadge = ({ tier }) => {
-//   let styles = "";
-//   switch (tier?.toLowerCase()) {
-//     case 'free':
-//       styles = "border-slate-600 text-slate-300 bg-slate-800/80 shadow-sm";
-//       break;
-//     case 'premium':
-//       styles = "border-blue-500/40 text-blue-400 bg-blue-900/30 shadow-md shadow-blue-900/20";
-//       break;
-//     case 'exclusive':
-//       styles = "border-amber-500/40 text-amber-400 bg-amber-900/30 shadow-md shadow-amber-900/20";
-//       break;
-//     default:
-//       return null;
-//   }
-//   return (
-//     <span className={`text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest border backdrop-blur-md ${styles}`}>
-//       {tier}
-//     </span>
-//   );
-// };
-
-// // --- SELECTION CARD COMPONENT ---
-// const SelectionCard = ({ title, subTitle, description, icon: Icon, onClick, badge, tier, features = [] }) => (
-//   <div 
-//     onClick={onClick}
-//     className="group relative bg-[#1e293b]/40 border border-slate-700/50 hover:border-teal-500/50 rounded-[1.5rem] p-1 shadow-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-teal-900/20 backdrop-blur-sm flex flex-col h-full cursor-pointer"
-//   >
-//     {/* Hover Glow Effect */}
-//     <div className="absolute inset-0 bg-gradient-to-br from-teal-500/0 via-teal-500/0 to-teal-500/5 group-hover:via-teal-500/10 rounded-[1.5rem] transition-all duration-500"></div>
-
-//     <div className="relative bg-[#0f1522]/90 rounded-[1.3rem] p-6 flex flex-col h-full overflow-hidden">
-        
-//         {/* Background Decor Icon (Large Faded) */}
-//         <div className="absolute -top-4 -right-4 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-700 transform group-hover:scale-125 group-hover:rotate-12 pointer-events-none">
-//             <Icon size={120} />
-//         </div>
-
-//         {/* Header Section */}
-//         <div className="flex justify-between items-start mb-6 relative z-10">
-//             <div className={`p-3 rounded-xl border border-white/5 transition-all duration-500 group-hover:scale-110 shadow-inner bg-gradient-to-br from-slate-800 to-slate-900 group-hover:from-teal-900/50 group-hover:to-slate-900`}>
-//                 <Icon size={24} className="text-slate-400 group-hover:text-teal-400 transition-colors" />
-//             </div>
-            
-//             <div className="flex flex-col items-end gap-2">
-//                 {tier && <TierBadge tier={tier} />}
-//                 {badge && (
-//                     <span className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-teal-500/20 flex items-center gap-1 animate-pulse">
-//                         <Sparkles size={8} /> {badge}
-//                     </span>
-//                 )}
-//             </div>
-//         </div>
-
-//         {/* Title & Description */}
-//         <div className="mb-6 relative z-10">
-//             <h3 className="text-xl font-black text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-teal-400 group-hover:to-emerald-400 transition-all duration-300">
-//                 {title}
-//             </h3>
-//             <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-3">{subTitle}</p>
-//             <p className="text-xs text-slate-400 leading-relaxed border-l-2 border-slate-700 pl-3 group-hover:border-teal-500/50 transition-colors line-clamp-3">
-//                 {description}
-//             </p>
-//         </div>
-
-//         {/* AI Capabilities List */}
-//         <div className="mb-6 flex-grow relative z-10">
-//             <div className="text-[9px] font-bold text-slate-600 uppercase mb-3 flex items-center gap-2">
-//                 <Cpu size={12} className="text-teal-500" /> System Capabilities
-//             </div>
-//             <div className="bg-slate-900/80 rounded-xl p-3 border border-slate-800/50 group-hover:border-teal-500/20 transition-colors">
-//                 {features.map((f, i) => <FeatureItem key={i} text={f} />)}
-//             </div>
-//         </div>
-
-//         {/* Action Button */}
-//         <button 
-//           className="w-full py-3 rounded-lg font-bold text-[10px] uppercase tracking-[0.15em] flex items-center justify-center gap-2 transition-all relative overflow-hidden bg-slate-800 text-slate-300 group-hover:bg-gradient-to-r group-hover:from-teal-600 group-hover:to-emerald-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-teal-500/25 z-10"
-//         >
-//             <span>Initialize Module</span>
-//             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform"/>
-//         </button>
-
-//     </div>
-//   </div>
-// );
-
-// // --- MAIN PAGE COMPONENT ---
-// const ResumeSelection = ({ onSelect }) => {
-//   return (
-//     <div className="h-screen bg-[#0b0f19] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-teal-500/30">
-      
-//       {/* --- BACKGROUND FX --- */}
-//       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-//       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-//         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-teal-500/5 blur-[100px] rounded-full animate-pulse"></div>
-//         <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/5 blur-[100px] rounded-full animate-pulse delay-1000"></div>
-//       </div>
-
-//       <div className="relative z-10 w-full max-w-[1200px] flex flex-col h-full justify-center">
-        
-//         {/* Header Section */}
-//         <div className="text-center mb-8 sm:mb-10 space-y-4">
-//           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-md text-slate-300 text-[9px] font-black uppercase tracking-[0.2em] mb-1 shadow-xl">
-//             <Zap size={10} className="text-teal-400 fill-teal-400" /> CareerSense Engine Active
-//           </div>
-//           <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-//             Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Path.</span>
-//           </h1>
-//           <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto leading-relaxed font-medium">
-//             Select an initialization protocol below. Our AI agents will adapt their processing logic based on your source material.
-//           </p>
-//         </div>
-
-//         {/* Cards Grid */}
-//         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 px-4 mb-8">
-            
-//             {/* OPTION 1: BUILD FROM SCRATCH */}
-//             <SelectionCard 
-//               title="Build from Scratch"
-//               subTitle="Manual Construction"
-//               description="Start with a blank canvas. Use our step-by-step wizard to manually input your details."
-//               icon={PenTool}
-//               tier="Free"
-//               onClick={() => onSelect('scratch')} 
-//               features={[
-//                   "Step-by-Step Wizard",
-//                   "Real-time Preview",
-//                   "Drag & Drop Sections",
-//                   "PDF Export"
-//               ]}
-//             />
-
-//             {/* OPTION 2: UPDATE RESUME */}
-//             <SelectionCard 
-//               title="Update Resume"
-//               subTitle="AI Extraction"
-//               description="Upload your existing resume (PDF/Docx). Our AI will extract your data instantly."
-//               icon={UploadCloud}
-//               tier="Premium"
-//               onClick={() => onSelect('upload')} 
-//               features={[
-//                   "PDF/Docx Parsing",
-//                   "Auto-fill Forms",
-//                   "Format Standardization",
-//                   "Instant Redesign"
-//               ]}
-//             />
-
-//             {/* OPTION 3: TAILOR TO JOB */}
-//             <SelectionCard 
-//               title="Targeted Resume"
-//               subTitle="Job Alignment Engine"
-//               description="Upload your Resume AND a Job Description. AI will rewrite your resume to match the role."
-//               icon={Target}
-//               tier="Exclusive"
-//               badge="AI Recommended"
-//               onClick={() => onSelect('tailor')} 
-//               features={[
-//                   "Resume + JD Analysis",
-//                   "Keyword Optimization",
-//                   "Summary Rewriting",
-//                   "Match Score Calculation"
-//               ]}
-//             />
-
-//         </div>
-
-//         {/* Footer Note */}
-//         <div className="text-center">
-//             <p className="text-[9px] text-slate-600 font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-//                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Protected by End-to-End Encryption
-//             </p>
-//         </div>
-
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default ResumeSelection;
-
 import React, { useState } from 'react';
-import { 
-  PenTool, 
-  UploadCloud, 
-  Cpu, 
-  ArrowRight, 
-  Zap,
+import {
+  ArrowRight,
   Brain,
-  Sparkles, 
-  Target,
-  PlayCircle,
-  X,
+  Cpu,
   Maximize2,
   Minimize2,
-  Youtube 
+  PenTool,
+  PlayCircle,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  UploadCloud,
+  X,
+  Youtube,
 } from 'lucide-react';
-
-// --- IMPORT VIDEOS ---
-// Make sure these paths match exactly where your videos are located!
 import resumeVideo from '../../assets/Resume.mp4';
 import resumeJdVideo from '../../assets/Resume&JD.mp4';
 
-// --- REUSABLE FEATURE ROW ---
 const FeatureItem = ({ text }) => (
-  <div className="flex items-center gap-2 text-[10px] text-slate-400 mb-1.5">
-    <div className="w-1 h-1 rounded-full bg-teal-500 shadow-[0_0_6px_rgba(20,184,166,0.6)]"></div>
-    <span className="tracking-wide">{text}</span>
+  <div className="flex items-center gap-2 text-[11px] text-[color:var(--theme-text-secondary)]">
+    <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
+    <span>{text}</span>
   </div>
 );
 
-// --- PRICING TIER BADGE ---
 const TierBadge = ({ tier }) => {
-  let styles = "";
-  switch (tier?.toLowerCase()) {
-    case 'free':
-      styles = "border-slate-600 text-slate-300 bg-slate-800/80 shadow-sm";
-      break;
-    case 'premium':
-      styles = "border-blue-500/40 text-blue-400 bg-blue-900/30 shadow-md shadow-blue-900/20";
-      break;
-    case 'exclusive':
-      styles = "border-amber-500/40 text-amber-400 bg-amber-900/30 shadow-md shadow-amber-900/20";
-      break;
-    default:
-      return null;
-  }
+  const styles = {
+    free: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    premium: 'border-blue-200 bg-blue-50 text-blue-700',
+    exclusive: 'border-amber-200 bg-amber-50 text-amber-700',
+  };
+
+  const className = styles[tier?.toLowerCase()];
+  if (!className) return null;
+
   return (
-    <span className={`text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest border backdrop-blur-md ${styles}`}>
+    <span className={`rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.22em] ${className}`}>
       {tier}
     </span>
   );
 };
 
-// --- CUSTOM VIDEO MODAL ---
 const VideoModal = ({ src, onClose }) => {
   const [isMaximized, setIsMaximized] = useState(false);
 
   if (!src) return null;
 
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 md:p-6 bg-slate-900/90 backdrop-blur-md transition-all">
-      <div 
-        className={`relative bg-slate-950 border border-slate-800 shadow-2xl rounded-2xl overflow-hidden transition-all duration-300 flex flex-col
-          ${isMaximized ? 'w-full h-full' : 'w-full max-w-5xl aspect-video'}
-        `}
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-[color:var(--theme-surface-glass)] p-4 backdrop-blur-md md:p-6">
+      <div
+        className={`theme-section-surface relative flex overflow-hidden rounded-[2rem] transition-all duration-300 ${
+          isMaximized ? 'h-full w-full' : 'aspect-video w-full max-w-5xl'
+        }`}
       >
-        {/* Custom Player Header */}
-        <div className="flex items-center justify-between px-5 py-3 bg-slate-900 border-b border-slate-800">
-          <div className="flex items-center gap-2 text-teal-400">
+        <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between border-b border-[color:var(--theme-border-soft)] bg-[color:var(--theme-surface-subtle)] px-5 py-3">
+          <div className="flex items-center gap-2 text-[color:var(--theme-accent)]">
             <PlayCircle size={16} />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300">Feature Demonstration</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[color:var(--theme-text-secondary)]">
+              Feature Demonstration
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsMaximized(!isMaximized)} 
-              className="text-slate-400 hover:text-white transition-colors"
-              title={isMaximized ? "Minimize" : "Maximize"}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsMaximized((current) => !current)}
+              className="rounded-lg p-1.5 text-[color:var(--theme-text-secondary)] transition-colors hover:bg-[color:var(--theme-surface-solid)] hover:text-[color:var(--theme-text-primary)]"
+              title={isMaximized ? 'Minimize video' : 'Maximize video'}
             >
               {isMaximized ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             </button>
-            <button 
-              onClick={onClose} 
-              className="text-slate-400 hover:text-rose-400 transition-colors bg-slate-800 hover:bg-rose-500/10 p-1.5 rounded-lg"
-              title="Close Player"
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg bg-[color:var(--theme-surface-solid)] p-1.5 text-[color:var(--theme-text-secondary)] transition-colors hover:bg-rose-500/10 hover:text-rose-500"
+              title="Close video"
             >
               <X size={16} />
             </button>
           </div>
         </div>
 
-        {/* Video Element */}
-        <div className="flex-1 bg-black relative">
-          <video 
-            src={src} 
-            controls 
-            autoPlay 
-            className="absolute inset-0 w-full h-full object-contain"
-          >
-            Your browser does not support the video tag.
-          </video>
+        <div className="relative flex-1 bg-black pt-[58px]">
+          <video src={src} controls autoPlay className="absolute inset-0 h-full w-full object-contain pt-[58px]" />
         </div>
       </div>
     </div>
   );
 };
 
-
-// --- SELECTION CARD COMPONENT ---
-const SelectionCard = ({ title, subTitle, description, icon: Icon, onClick, badge, tier, features = [], onPlayVideo }) => (
-  <div 
+const SelectionCard = ({
+  title,
+  subTitle,
+  description,
+  icon: Icon,
+  onClick,
+  badge,
+  tier,
+  features,
+  onPlayVideo,
+}) => (
+  <div
     onClick={onClick}
-    className="group relative bg-[#1e293b]/40 border border-slate-700/50 hover:border-teal-500/50 rounded-[1.5rem] p-1 shadow-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-teal-900/20 backdrop-blur-sm flex flex-col h-full cursor-pointer"
+    className="theme-section-glass group relative flex h-full cursor-pointer flex-col rounded-[1.75rem] p-1 transition-all duration-300 hover:-translate-y-1 hover:border-[color:var(--theme-border-strong)]"
   >
-    {/* Hover Glow Effect */}
-    <div className="absolute inset-0 bg-gradient-to-br from-teal-500/0 via-teal-500/0 to-teal-500/5 group-hover:via-teal-500/10 rounded-[1.5rem] transition-all duration-500"></div>
+    <div className="absolute inset-0 rounded-[1.75rem] bg-gradient-to-br from-teal-500/0 via-teal-500/0 to-teal-500/5 transition-all duration-300 group-hover:via-teal-500/10" />
 
-    <div className="relative bg-[#0f1522]/90 rounded-[1.3rem] p-6 flex flex-col h-full overflow-hidden">
-        
-        {/* Background Decor Icon (Large Faded) */}
-        <div className="absolute -top-4 -right-4 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-700 transform group-hover:scale-125 group-hover:rotate-12 pointer-events-none">
-            <Icon size={120} />
+    <div className="theme-section-surface relative flex h-full flex-col overflow-hidden rounded-[1.5rem] p-6">
+      <div className="absolute -right-6 -top-6 opacity-[0.04] text-[color:var(--theme-text-primary)] transition-all duration-500 group-hover:scale-110 group-hover:opacity-[0.08]">
+        <Icon size={132} />
+      </div>
+
+      <div className="relative z-10 mb-6 flex items-start justify-between gap-4">
+        <div className="rounded-2xl border border-[color:var(--theme-border-soft)] bg-[color:var(--theme-surface-subtle)] p-3 shadow-sm transition-all duration-300 group-hover:border-teal-300 group-hover:bg-white">
+          <Icon size={24} className="text-[color:var(--theme-accent)]" />
         </div>
-
-        {/* Header Section */}
-        <div className="flex justify-between items-start mb-6 relative z-10">
-            <div className={`p-3 rounded-xl border border-white/5 transition-all duration-500 group-hover:scale-110 shadow-inner bg-gradient-to-br from-slate-800 to-slate-900 group-hover:from-teal-900/50 group-hover:to-slate-900`}>
-                <Icon size={24} className="text-slate-400 group-hover:text-teal-400 transition-colors" />
-            </div>
-            
-            <div className="flex flex-col items-end gap-2">
-                {tier && <TierBadge tier={tier} />}
-                {badge && (
-                    <span className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-teal-500/20 flex items-center gap-1 animate-pulse">
-                        <Sparkles size={8} /> {badge}
-                    </span>
-                )}
-            </div>
+        <div className="flex flex-col items-end gap-2">
+          {tier ? <TierBadge tier={tier} /> : null}
+          {badge ? (
+            <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.22em] text-white shadow-lg shadow-teal-500/20">
+              <Sparkles size={8} />
+              {badge}
+            </span>
+          ) : null}
         </div>
+      </div>
 
-        {/* Title & Description */}
-        <div className="mb-4 relative z-10">
-            <h3 className="text-xl font-black text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-teal-400 group-hover:to-emerald-400 transition-all duration-300">
-                {title}
-            </h3>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-3">{subTitle}</p>
-            <p className="text-xs text-slate-400 leading-relaxed border-l-2 border-slate-700 pl-3 group-hover:border-teal-500/50 transition-colors line-clamp-3">
-                {description}
-            </p>
+      <div className="relative z-10 mb-5">
+        <h3 className="mb-1 text-xl font-black text-[color:var(--theme-text-primary)]">{title}</h3>
+        <p className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] text-[color:var(--theme-text-muted)]">
+          {subTitle}
+        </p>
+        <p className="border-l-2 border-[color:var(--theme-border-soft)] pl-3 text-sm leading-6 text-[color:var(--theme-text-secondary)]">
+          {description}
+        </p>
+      </div>
+
+      <div className="relative z-10 mb-5 min-h-[44px]">
+        {onPlayVideo ? (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onPlayVideo();
+            }}
+            className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.18em] text-red-600 transition-all hover:-translate-y-0.5 hover:bg-red-100"
+          >
+            <Youtube size={18} strokeWidth={2.3} />
+            Watch Demo
+          </button>
+        ) : null}
+      </div>
+
+      <div className="relative z-10 mb-6 flex-1">
+        <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-[color:var(--theme-text-muted)]">
+          <Cpu size={12} className="text-teal-500" />
+          System Capabilities
         </div>
-
-        {/* --- FIXED YOUTUBE STYLE PLAY VIDEO BUTTON --- */}
-        {onPlayVideo && (
-            <div className="mb-6 relative z-20">
-                <button 
-                  onClick={(e) => { 
-                    e.stopPropagation(); 
-                    onPlayVideo(); 
-                  }}
-                  className="group/play w-fit flex items-center justify-center gap-2.5 text-[11px] font-black uppercase tracking-[0.15em] text-white bg-[#FF0000] hover:bg-[#FF3333] border border-red-500/50 px-4 py-2.5 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(255,0,0,0.3)] hover:shadow-[0_0_30px_rgba(255,0,0,0.5)] hover:-translate-y-0.5"
-                >
-                  {/* Removed fill="currentColor" and increased strokeWidth so the YouTube outline is crisp and beautiful */}
-                  <Youtube size={20} strokeWidth={2.5} className="text-white drop-shadow-md group-hover/play:scale-110 transition-transform" /> 
-                  How It Works
-                </button>
-            </div>
-        )}
-        {!onPlayVideo && <div className="mb-6 h-[42px]"></div>} {/* Spacer to keep cards perfectly aligned */}
-
-        {/* AI Capabilities List */}
-        <div className="mb-6 flex-grow relative z-10">
-            <div className="text-[9px] font-bold text-slate-600 uppercase mb-3 flex items-center gap-2">
-                <Cpu size={12} className="text-teal-500" /> System Capabilities
-            </div>
-            <div className="bg-slate-900/80 rounded-xl p-3 border border-slate-800/50 group-hover:border-teal-500/20 transition-colors">
-                {features.map((f, i) => <FeatureItem key={i} text={f} />)}
-            </div>
+        <div className="rounded-2xl border border-[color:var(--theme-border-soft)] bg-[color:var(--theme-surface-subtle)] p-4">
+          <div className="space-y-2.5">
+            {features.map((feature) => (
+              <FeatureItem key={feature} text={feature} />
+            ))}
+          </div>
         </div>
+      </div>
 
-        {/* Action Button */}
-        <button 
-          className="w-full py-3 rounded-lg font-bold text-[10px] uppercase tracking-[0.15em] flex items-center justify-center gap-2 transition-all relative overflow-hidden bg-slate-800 text-slate-300 group-hover:bg-gradient-to-r group-hover:from-teal-600 group-hover:to-emerald-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-teal-500/25 z-10"
-        >
-            <span>Initialize Module</span>
-            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform"/>
-        </button>
-
+      <button
+        type="button"
+        className="theme-secondary-button relative z-10 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-[10px] font-black uppercase tracking-[0.18em] transition-all group-hover:bg-gradient-to-r group-hover:from-teal-600 group-hover:to-emerald-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-teal-500/20"
+      >
+        Initialize Module
+        <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+      </button>
     </div>
   </div>
 );
 
-
-// --- MAIN PAGE COMPONENT ---
 const ResumeSelection = ({ onSelect }) => {
-  // State to handle which video is currently playing
   const [playingVideo, setPlayingVideo] = useState(null);
 
   return (
     <>
-      <div className="h-screen bg-[#0b0f19] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-teal-500/30">
-        
-        {/* --- BACKGROUND FX --- */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-teal-500/5 blur-[100px] rounded-full animate-pulse"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/5 blur-[100px] rounded-full animate-pulse delay-1000"></div>
-        </div>
+      <div className="theme-app-shell relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-4 py-10 font-sans selection:bg-teal-500/20 sm:p-6">
+        <div className="theme-grid-overlay absolute inset-0" />
+        <div className="pointer-events-none absolute -left-24 top-0 h-[340px] w-[340px] rounded-full bg-teal-400/12 blur-[110px]" />
+        <div className="pointer-events-none absolute -bottom-12 right-0 h-[360px] w-[360px] rounded-full bg-sky-300/14 blur-[130px]" />
 
-        <div className="relative z-10 w-full max-w-[1200px] flex flex-col h-full justify-center">
-          
-          {/* Header Section */}
-          <div className="text-center mb-8 sm:mb-10 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-md text-slate-300 text-[9px] font-black uppercase tracking-[0.2em] mb-1 shadow-xl">
-              <Brain size={10} className="text-teal-400 fill-teal-400" /> CareerSense Engine Active
+        <div className="relative z-10 mx-auto flex w-full max-w-[1240px] flex-col justify-center">
+          <div className="mb-8 text-center sm:mb-10">
+            <div className="theme-section-glass mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.26em] text-[color:var(--theme-text-secondary)]">
+              <Brain size={12} className="text-teal-500" />
+              CareerSense Engine Active
             </div>
-            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-              Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Path.</span>
+            <h1 className="text-4xl font-black tracking-tight text-[color:var(--theme-text-primary)] md:text-5xl">
+              Choose Your{' '}
+              <span className="bg-gradient-to-r from-teal-500 to-emerald-400 bg-clip-text text-transparent">
+                Path
+              </span>
             </h1>
-            <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto leading-relaxed font-medium">
-              Select an initialization protocol below. Our AI agents will adapt their processing logic based on your source material.
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[color:var(--theme-text-secondary)] md:text-base">
+              Pick how you want to start. Every path leads into the same live builder, but the import and AI workflow adapt to your source material.
             </p>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 px-4 mb-8">
-              
-              {/* OPTION 1: BUILD FROM SCRATCH */}
-              <SelectionCard 
-                title="Build from Scratch"
-                subTitle="Manual Construction"
-                description="Start with a blank canvas. Use our step-by-step wizard to manually input your details."
-                icon={PenTool}
-                tier="Free"
-                onClick={() => onSelect('scratch')} 
-                features={[
-                    "Step-by-Step Wizard",
-                    "Real-time Preview",
-                    "Drag & Drop Sections",
-                    "PDF Export"
-                ]}
-              />
+          <div className="mb-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
+            <SelectionCard
+              title="Build from Scratch"
+              subTitle="Manual Construction"
+              description="Start with a blank canvas and build your resume section by section with full control over the content."
+              icon={PenTool}
+              tier="Free"
+              onClick={() => onSelect('scratch')}
+              features={[
+                'Step-by-step guided builder',
+                'Live preview while editing',
+                'Flexible section ordering',
+                'PDF export ready',
+              ]}
+            />
 
-              {/* OPTION 2: UPDATE RESUME */}
-              <SelectionCard 
-                title="Update Resume"
-                subTitle="AI Extraction"
-                description="Upload your existing resume (PDF/Docx). Our AI will extract your data instantly."
-                icon={UploadCloud}
-                tier="Premium"
-                onPlayVideo={() => setPlayingVideo(resumeVideo)} // Trigger Video 1
-                onClick={() => onSelect('upload')} 
-                features={[
-                    "PDF/Docx Parsing",
-                    "Auto-fill Forms",
-                    "Format Standardization",
-                    "Instant Redesign"
-                ]}
-              />
+            <SelectionCard
+              title="Update Resume"
+              subTitle="Exact Or AI Import"
+              description="Upload an existing resume and decide whether to keep the wording exactly as written or open with an AI-strengthened draft."
+              icon={UploadCloud}
+              tier="Premium"
+              onPlayVideo={() => setPlayingVideo(resumeVideo)}
+              onClick={() => onSelect('upload')}
+              features={[
+                'Exact no-AI import option',
+                'AI optimized content option',
+                'Auto-filled editable sections',
+                'Instant redesign into templates',
+              ]}
+            />
 
-              {/* OPTION 3: TAILOR TO JOB */}
-              <SelectionCard 
-                title="Targeted Resume"
-                subTitle="Job Alignment Engine"
-                description="Upload your Resume AND a Job Description. AI will rewrite your resume to match the role."
-                icon={Target}
-                tier="Exclusive"
-                badge="AI Recommended"
-                onPlayVideo={() => setPlayingVideo(resumeJdVideo)} // Trigger Video 2
-                onClick={() => onSelect('tailor')} 
-                features={[
-                    "Resume + JD Analysis",
-                    "Keyword Optimization",
-                    "Summary Rewriting",
-                    "Match Score Calculation"
-                ]}
-              />
-
+            <SelectionCard
+              title="Targeted Resume"
+              subTitle="Job Alignment Engine"
+              description="Upload your resume and a job description to create a tailored version aligned to the role you want."
+              icon={Target}
+              tier="Exclusive"
+              badge="AI Recommended"
+              onPlayVideo={() => setPlayingVideo(resumeJdVideo)}
+              onClick={() => onSelect('tailor')}
+              features={[
+                'Resume plus JD analysis',
+                'Keyword optimization',
+                'Summary and bullet alignment',
+                'Role-focused final draft',
+              ]}
+            />
           </div>
 
-          {/* Footer Note */}
-          <div className="text-center">
-              <p className="text-[9px] text-slate-600 font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Protected by End-to-End Encryption
+          <div className="theme-section-glass mx-auto flex w-full max-w-3xl flex-col gap-4 rounded-[2rem] px-6 py-5 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+            <div>
+              <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[color:var(--theme-text-muted)]">
+                Builder Promise
+              </div>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--theme-text-secondary)]">
+                No matter which route you choose, everything stays editable later in the review and live editor.
               </p>
+            </div>
+            <div className="inline-flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-[color:var(--theme-text-secondary)]">
+              <ShieldCheck size={14} className="text-emerald-500" />
+              Protected by end-to-end encryption
+            </div>
           </div>
-
         </div>
       </div>
 
-      {/* Render the Video Modal if a video is currently selected */}
       <VideoModal src={playingVideo} onClose={() => setPlayingVideo(null)} />
     </>
   );

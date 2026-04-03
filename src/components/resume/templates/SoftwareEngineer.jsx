@@ -1,4 +1,6 @@
 import React from 'react';
+import FormattedTextBlock from '../FormattedTextBlock';
+import PreviewEditableField from '../PreviewEditableField';
 
 const SoftwareEngineer = ({ data }) => {
   const {
@@ -19,8 +21,12 @@ const SoftwareEngineer = ({ data }) => {
       <main className="w-[66%] p-10 pt-14">
           
           <header className="mb-10">
-              <h1 className="text-5xl font-bold uppercase text-slate-800 tracking-tight mb-2">{personal.name}</h1>
-              <p className="text-xl text-teal-600 font-medium">{personal.title}</p>
+              <PreviewEditableField path="personal.name" label="Full Name" as="h1" className="text-5xl font-bold uppercase text-slate-800 tracking-tight mb-2">
+                {personal.name}
+              </PreviewEditableField>
+              <PreviewEditableField path="personal.title" label="Job Title" as="p" className="text-xl text-teal-600 font-medium">
+                {personal.title}
+              </PreviewEditableField>
               
               <div className="flex gap-4 mt-4 text-xs font-bold text-slate-400">
                   {personal.phone && <span>{personal.phone}</span>}
@@ -32,7 +38,14 @@ const SoftwareEngineer = ({ data }) => {
           {personal.summary && (
               <section className="mb-10">
                   <h3 className="text-xs font-bold uppercase text-slate-400 mb-3 tracking-widest">Summary</h3>
-                  <p className="text-sm text-slate-600 leading-6">{personal.summary}</p>
+                  <FormattedTextBlock
+                    text={personal.summary}
+                    editablePath="personal.summary"
+                    editableLabel="Professional Summary"
+                    plainClassName="text-sm text-slate-600 leading-6 whitespace-pre-wrap"
+                    unorderedListClassName="ml-4 list-disc space-y-1 text-sm text-slate-600 leading-6"
+                    orderedListClassName="ml-4 list-decimal space-y-1 text-sm text-slate-600 leading-6"
+                  />
               </section>
           )}
 
@@ -40,18 +53,27 @@ const SoftwareEngineer = ({ data }) => {
               <section className="mb-10">
                   <h3 className="text-xs font-bold uppercase text-slate-400 mb-6 tracking-widest">Professional Experience</h3>
                   <div className="space-y-8">
-                      {experience.map(exp => (
+                      {experience.map((exp, index) => (
                           <div key={exp.id}>
                               <div className="flex justify-between items-baseline mb-1">
-                                  <h4 className="font-bold text-lg text-slate-900">{exp.role}</h4>
-                                  <span className="text-xs font-bold text-slate-400">{exp.date}</span>
+                                  <PreviewEditableField path={`experience[${index}].role`} label="Experience Role" as="h4" className="font-bold text-lg text-slate-900">
+                                    {exp.role}
+                                  </PreviewEditableField>
+                                  <PreviewEditableField path={`experience[${index}].date`} label="Experience Date" className="text-xs font-bold text-slate-400">
+                                    {exp.date}
+                                  </PreviewEditableField>
                               </div>
-                              <div className="text-sm font-bold text-teal-600 mb-2">{exp.company}</div>
-                              <ul className="list-disc ml-4 text-sm text-slate-600 space-y-1">
-                                  {exp.desc.split('\n').map((line, i) => (
-                                      line.trim() && <li key={i}>{line}</li>
-                                  ))}
-                              </ul>
+                              <PreviewEditableField path={`experience[${index}].company`} label="Experience Company" as="div" className="text-sm font-bold text-teal-600 mb-2">
+                                {exp.company}
+                              </PreviewEditableField>
+                              <FormattedTextBlock
+                                text={exp.desc}
+                                editablePath={`experience[${index}].desc`}
+                                editableLabel="Experience Description"
+                                plainClassName="text-sm text-slate-600 leading-6 whitespace-pre-wrap"
+                                unorderedListClassName="ml-4 list-disc space-y-1 text-sm text-slate-600"
+                                orderedListClassName="ml-4 list-decimal space-y-1 text-sm text-slate-600"
+                              />
                           </div>
                       ))}
                   </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import FormattedTextBlock from '../FormattedTextBlock';
 
 const Sales = ({ data }) => {
   const {
@@ -32,7 +33,12 @@ const Sales = ({ data }) => {
           {personal.summary && (
               <section className="mb-10">
                   <h3 className="text-xs font-bold uppercase border-b-2 border-slate-800 mb-3 pb-1">Summary</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">{personal.summary}</p>
+                  <FormattedTextBlock
+                    text={personal.summary}
+                    plainClassName="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"
+                    unorderedListClassName="ml-4 list-disc space-y-1 text-sm text-slate-600"
+                    orderedListClassName="ml-4 list-decimal space-y-1 text-sm text-slate-600"
+                  />
               </section>
           )}
 
@@ -47,11 +53,12 @@ const Sales = ({ data }) => {
                                   <span className="text-xs text-slate-500">{exp.date}</span>
                               </div>
                               <div className="text-sm font-bold text-blue-600 mb-2">{exp.company}</div>
-                              <ul className="list-disc ml-4 text-sm text-slate-600 space-y-1">
-                                  {exp.desc.split('\n').map((line, i) => (
-                                      line.trim() && <li key={i}>{line}</li>
-                                  ))}
-                              </ul>
+                              <FormattedTextBlock
+                                text={exp.desc}
+                                plainClassName="text-sm text-slate-600 whitespace-pre-wrap"
+                                unorderedListClassName="ml-4 list-disc space-y-1 text-sm text-slate-600"
+                                orderedListClassName="ml-4 list-decimal space-y-1 text-sm text-slate-600"
+                              />
                           </div>
                       ))}
                   </div>

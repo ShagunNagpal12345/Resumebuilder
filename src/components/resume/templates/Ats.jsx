@@ -1,4 +1,6 @@
 import React from 'react';
+import FormattedTextBlock from '../FormattedTextBlock';
+import PreviewEditableField from '../PreviewEditableField';
 
 const Ats = ({ data }) => {
   const {
@@ -21,7 +23,9 @@ const Ats = ({ data }) => {
       
       {/* HEADER */}
       <div className="mb-6 shrink-0 text-center">
-        <h1 className="text-3xl font-bold text-black uppercase tracking-tight mb-2">{personal.name || 'Your Name'}</h1>
+        <PreviewEditableField path="personal.name" label="Full Name" as="h1" className="text-3xl font-bold text-black uppercase tracking-tight mb-2">
+          {personal.name || 'Your Name'}
+        </PreviewEditableField>
         
         <div className="text-xs text-black font-medium space-x-2 mb-1">
           {personal.location && <span>{personal.location} |</span>}
@@ -37,7 +41,14 @@ const Ats = ({ data }) => {
         {personal.summary && (
           <section>
             <SectionTitle title="Professional Summary" />
-            <p className="text-[11px] leading-relaxed text-black text-justify whitespace-pre-wrap">{personal.summary}</p>
+            <FormattedTextBlock
+              text={personal.summary}
+              editablePath="personal.summary"
+              editableLabel="Professional Summary"
+              plainClassName="text-[11px] leading-relaxed text-black text-justify whitespace-pre-wrap"
+              unorderedListClassName="pl-5 list-disc space-y-1 text-[11px] leading-relaxed text-black"
+              orderedListClassName="pl-5 list-decimal space-y-1 text-[11px] leading-relaxed text-black"
+            />
           </section>
         )}
 
@@ -61,14 +72,31 @@ const Ats = ({ data }) => {
                   {exp.pageBreak && <div className="manual-page-break" />}
                   <div>
                     <div className="flex justify-between items-baseline font-bold text-[12px] text-black mb-1">
-                      <span>{exp.role}, {exp.company}</span>
-                      <span className="shrink-0">{exp.date}</span>
+                      <div className="inline">
+                        <PreviewEditableField path={`experience[${i}].role`} label="Experience Role" className="inline">
+                          {exp.role}
+                        </PreviewEditableField>
+                        {exp.company ? (
+                          <>
+                            {', '}
+                            <PreviewEditableField path={`experience[${i}].company`} label="Experience Company" className="inline">
+                              {exp.company}
+                            </PreviewEditableField>
+                          </>
+                        ) : null}
+                      </div>
+                      <PreviewEditableField path={`experience[${i}].date`} label="Experience Date" className="shrink-0">
+                        {exp.date}
+                      </PreviewEditableField>
                     </div>
-                    <ul className="list-disc pl-5 text-[11px] text-black space-y-1">
-                      {(exp.desc || '').split('\n').map((line, idx) => (
-                        line.trim() && <li key={idx} className="leading-relaxed">{line}</li>
-                      ))}
-                    </ul>
+                    <FormattedTextBlock
+                      text={exp.desc}
+                      editablePath={`experience[${i}].desc`}
+                      editableLabel="Experience Description"
+                      plainClassName="text-[11px] text-black leading-relaxed whitespace-pre-wrap"
+                      unorderedListClassName="pl-5 list-disc space-y-1 text-[11px] text-black"
+                      orderedListClassName="pl-5 list-decimal space-y-1 text-[11px] text-black"
+                    />
                   </div>
                 </React.Fragment>
               ))}
@@ -107,7 +135,14 @@ const Ats = ({ data }) => {
                   {proj.pageBreak && <div className="manual-page-break" />}
                   <div>
                     <div className="font-bold text-[12px] text-black mb-1">{proj.name}</div>
-                    <p className="text-[11px] text-black leading-relaxed whitespace-pre-wrap">{proj.desc}</p>
+                    <FormattedTextBlock
+                      text={proj.desc}
+                      editablePath={`projects[${i}].desc`}
+                      editableLabel="Project Description"
+                      plainClassName="text-[11px] text-black leading-relaxed whitespace-pre-wrap"
+                      unorderedListClassName="pl-5 list-disc space-y-1 text-[11px] text-black"
+                      orderedListClassName="pl-5 list-decimal space-y-1 text-[11px] text-black"
+                    />
                   </div>
                 </React.Fragment>
               ))}

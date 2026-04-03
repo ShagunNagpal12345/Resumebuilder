@@ -1,4 +1,5 @@
 import React from 'react';
+import FormattedTextBlock from '../FormattedTextBlock';
 
 type SectionId =
   | 'personal'
@@ -43,9 +44,12 @@ export const Sections = {
         </div>
 
         {p.summary && (
-          <div className="mt-4 text-sm text-slate-700 whitespace-pre-wrap">
-            {p.summary}
-          </div>
+          <FormattedTextBlock
+            text={p.summary}
+            plainClassName="mt-4 text-sm text-slate-700 whitespace-pre-wrap"
+            unorderedListClassName="mt-4 list-disc pl-5 space-y-1.5 text-sm text-slate-700"
+            orderedListClassName="mt-4 list-decimal pl-5 space-y-1.5 text-sm text-slate-700"
+          />
         )}
       </div>
     );
@@ -67,7 +71,12 @@ export const Sections = {
                 <div className="text-xs text-slate-500 font-semibold">{e.date}</div>
               </div>
               <div className="text-xs text-slate-600 font-semibold">{e.company}</div>
-              {e.desc && <div className="text-sm text-slate-700 mt-1 whitespace-pre-wrap">{e.desc}</div>}
+              <FormattedTextBlock
+                text={e.desc}
+                plainClassName="mt-1 text-sm text-slate-700 whitespace-pre-wrap"
+                unorderedListClassName="mt-1 list-disc pl-5 space-y-1.5 text-sm text-slate-700"
+                orderedListClassName="mt-1 list-decimal pl-5 space-y-1.5 text-sm text-slate-700"
+              />
             </div>
           ))}
         </div>
@@ -87,7 +96,12 @@ export const Sections = {
           {list.map((p: any) => (
             <div key={p.id}>
               <div className="font-bold">{p.name}</div>
-              {p.desc && <div className="text-sm text-slate-700 whitespace-pre-wrap">{p.desc}</div>}
+              <FormattedTextBlock
+                text={p.desc}
+                plainClassName="text-sm text-slate-700 whitespace-pre-wrap"
+                unorderedListClassName="list-disc pl-5 space-y-1.5 text-sm text-slate-700"
+                orderedListClassName="list-decimal pl-5 space-y-1.5 text-sm text-slate-700"
+              />
             </div>
           ))}
         </div>
@@ -231,7 +245,12 @@ export const Sections = {
             <div key={v.id}>
               <div className="font-bold">{v.role}</div>
               <div className="text-xs text-slate-600">{v.org} {v.date ? `· ${v.date}` : ''}</div>
-              {v.desc && <div className="text-sm text-slate-700 whitespace-pre-wrap">{v.desc}</div>}
+              <FormattedTextBlock
+                text={v.desc}
+                plainClassName="text-sm text-slate-700 whitespace-pre-wrap"
+                unorderedListClassName="list-disc pl-5 space-y-1.5 text-sm text-slate-700"
+                orderedListClassName="list-decimal pl-5 space-y-1.5 text-sm text-slate-700"
+              />
             </div>
           ))}
         </div>

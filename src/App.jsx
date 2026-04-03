@@ -320,12 +320,14 @@ import JDUpload from './components/landing/JDUpload';
 import TargetedResumeUI from './components/resume/TargetedResumeUI';
 
 // --- BUILDER COMPONENTS (The Clean UI) ---
+import ResumeImportOptions from './components/builder/ResumeImportOptions';
 import TemplateGallery from './components/builder/TemplateGallery';
 import Editor from './components/builder/Editor';
 import DataReview from './components/builder/DataReview';
+import ThemeToggleButton from './components/ui/ThemeToggleButton';
 
 // --- LOGIC ---
-import { extractResumeData } from './services/groqService';
+import { enhanceResumeData, extractResumeData, extractResumeDataVerbatim } from './services/groqService';
 import { extractTextFromFile } from './utils/fileParser';
 
 const App = () => {
@@ -333,11 +335,20 @@ const App = () => {
   const [resumeData, setResumeData] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [selectedMode, setSelectedMode] = useState(null); 
+  const [resumeImportMode, setResumeImportMode] = useState('ai-enhanced');
+  const [pendingResumeFile, setPendingResumeFile] = useState(null);
+  const [resumeUploadSource, setResumeUploadSource] = useState('upload');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
 
   // 1. Navigation Helpers
   const handleBack = () => {
+    if (view === 'upload-options') {
+      setPendingResumeFile(null);
+      setView(resumeUploadSource === 'landing' ? 'landing' : 'upload');
+      return;
+    }
+
     // Note: If you want 'back' from gallery to always go to landing when no data exists, 
     // you might want to adjust this logic later. For now, keeping your original map.
     const history = {
@@ -351,20 +362,38 @@ const App = () => {
     setView(history[view] || 'landing');
   };
 
-  // 2. File Processing Logic (For Standard Upload)
-  const handleResumeFile = async (file) => {
+  const openResumeImportOptions = (file, source = 'upload') => {
     if (!file) return;
-    
+
+    setSelectedMode('upload');
+    setPendingResumeFile(file);
+    setResumeUploadSource(source);
+    setView('upload-options');
+  };
+
+  // 2. File Processing Logic (For Standard Upload)
+  const handleResumeImport = async (importMode) => {
+    if (!pendingResumeFile) return;
+
+    setResumeImportMode(importMode);
     setIsAnalyzing(true);
     setLoadingMessage('Reading your resume...');
     
     try {
       // Step A: Extract Text
-      const rawText = await extractTextFromFile(file);
-      
-      // Step B: AI Analysis
-      setLoadingMessage('AI is extracting your profile...');
-      const jsonData = await extractResumeData(rawText);
+      const rawText = await extractTextFromFile(pendingResumeFile);
+
+      let jsonData = null;
+
+      if (importMode === 'verbatim') {
+        setLoadingMessage('Extracting your resume without rewriting the content...');
+        jsonData = await extractResumeDataVerbatim(rawText);
+      } else {
+        setLoadingMessage('AI is extracting your profile...');
+        const extractedData = await extractResumeData(rawText);
+        setLoadingMessage('AI is strengthening your resume content...');
+        jsonData = await enhanceResumeData(extractedData);
+      }
       
       if (jsonData) {
         setResumeData(jsonData);
@@ -374,18 +403,24 @@ const App = () => {
       alert("Error: " + error.message);
       console.error(error);
     } finally {
+      setPendingResumeFile(null);
       setIsAnalyzing(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 relative">
+    <div className="theme-app-shell min-h-screen font-sans text-slate-900 relative">
+      {view !== 'landing' && (
+        <div className="fixed right-4 top-4 z-[9998] sm:right-6 sm:top-6">
+          <ThemeToggleButton />
+        </div>
+      )}
       
       {/* VIEW: LANDING */}
       {view === 'landing' && (
         <ResumeBuilderLanding 
           onStart={() => setView('selection')} 
-          onFileSelect={(f) => { setSelectedMode('upload'); handleResumeFile(f); }} 
+          onFileSelect={(f) => openResumeImportOptions(f, 'landing')} 
           onViewTemplates={() => setView('gallery')} 
         />
       )}
@@ -395,9 +430,11 @@ const App = () => {
         <ResumeSelection onSelect={(mode) => {
           setSelectedMode(mode);
           if (mode === 'scratch') { 
+            setResumeImportMode('ai-enhanced');
             setResumeData(null); 
             setView('gallery'); 
           } else if (mode === 'tailor') { 
+            setResumeImportMode('ai-enhanced');
             setView('tailor'); // Route to new Targeted Resume Engine
           } else { 
             setView('upload'); 
@@ -408,8 +445,17 @@ const App = () => {
       {/* VIEW: UPLOAD (Dark UI) */}
       {view === 'upload' && (
         <ResumeUpload 
-          onFileUpload={handleResumeFile} 
+          onFileUpload={(file) => openResumeImportOptions(file, 'upload')} 
           onBack={handleBack} 
+        />
+      )}
+
+      {/* VIEW: IMPORT OPTIONS */}
+      {view === 'upload-options' && (
+        <ResumeImportOptions
+          file={pendingResumeFile}
+          onBack={handleBack}
+          onSelectOption={handleResumeImport}
         />
       )}
 
@@ -419,6 +465,7 @@ const App = () => {
           onCancel={handleBack}
           onComplete={(finalTailoredJson) => {
             // Once the 3-step AI finishes, save the data and send them to the review screen
+            setResumeImportMode('ai-enhanced');
             setResumeData(finalTailoredJson);
             setView('review'); 
           }}
@@ -434,6 +481,7 @@ const App = () => {
       {view === 'review' && (
         <DataReview 
           extractedData={resumeData} 
+          importMode={resumeImportMode}
           onComplete={(data) => { setResumeData(data); setView('gallery'); }} 
         />
       )}
@@ -441,6 +489,8 @@ const App = () => {
       {/* VIEW: GALLERY (Clean UI) */}
       {view === 'gallery' && (
         <TemplateGallery 
+          resumeData={resumeData}
+          mode={selectedMode}
           onSelectTemplate={(tpl) => { setSelectedTemplate(tpl); setView('builder'); }} 
           onBack={handleBack} 
         />
@@ -459,10 +509,12 @@ const App = () => {
 
       {/* GLOBAL LOADING OVERLAY (For Standard Upload only) */}
       {isAnalyzing && (
-        <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center text-white">
-          <Loader2 size={64} className="text-teal-400 animate-spin mb-6" />
-          <h2 className="text-2xl font-bold">{loadingMessage}</h2>
-          <p className="text-slate-400 mt-2">This usually takes about 10-15 seconds.</p>
+        <div className="fixed inset-0 z-[9999] bg-[color:var(--theme-surface-glass)] backdrop-blur-xl flex flex-col items-center justify-center text-[color:var(--theme-text-primary)]">
+          <div className="theme-section-surface rounded-[2rem] px-10 py-10 text-center">
+            <Loader2 size={64} className="mx-auto mb-6 animate-spin text-[color:var(--theme-accent)]" />
+            <h2 className="text-2xl font-bold">{loadingMessage}</h2>
+            <p className="mt-2 text-[color:var(--theme-text-secondary)]">This usually takes about 10-15 seconds.</p>
+          </div>
         </div>
       )}
     </div>

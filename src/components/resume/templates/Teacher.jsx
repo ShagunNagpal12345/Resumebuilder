@@ -1,4 +1,5 @@
 import React from 'react';
+import FormattedTextBlock from '../FormattedTextBlock';
 
 const Teacher = ({ data }) => {
   const {
@@ -36,11 +37,12 @@ const Teacher = ({ data }) => {
                           <div key={exp.id}>
                               <h4 className="font-bold text-lg text-slate-800">{exp.role}</h4>
                               <div className="font-sans text-xs font-bold text-slate-500 mb-2">{exp.company} | {exp.date}</div>
-                              <ul className="list-disc ml-4 text-sm text-slate-600 space-y-1">
-                                  {exp.desc.split('\n').map((line, i) => (
-                                      line.trim() && <li key={i}>{line}</li>
-                                  ))}
-                              </ul>
+                              <FormattedTextBlock
+                                text={exp.desc}
+                                plainClassName="text-sm text-slate-600 whitespace-pre-wrap"
+                                unorderedListClassName="ml-4 list-disc space-y-1 text-sm text-slate-600"
+                                orderedListClassName="ml-4 list-decimal space-y-1 text-sm text-slate-600"
+                              />
                           </div>
                       ))}
                   </div>
@@ -94,7 +96,12 @@ const Teacher = ({ data }) => {
                       {projects.map(p => (
                           <div key={p.id}>
                               <div className="font-bold text-sm text-slate-800">{p.name}</div>
-                              <div className="text-xs text-slate-500 leading-snug">{p.desc}</div>
+                              <FormattedTextBlock
+                                text={p.desc}
+                                plainClassName="text-xs text-slate-500 leading-snug whitespace-pre-wrap"
+                                unorderedListClassName="ml-4 list-disc space-y-1 text-xs text-slate-500 leading-snug"
+                                orderedListClassName="ml-4 list-decimal space-y-1 text-xs text-slate-500 leading-snug"
+                              />
                           </div>
                       ))}
                   </div>

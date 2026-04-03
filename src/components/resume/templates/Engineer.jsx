@@ -1,4 +1,5 @@
 import React from 'react';
+import FormattedTextBlock from '../FormattedTextBlock';
 
 const Engineer = ({ data }) => {
   const {
@@ -32,7 +33,12 @@ const Engineer = ({ data }) => {
           {personal.summary && (
               <section className="mb-10 border-t border-slate-200 pt-6">
                   <h3 className="font-bold uppercase text-xs mb-3 text-slate-400">Summary</h3>
-                  <p className="text-sm leading-relaxed">{personal.summary}</p>
+                  <FormattedTextBlock
+                    text={personal.summary}
+                    plainClassName="text-sm leading-relaxed whitespace-pre-wrap"
+                    unorderedListClassName="ml-4 list-disc space-y-1 text-sm leading-relaxed"
+                    orderedListClassName="ml-4 list-decimal space-y-1 text-sm leading-relaxed"
+                  />
               </section>
           )}
 
@@ -44,11 +50,12 @@ const Engineer = ({ data }) => {
                           <div key={exp.id}>
                               <h4 className="font-bold text-lg text-slate-900">{exp.role}</h4>
                               <div className="text-xs font-bold text-blue-600 mb-2 uppercase">{exp.company} | {exp.date}</div>
-                              <ul className="list-disc ml-4 text-sm text-slate-600 space-y-1">
-                                  {exp.desc.split('\n').map((line, i) => (
-                                      line.trim() && <li key={i}>{line}</li>
-                                  ))}
-                              </ul>
+                              <FormattedTextBlock
+                                text={exp.desc}
+                                plainClassName="text-sm text-slate-600 whitespace-pre-wrap"
+                                unorderedListClassName="ml-4 list-disc space-y-1 text-sm text-slate-600"
+                                orderedListClassName="ml-4 list-decimal space-y-1 text-sm text-slate-600"
+                              />
                           </div>
                       ))}
                   </div>
@@ -113,7 +120,12 @@ const Engineer = ({ data }) => {
                       {projects.map(p => (
                           <div key={p.id}>
                               <div className="font-bold text-sm text-slate-800">{p.name}</div>
-                              <div className="text-xs text-slate-500 leading-tight">{p.desc}</div>
+                              <FormattedTextBlock
+                                text={p.desc}
+                                plainClassName="text-xs text-slate-500 leading-tight whitespace-pre-wrap"
+                                unorderedListClassName="ml-4 list-disc space-y-1 text-xs text-slate-500 leading-tight"
+                                orderedListClassName="ml-4 list-decimal space-y-1 text-xs text-slate-500 leading-tight"
+                              />
                           </div>
                       ))}
                   </div>

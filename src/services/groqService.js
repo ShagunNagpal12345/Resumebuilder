@@ -346,6 +346,7 @@
 
 
 import Groq from "groq-sdk";
+import { applyResumeSourceCorrections } from "../utils/resumeSourceCorrections";
 
 // --- API KEY 1: EXTRACTION ---
 const groqExtract = new Groq({
@@ -392,7 +393,93 @@ ${rawText.substring(0, 15000)}
     response_format: { type: "json_object" }
   });
 
-  return JSON.parse(completion.choices[0].message.content);
+  const parsedData = JSON.parse(completion.choices[0].message.content);
+  return applyResumeSourceCorrections(parsedData, rawText);
+};
+
+// ===============================
+// 1B. EXACT / VERBATIM EXTRACTION
+// ===============================
+export const extractResumeDataVerbatim = async (rawText) => {
+  const prompt = `
+You are an expert resume parser performing STRUCTURE-ONLY extraction.
+
+Your job is to map the resume into the JSON schema WITHOUT rewriting, improving, summarizing, correcting, or adding anything.
+
+Critical rules:
+- Preserve the candidate's original wording as closely as possible.
+- Do NOT strengthen bullet points.
+- Do NOT improve grammar.
+- Do NOT add inferred skills, projects, companies, degrees, achievements, or missing details.
+- Do NOT split one role into multiple roles unless the source clearly shows multiple separate jobs.
+- Do NOT create extra company entries from bullet points.
+- If one experience entry has many bullet points, keep them together in the SAME "desc" string separated by "\\n".
+- Keep capitalization and phrasing from the source wherever possible.
+- Only populate fields that are clearly present in the source.
+- If a field is missing, use "" or [].
+
+Return ONLY valid JSON matching this schema:
+{
+  "personal": { "name": "", "email": "", "phone": "", "location": "", "summary": "", "title": "", "linkedin": "" },
+  "experience": [{ "id": 1, "role": "", "company": "", "date": "", "desc": "" }],
+  "education": [{ "id": 1, "degree": "", "school": "", "date": "" }],
+  "skills": { "technical": [], "soft": [], "core": [] },
+  "projects": [{ "id": 1, "name": "", "desc": "" }],
+  "certifications": [{ "id": 1, "name": "", "issuer": "", "date": "" }],
+  "languages": [{ "id": 1, "name": "", "level": "" }],
+  "awards": [{ "id": 1, "name": "", "issuer": "", "date": "" }],
+  "volunteering": [{ "id": 1, "role": "", "org": "", "date": "", "desc": "" }]
+}
+
+Extra extraction guidance:
+- "summary" should contain only the summary/objective/profile text from the resume, not invented text.
+- "skills" arrays should only contain skills literally present in the source text.
+- Prefer grouping generic competency words into "core" and interpersonal skills into "soft" only when clearly listed that way; otherwise keep concrete tools/technologies in "technical" and place remaining listed skills in "core".
+- For experience and projects, preserve bullet order.
+- For awards, certifications, education, and volunteering, create one object per real entry from the source and do not duplicate lines across multiple objects.
+
+Resume Text:
+${rawText.substring(0, 18000)}
+`;
+
+  const completion = await groqExtract.chat.completions.create({
+    messages: [{ role: "user", content: prompt }],
+    model: "llama-3.3-70b-versatile",
+    temperature: 0,
+    response_format: { type: "json_object" }
+  });
+
+  const exactData = JSON.parse(completion.choices[0].message.content);
+
+  if (exactData.experience) {
+    exactData.experience = exactData.experience.map((exp, index) => ({
+      id: exp.id || index + 1,
+      role: exp.role || "",
+      company: exp.company || "",
+      date: exp.date || "",
+      desc: Array.isArray(exp.desc) ? exp.desc.join("\n") : (exp.desc || ""),
+    }));
+  }
+
+  if (exactData.projects) {
+    exactData.projects = exactData.projects.map((project, index) => ({
+      id: project.id || index + 1,
+      name: project.name || "",
+      desc: Array.isArray(project.desc) ? project.desc.join("\n") : (project.desc || ""),
+    }));
+  }
+
+  if (exactData.volunteering) {
+    exactData.volunteering = exactData.volunteering.map((item, index) => ({
+      id: item.id || index + 1,
+      role: item.role || "",
+      org: item.org || "",
+      date: item.date || "",
+      desc: Array.isArray(item.desc) ? item.desc.join("\n") : (item.desc || ""),
+    }));
+  }
+
+  return applyResumeSourceCorrections(exactData, rawText);
 };
 
 

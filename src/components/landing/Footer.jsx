@@ -1,63 +1,92 @@
 import React from 'react';
 import { Sparkles, Github, Twitter, Linkedin, Mail } from 'lucide-react';
+import { scrollToLandingSection } from './scrollToLandingSection';
 
-const Footer = () => {
+const Footer = ({ onStart }) => {
+  const productLinks = [
+    { label: 'Resume Templates', action: () => scrollToLandingSection('templates') },
+    { label: 'AI Job Tailoring', action: () => scrollToLandingSection('features') },
+    { label: 'Cover Letter Builder', action: onStart || (() => scrollToLandingSection('features')) },
+    { label: 'Resume Examples', action: () => scrollToLandingSection('examples') },
+  ];
+
+  const resourceLinks = [
+    { label: 'Career Blog', action: () => scrollToLandingSection('faq') },
+    { label: 'Interview Prep', action: () => scrollToLandingSection('features') },
+    { label: 'ATS Scanner', action: () => scrollToLandingSection('features') },
+    { label: 'Help Center', action: () => scrollToLandingSection('faq') },
+  ];
+
+  const legalLinks = [
+    { label: 'Privacy Policy', href: 'mailto:support@careersense.ai?subject=Privacy%20Policy%20Request' },
+    { label: 'Terms of Service', href: 'mailto:support@careersense.ai?subject=Terms%20of%20Service%20Request' },
+    { label: 'Cookie Policy', href: 'mailto:support@careersense.ai?subject=Cookie%20Policy%20Request' },
+  ];
+
   return (
-    <footer className="bg-[#0b0f19] border-t border-slate-800 pt-20 pb-10 text-slate-400 font-sans">
+    <footer className="theme-footer-surface border-t pt-20 pb-10 font-sans">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           
           {/* Brand Column */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-white font-black text-xl tracking-tight">
-              <Sparkles size={20} className="text-teal-500" /> 
+            <div className="flex items-center gap-2 text-[color:var(--theme-text-primary)] font-black text-xl tracking-tight">
+              <Sparkles size={20} className="text-[color:var(--theme-accent)]" /> 
               CareerSense
             </div>
             <p className="text-sm leading-relaxed">
               The AI-powered resume builder designed to beat the ATS and help you land your dream job faster.
             </p>
             <div className="flex gap-4">
-                <a href="#" className="hover:text-teal-400 transition-colors"><Twitter size={18} /></a>
-                <a href="#" className="hover:text-teal-400 transition-colors"><Github size={18} /></a>
-                <a href="#" className="hover:text-teal-400 transition-colors"><Linkedin size={18} /></a>
+                <button type="button" onClick={() => scrollToLandingSection('reviews')} className="transition-colors hover:text-[color:var(--theme-accent-strong)]" aria-label="Go to reviews"><Twitter size={18} /></button>
+                <button type="button" onClick={() => scrollToLandingSection('templates')} className="transition-colors hover:text-[color:var(--theme-accent-strong)]" aria-label="Go to templates"><Github size={18} /></button>
+                <button type="button" onClick={() => scrollToLandingSection('features')} className="transition-colors hover:text-[color:var(--theme-accent-strong)]" aria-label="Go to features"><Linkedin size={18} /></button>
             </div>
           </div>
 
           {/* Links Column 1 */}
           <div>
-            <h4 className="text-white font-bold mb-6 uppercase text-xs tracking-widest">Product</h4>
+            <h4 className="mb-6 uppercase text-xs tracking-widest font-bold text-[color:var(--theme-text-primary)]">Product</h4>
             <ul className="space-y-3 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Resume Templates</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">AI Job Tailoring</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Cover Letter Builder</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Resume Examples</a></li>
+                {productLinks.map((item) => (
+                  <li key={item.label}>
+                    <button type="button" onClick={item.action} className="transition-colors text-left hover:text-[color:var(--theme-accent-strong)]">
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
             </ul>
           </div>
 
           {/* Links Column 2 */}
           <div>
-            <h4 className="text-white font-bold mb-6 uppercase text-xs tracking-widest">Resources</h4>
+            <h4 className="mb-6 uppercase text-xs tracking-widest font-bold text-[color:var(--theme-text-primary)]">Resources</h4>
             <ul className="space-y-3 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Career Blog</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Interview Prep</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">ATS Scanner</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
+                {resourceLinks.map((item) => (
+                  <li key={item.label}>
+                    <button type="button" onClick={item.action} className="transition-colors text-left hover:text-[color:var(--theme-accent-strong)]">
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
             </ul>
           </div>
 
           {/* Links Column 3 */}
           <div>
-            <h4 className="text-white font-bold mb-6 uppercase text-xs tracking-widest">Legal</h4>
+            <h4 className="mb-6 uppercase text-xs tracking-widest font-bold text-[color:var(--theme-text-primary)]">Legal</h4>
             <ul className="space-y-3 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Cookie Policy</a></li>
-                <li><a href="mailto:support@careersense.ai" className="hover:text-white transition-colors flex items-center gap-2"><Mail size={14}/> Contact Us</a></li>
+                {legalLinks.map((item) => (
+                  <li key={item.label}>
+                    <a href={item.href} className="transition-colors hover:text-[color:var(--theme-accent-strong)]">{item.label}</a>
+                  </li>
+                ))}
+                <li><a href="mailto:support@careersense.ai" className="transition-colors hover:text-[color:var(--theme-accent-strong)] flex items-center gap-2"><Mail size={14}/> Contact Us</a></li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-slate-800 pt-8 text-center text-xs font-medium">
+        <div className="border-t pt-8 text-center text-xs font-medium border-[color:var(--theme-footer-border)]">
             <p>&copy; {new Date().getFullYear()} CareerSense AI. All rights reserved.</p>
         </div>
       </div>

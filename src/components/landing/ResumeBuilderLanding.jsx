@@ -470,6 +470,7 @@ import ResumeExamples from './ResumeExamples'; // <--- Import New Component
 // --- IMPORT VIDEOS ---
 import resumeVideo from '../../assets/Resume.mp4';
 import resumeJdVideo from '../../assets/Resume&JD.mp4';
+import poojaImage from '../../assets/Pooja.png';
 
 // --- DUMMY DATA FOR LANDING PAGE PREVIEWS ---
 const PREVIEW_DATA = {
@@ -479,6 +480,7 @@ const PREVIEW_DATA = {
       email: "p.bansal@careersense.com",
       phone: "+1 555 0199 283",
       location: "New York, USA",
+      photo: poojaImage,
       summary: "Results-oriented BI Manager with 7+ years of experience driving market share growth through data-driven strategies. Expert in translating complex datasets into actionable business insights, overseeing cross-functional teams, and implementing scalable data architecture."
     },
     experience: [
@@ -576,22 +578,50 @@ const SCROLLER_TEMPLATES = [
   // --- The Core / Basics ---
   { id: 'minimal', name: 'ATS Minimal' },
   { id: 'infographic', name: 'Infographic' },
-  {id: 'info-navy', name : 'Full Infographic'},
+  { id: 'motion-designer-board', name: 'Motion Designer Board' },
+  { id: 'magazine-cover', name: 'Magazine Cover' },
+  { id: 'lawyer-trial', name: 'Trial Lawyer' },
+  { id: 'youtube-creator', name: 'YouTube Creator' },
   { id: 'professional', name: 'Clean Professional' },
   { id: 'developer', name: 'Dev Console' },
+  { id: 'gamer-arena', name: 'Gamer Arena' },
+  { id: 'sql-terminal', name: 'SQL Terminal' },
+  { id: 'newspaper-editorial', name: 'Newspaper Editorial' },
+  { id: 'actor-spotlight', name: 'Actor Spotlight' },
+  { id: 'reporting-mis', name: 'Reporting MIS' },
+  { id: 'chartered-accountant', name: 'Chartered Accountant' },
+  { id: 'doctor-profile', name: 'Doctor Profile' },
+  { id: 'physician-care', name: 'Physician Care' },
   { id: 'info-executive', name: 'Executive Grid'},
-  { id: 'cyan-grid', name: 'Cyan Flux' },                   
+  { id: 'cyan-grid', name: 'Cyan Flux' },
+  {id: 'info-navy', name : 'Full Infographic'},                   
   { id: 'classic', name: 'Ivy League' },
+  { id: 'class-file-dark', name: 'Class File Dark' },
   { id: 'blue-frame', name: 'Blue Frame' },
   { id: 'amber-visual', name: 'Amber Visual' },
   { id: 'professional-columns', name: 'Prof. Columns' },               
   { id: 'tech', name: 'Terminal Dark' },
   { id: 'Architect', name: 'Architect Grid'},
-
-  // --- Colorful & Creative ---
+ 
   
   { id: 'bubble-header', name: 'Bubble Header' },          // Playful / Header-focused
   { id: 'modern-circle', name: 'Modern Circle' },          // Trendy / Creative
+  
+  { id: 'student-notes', name: 'Student Notes' },
+  { id: 'chalkboard-artist', name: 'Chalkboard Artist' },
+  { id: 'polaroid-portfolio', name: 'Polaroid Portfolio' },
+  { id: 'influencer-media-kit', name: 'Influencer Media Kit' },
+  
+  { id: 'chef-menu', name: 'Chef Menu' },
+  { id: 'painter-canvas', name: 'Painter Canvas' },
+  
+  { id: 'portfolio-showcase', name: 'Portfolio Showcase' },
+  { id: 'photographer-resume', name: 'Photographer Resume' },
+  
+  
+  
+  // --- Specialty Career Templates ---
+  
 
   // --- Role-Specific (From your new templates) ---
   { id: 'software-engineer', name: 'Software Engineer' },  // Job Specific (Engineering)
@@ -628,7 +658,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto custom-scrollbar bg-white h-screen scroll-smooth font-sans text-slate-900">
+    <div className="theme-app-shell min-h-screen overflow-y-auto custom-scrollbar scroll-smooth font-sans text-slate-900">
       
       {/* 1. NAVBAR */}
       <Navbar onStart={onStart} />
@@ -641,18 +671,19 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
       />
 
       {/* 3. HERO SECTION */}
-      <div className="relative overflow-hidden bg-[#0f172a] text-white pt-32 pb-32 px-6">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-teal-600/10 blur-[120px] rounded-full pointer-events-none" />
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center relative z-10">
+      <div id="home" className="theme-hero-surface relative overflow-hidden px-4 pt-24 pb-20 sm:px-6 sm:pt-28 sm:pb-24 lg:pt-32 lg:pb-32 scroll-mt-28">
+        <div className="absolute top-0 right-0 h-full w-1/2 rounded-full bg-teal-400/15 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 h-[320px] w-[320px] rounded-full bg-sky-200/35 blur-[120px] pointer-events-none" />
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 lg:gap-16 items-center relative z-10">
           <div>
             {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-400 text-[10px] font-black uppercase tracking-widest mb-6 border border-teal-500/30">
               <Sparkles size={12} /> #1 Rated AI Resume Builder
             </div> */}
-            <h1 className="text-5xl md:text-6xl font-black tracking-tighter leading-[1.1] mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter leading-[1.1] mb-6 text-[color:var(--theme-text-primary)]">
               The Professional <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Resume Builder</span>
             </h1>
-            <p className="text-lg text-slate-400 mb-8 max-w-xl leading-relaxed">
+            <p className="mb-8 max-w-xl text-base leading-relaxed text-[color:var(--theme-text-secondary)] sm:text-lg">
               Use our professional field-tested resume templates that follow the exact "resume rules" employers look for. Easy to use and done within 15 minutes.
             </p>
             
@@ -660,7 +691,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
   {/* Primary Button - Starts the resume builder */}
   <button 
     onClick={onStart} 
-    className="px-10 py-5 rounded-2xl bg-[#0d9488] text-white font-black text-sm uppercase tracking-widest hover:bg-[#0b7a6f] transition-all flex items-center justify-center gap-3"
+    className="theme-primary-button w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-3"
   >
     Create My Resume <ArrowRight size={18} />
   </button>
@@ -668,15 +699,15 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
   {/* Secondary Button - Navigates to the Template Gallery */}
   <button 
     onClick={onViewTemplates} 
-    className="px-10 py-5 rounded-2xl border border-white/10 bg-white/5 text-white font-black text-sm uppercase tracking-widest hover:bg-white/10 transition flex items-center justify-center gap-3"
+    className="theme-secondary-button w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest transition flex items-center justify-center gap-3"
   >
     View Templates
   </button>
 </div>
 
-            <div className="flex items-center gap-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
+            <div className="flex flex-col items-start gap-4 text-xs font-bold uppercase tracking-widest text-[color:var(--theme-text-muted)] sm:flex-row sm:items-center sm:gap-6">
               <div className="flex -space-x-3">
-                {[1,2,3,4].map(i => <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0f172a] bg-slate-700 bg-cover" style={{backgroundImage: `url(https://i.pravatar.cc/100?img=${i+10})`}} />)}
+                {[1,2,3,4].map(i => <div key={i} className="h-10 w-10 rounded-full border-2 border-white bg-slate-200 bg-cover shadow-sm" style={{backgroundImage: `url(https://i.pravatar.cc/100?img=${i+10})`}} />)}
               </div>
               <div className="flex flex-col">
                 <div className="flex text-yellow-500 mb-1">
@@ -705,24 +736,24 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
       </div>
 
       {/* --- NEW: 5. HOW IT WORKS (VIDEO DEMOS - LIGHT THEME) --- */}
-      <div className="py-24 px-6 bg-slate-50 relative overflow-hidden border-b border-slate-200">
+      <div id="how-it-works" className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 bg-slate-50 relative overflow-hidden border-b border-slate-200 scroll-mt-28">
           {/* Subtle background glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-teal-500/10 blur-[120px] rounded-full pointer-events-none"></div>
           
           <div className="max-w-7xl mx-auto relative z-10">
-              <div className="text-center mb-16">
+              <div className="text-center mb-12 sm:mb-16">
                   {/* <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-50 text-teal-600 text-[10px] font-bold uppercase tracking-[0.2em] mb-6 border border-teal-100 shadow-sm">
                      Feature Demonstration
                   </div> */}
-                  <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight tracking-tight">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight tracking-tight">
                     How CareerSense Resume Builder <span className="text-[#0d9488]">works</span>
                   </h2>
-                  <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
+                  <p className="text-base sm:text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
                     Watch how our AI-powered engine seamlessly transforms your existing profile or aligns it perfectly with your target job description.
                   </p>
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-10">
+              <div className="grid lg:grid-cols-2 gap-6 lg:gap-10">
                   {/* Player 1 */}
                   <div className="flex flex-col bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 hover:border-teal-300 transition-all duration-500 shadow-lg hover:shadow-xl group">
                       <div className="h-16 flex items-center justify-center mb-6">
@@ -765,16 +796,16 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
       </div>
 
       {/* 6. IMPORT RESUME SECTION */}
-      <div className="py-32 px-6 relative overflow-hidden">
+      <div id="import" className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 relative overflow-hidden scroll-mt-28">
           <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-white to-teal-50 opacity-80" />
-          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center relative z-10">
+          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 lg:gap-20 items-center relative z-10">
               <div className="relative group perspective-1000">
                   <div className="absolute -inset-1 bg-gradient-to-r from-green-600 to-teal-600 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-                  <div className="relative bg-white/60 backdrop-blur-xl border border-teal/50 rounded-[2.5rem] p-8 shadow-2xl">
-                      <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center shadow-inner">
+                  <div className="theme-section-glass relative rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-8">
+                      <div className="bg-white rounded-2xl border border-slate-100 p-5 sm:p-8 text-center shadow-inner">
                           <h3 className="text-xl font-bold text-slate-800 mb-2">Import Your Resume</h3>
                           <p className="text-slate-500 text-sm mb-8">Drag and drop or upload your existing resume to start.</p>
-                          <div className="border-2 border-dashed border-slate-200 rounded-xl p-10 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 hover:border-teal-400 transition-colors cursor-pointer group/drop relative">
+                          <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 sm:p-10 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 hover:border-teal-400 transition-colors cursor-pointer group/drop relative">
                                 <input 
                                     type="file" 
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50" 
@@ -785,17 +816,17 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
                                     <UploadCloud size={32} />
                                 </div>
                                 <span className="text-sm font-bold text-slate-700">Drag and drop a file here</span>
-                                <button className="mt-6 px-6 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold uppercase tracking-widest pointer-events-none">Browse</button>
+                                <button className="theme-primary-button mt-6 rounded-lg px-6 py-2 text-xs font-bold uppercase tracking-widest pointer-events-none">Browse</button>
                           </div>
                       </div>
                   </div>
               </div>
               <div>
-                  <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
                     Import Your Resume <br/>
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-teal-600">Without Interrupting Your Day</span>
                   </h2>
-                  <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                  <p className="text-base sm:text-lg text-slate-600 mb-8 leading-relaxed">
                     Already have a draft? Upload it to our platform in seconds from your preferred device.
                   </p>
                   <div className="relative inline-block">
@@ -805,7 +836,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
                         accept=".pdf,.docx,.doc,.txt"
                         onChange={(e) => e.target.files?.[0] && onFileSelect(e.target.files[0])}
                     />
-                    <button className="px-10 py-4 rounded-xl bg-gradient-to-r from-green-600 to-teal-600 text-white font-bold text-sm uppercase tracking-widest hover:shadow-lg transition-all">
+                    <button className="theme-primary-button w-full sm:w-auto px-8 sm:px-10 py-4 rounded-xl font-bold text-sm uppercase tracking-widest transition-all">
                         Import My Resume
                     </button>
                   </div>
@@ -814,28 +845,34 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
       </div>
 
 {/* 7. RESUME EXAMPLES SECTION (New & Improved) */}
-        <ResumeExamples onStart={onStart} />
+        <section id="examples" className="scroll-mt-28">
+          <ResumeExamples onStart={onStart} />
+        </section>
 {/* --- ADD AI FEATURES HERE (Option A) --- */}
-        <AIFeatures />
+        <section id="features" className="scroll-mt-28">
+          <AIFeatures />
+        </section>
 {/* 8. ANATOMY SECTION */}
-        <ResumeAnatomy />
+        <section id="anatomy" className="scroll-mt-28">
+          <ResumeAnatomy />
+        </section>
 
       {/* 9. TEMPLATE SCROLLER */}
-      <div className="py-24 bg-white border-b border-slate-200 overflow-hidden">
-          <div className="max-w-[1600px] mx-auto px-6">
-              <div className="flex justify-between items-end mb-16">
+      <div id="templates" className="py-16 sm:py-20 lg:py-24 bg-white border-b border-slate-200 overflow-hidden scroll-mt-28">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+              <div className="flex flex-col gap-6 sm:flex-row sm:justify-between sm:items-end mb-10 sm:mb-16">
                   <div className="max-w-1xl">
-                      <h2 className="text-4xl font-black text-slate-900 mb-4 uppercase tracking-tight">Choose from our <span className="text-[#0d9488]">70+ Professional Templates</span></h2>
-                      <p className="text-slate-500 text-lg">Designed by recruiters to pass ATS filters and impress hiring managers.</p>
+                      <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4 uppercase tracking-tight">Choose from our <span className="text-[#0d9488]">70+ Professional Templates</span></h2>
+                      <p className="text-slate-500 text-base sm:text-lg">Designed by recruiters to pass ATS filters and impress hiring managers.</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 self-start sm:self-auto">
                       <button onClick={() => scroll('left', scrollRef)} className="p-3 bg-white rounded-full shadow-md hover:bg-slate-100 border border-slate-200 transition-all active:scale-95"><ChevronLeft size={20}/></button>
                       <button onClick={() => scroll('right', scrollRef)} className="p-3 bg-white rounded-full shadow-md hover:bg-slate-100 border border-slate-200 transition-all active:scale-95"><ChevronRight size={20}/></button>
                   </div>
               </div>
               <div ref={scrollRef} className="flex gap-8 overflow-x-auto pb-12 snap-x snap-mandatory hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                   {SCROLLER_TEMPLATES.map((tpl) => (
-                      <div key={tpl.id} className="snap-center shrink-0 w-[300px] group cursor-pointer" onClick={onStart}>
+                      <div key={tpl.id} className="snap-center shrink-0 w-[260px] sm:w-[300px] group cursor-pointer" onClick={onViewTemplates}>
                           <div className="bg-white rounded-[2rem] shadow-sm border-[6px] border-white overflow-hidden relative aspect-[210/297] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
                               <div className="absolute inset-0 transform scale-[0.4] origin-top-left w-[250%] h-[250%] pointer-events-none bg-slate-50">
                                   <ResumePreview data={PREVIEW_DATA} template={tpl.id} />
@@ -853,9 +890,9 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
       </div>
 
       {/* 10. FEATURES GRID */}
-      <div className="bg-slate-50 py-24 px-6 border-b border-slate-200">
+      <div className="bg-slate-50 py-16 sm:py-20 lg:py-24 px-4 sm:px-6 border-b border-slate-200">
          <div className="max-w-7xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div className="grid md:grid-cols-2 gap-10 lg:gap-16 items-center">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <FeatureCard icon={Brain} title="AI-Powered Text" desc="Instantly generate bullet points for your role using our advanced AI algorithms." />
                     <FeatureCard icon={Layout} title="ATS Optimized" desc="Templates designed to pass Applicant Tracking Systems used by major companies." />
@@ -863,32 +900,32 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
                     <FeatureCard icon={CheckCircle2} title="Pre-written Examples" desc="Access thousands of pre-written examples for every job title and industry." />
                 </div>
                 <div>
-                    <h2 className="text-4xl font-black text-slate-900 mb-6 leading-tight">Designed to get you <br/><span className="text-[#0d9488]">Hired Faster.</span></h2>
-                    <p className="text-slate-500 mb-8 leading-relaxed text-lg">Most resumes never reach a human eye. Our platform ensures your resume is not only beautiful but technically optimized for the robots that read it first.</p>
-                    <button onClick={onStart} className="px-8 py-4 rounded-xl bg-[#0f172a] text-white font-bold text-sm hover:bg-slate-800 transition shadow-lg">Start Building Now</button>
+                    <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-6 leading-tight">Designed to get you <br/><span className="text-[#0d9488]">Hired Faster.</span></h2>
+                    <p className="text-slate-500 mb-8 leading-relaxed text-base sm:text-lg">Most resumes never reach a human eye. Our platform ensures your resume is not only beautiful but technically optimized for the robots that read it first.</p>
+                    <button onClick={onStart} className="theme-primary-button rounded-xl px-8 py-4 font-bold text-sm transition shadow-lg">Start Building Now</button>
                 </div>
             </div>
          </div>
       </div>
 
       {/* 11. GOOGLE REVIEWS SECTION */}
-      <div className="py-24 bg-white border-b border-slate-200 overflow-hidden" id="reviews">
-          <div className="max-w-[1600px] mx-auto px-6">
-              <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+      <div className="py-16 sm:py-20 lg:py-24 bg-white border-b border-slate-200 overflow-hidden scroll-mt-28" id="reviews">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 sm:mb-16 gap-6 sm:gap-8">
                   <div className="max-w-lg">
-                    <div className="flex items-center gap-3 text-2xl font-black text-slate-900 mb-2">
+                    <div className="flex flex-wrap items-center gap-3 text-2xl font-black text-slate-900 mb-2">
                         <span>4.9</span>
                         <div className="flex text-yellow-500">
                             {[1,2,3,4,5].map(i => <Star key={i} size={24} fill="currentColor" />)}
                         </div>
                     </div>
-                    <p className="text-lg text-slate-500">Based on <strong>1,250+ reviews</strong> from happy job seekers.</p>
+                    <p className="text-base sm:text-lg text-slate-500">Based on <strong>1,250+ reviews</strong> from happy job seekers.</p>
                   </div>
-                  <div className="flex items-center gap-6">
-                      <button className="px-8 py-3 rounded-full bg-white text-slate-900 font-bold text-sm border-2 border-slate-200 hover:border-[#0d9488] hover:text-[#0d9488] transition-colors flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full md:w-auto">
+                      <button className="w-full sm:w-auto px-6 sm:px-8 py-3 rounded-full bg-white text-slate-900 font-bold text-sm border-2 border-slate-200 hover:border-[#0d9488] hover:text-[#0d9488] transition-colors flex items-center justify-center gap-2">
                           Review us on Google
                       </button>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 self-start sm:self-auto">
                           <button onClick={() => scroll('left', reviewScrollRef)} className="p-3 bg-white rounded-full shadow-md hover:bg-slate-100 border border-slate-200 transition-all active:scale-95"><ChevronLeft size={20}/></button>
                           <button onClick={() => scroll('right', reviewScrollRef)} className="p-3 bg-white rounded-full shadow-md hover:bg-slate-100 border border-slate-200 transition-all active:scale-95"><ChevronRight size={20}/></button>
                       </div>
@@ -896,7 +933,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
               </div>
               <div ref={reviewScrollRef} className="flex gap-6 overflow-x-auto pb-12 snap-x snap-mandatory hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                   {GOOGLE_REVIEWS.map((review, i) => (
-                      <div key={i} className="snap-start shrink-0 w-[350px] bg-slate-50 p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div key={i} className="snap-start shrink-0 w-[300px] sm:w-[350px] bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                           <div className="flex items-center gap-4 mb-6">
                               <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-200">
                                   <img src={review.img} alt={review.name} className="w-full h-full object-cover" />
@@ -917,8 +954,8 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
       </div>
 
       {/* 12. FAQ SECTION */}
-      <div className="py-24 px-6 max-w-7xl mx-auto">
-          <h2 className="text-3xl font-black text-slate-900 mb-12 text-center uppercase tracking-tight">Frequently Asked Questions</h2>
+      <div id="faq" className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 max-w-7xl mx-auto scroll-mt-28">
+          <h2 className="text-3xl font-black text-slate-900 mb-10 sm:mb-12 text-center uppercase tracking-tight">Frequently Asked Questions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {FAQ_DATA.map((faq, i) => (
                   <details key={i} className="group bg-white p-6 rounded-2xl border border-slate-200 open:border-teal-500 transition-colors shadow-sm cursor-pointer h-fit">
@@ -933,17 +970,17 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect }) => {
       </div>
 
       {/* 13. FINAL CTA */}
-      <div className="bg-teal-50 border-t border-teal-100 py-24 px-6 text-center">
+      <div className="bg-teal-50 border-t border-teal-100 py-16 sm:py-20 lg:py-24 px-4 sm:px-6 text-center">
           <div className="max-w-3xl mx-auto">
-              <h2 className="text-4xl font-black text-slate-900 mb-6">Ready to land your dream job?</h2>
-              <button onClick={onStart} className="px-12 py-6 rounded-full bg-[#0d9488] text-white font-black text-lg uppercase tracking-widest hover:bg-[#0b7a6f] transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 transform flex items-center justify-center gap-3 mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-6">Ready to land your dream job?</h2>
+              <button onClick={onStart} className="theme-primary-button mx-auto flex w-full sm:w-auto items-center justify-center gap-3 rounded-full px-8 sm:px-12 py-4 sm:py-6 font-black text-base sm:text-lg uppercase tracking-widest transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 transform">
                 Create My Resume <ArrowRight size={20} />
               </button>
           </div>
       </div>
 
       {/* --- FOOTER --- */}
-      <Footer />
+      <Footer onStart={onStart} />
 
     </div>
   );

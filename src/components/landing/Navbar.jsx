@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Menu, X, ArrowRight } from 'lucide-react';
+import { scrollToLandingSection } from './scrollToLandingSection';
+import ThemeToggleButton from '../ui/ThemeToggleButton';
 
 const Navbar = ({ onStart }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navItems = [
+    { id: 'features', label: 'Features' },
+    { id: 'templates', label: 'Templates' },
+    { id: 'reviews', label: 'Reviews' },
+    { id: 'faq', label: 'FAQ' },
+  ];
+
+  const handleNavClick = (sectionId) => {
+    scrollToLandingSection(sectionId);
+    setMobileMenuOpen(false);
+  };
 
   // Handle scroll effect (We keep this for the padding animation)
   useEffect(() => {
@@ -17,9 +30,10 @@ const Navbar = ({ onStart }) => {
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b bg-[#0f172a] ${
+      data-landing-navbar="true"
+      className={`theme-nav-surface fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
         scrolled 
-          ? 'border-slate-800 py-4 shadow-lg' 
+          ? 'py-4 shadow-[0_20px_50px_var(--theme-shadow-soft)]' 
           : 'border-transparent py-2'
       }`}
     >
@@ -27,31 +41,42 @@ const Navbar = ({ onStart }) => {
         
         {/* Logo */}
         <div 
-          className="flex items-center gap-2 font-black text-xl tracking-tight cursor-pointer text-white"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex items-center gap-2 font-black text-xl tracking-tight cursor-pointer text-[color:var(--theme-nav-link)]"
+          onClick={() => handleNavClick('top')}
         >
-          <div className="w-8 h-8 bg-gradient-to-tr from-teal-400 to-emerald-500 rounded-lg flex items-center justify-center text-white">
+          <div className="w-8 h-8 bg-gradient-to-tr from-teal-300 to-emerald-400 rounded-lg flex items-center justify-center text-white shadow-sm shadow-black/10">
             <Sparkles size={18} fill="white" />
           </div>
           <span>CareerSense</span>
         </div>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-          <a href="#features" className="hover:text-white transition-colors">Features</a>
-          <a href="#templates" className="hover:text-white transition-colors">Templates</a>
-          <a href="#testimonials" className="hover:text-white transition-colors">Reviews</a>
-          <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium theme-nav-link">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleNavClick(item.id)}
+              className="theme-nav-link transition-colors"
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-4">
-          <button className="text-slate-300 hover:text-white font-bold text-sm transition-colors">
-            Log in
+          <ThemeToggleButton />
+          <button
+            type="button"
+            onClick={() => handleNavClick('templates')}
+            className="theme-nav-link font-bold text-sm transition-colors"
+          >
+            View Templates
           </button>
           <button 
             onClick={onStart}
-            className="group px-5 py-2.5 bg-white text-slate-900 rounded-full font-bold text-sm hover:bg-teal-50 transition-all flex items-center gap-2"
+            className="theme-nav-cta group rounded-full px-5 py-2.5 font-bold text-sm transition-all flex items-center gap-2"
           >
             Get Started <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform"/>
           </button>
@@ -59,7 +84,7 @@ const Navbar = ({ onStart }) => {
 
         {/* Mobile Menu Toggle */}
         <button 
-          className="md:hidden text-slate-300"
+          className="theme-nav-link md:hidden"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? <X /> : <Menu />}
@@ -68,13 +93,29 @@ const Navbar = ({ onStart }) => {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-[#0f172a] border-b border-slate-800 p-6 flex flex-col gap-4 shadow-2xl">
-          <a href="#features" className="text-slate-300 hover:text-white" onClick={() => setMobileMenuOpen(false)}>Features</a>
-          <a href="#templates" className="text-slate-300 hover:text-white" onClick={() => setMobileMenuOpen(false)}>Templates</a>
-          <a href="#testimonials" className="text-slate-300 hover:text-white" onClick={() => setMobileMenuOpen(false)}>Reviews</a>
-          <hr className="border-slate-800 my-2" />
-          <button className="text-left text-slate-300 hover:text-white font-bold">Log in</button>
-          <button onClick={onStart} className="px-5 py-3 bg-teal-500 text-white rounded-xl font-bold text-center">
+        <div className="theme-nav-surface md:hidden absolute top-full left-0 w-full border-b p-6 flex flex-col gap-4 shadow-2xl">
+          <div className="mb-2">
+            <ThemeToggleButton showLabel />
+          </div>
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleNavClick(item.id)}
+              className="theme-nav-link text-left"
+            >
+              {item.label}
+            </button>
+          ))}
+          <hr className="my-2 border-white/10" />
+          <button
+            type="button"
+            onClick={() => handleNavClick('templates')}
+            className="theme-nav-link text-left font-bold"
+          >
+            View Templates
+          </button>
+          <button onClick={onStart} className="theme-nav-cta rounded-xl px-5 py-3 font-bold text-center">
             Create Resume
           </button>
         </div>

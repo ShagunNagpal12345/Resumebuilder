@@ -143,6 +143,9 @@
 
 import React from 'react';
 
+import FormattedTextBlock from '../FormattedTextBlock';
+import PreviewEditableField from '../PreviewEditableField';
+
 const Modern = ({ data }) => {
   const {
     personal = {},
@@ -160,8 +163,12 @@ const Modern = ({ data }) => {
       
       {/* HEADER BLOCK - Solid Dark Blue/Slate */}
       <header className="bg-[#0f172a] text-white p-12 pt-16 pb-16">
-          <h1 className="text-5xl font-black uppercase tracking-tight mb-2">{personal.name}</h1>
-          <p className="text-xl font-bold text-teal-400 tracking-wide uppercase mb-6">{personal.title}</p>
+          <PreviewEditableField path="personal.name" label="Full Name" as="h1" className="text-5xl font-black uppercase tracking-tight mb-2">
+            {personal.name}
+          </PreviewEditableField>
+          <PreviewEditableField path="personal.title" label="Job Title" as="p" className="text-xl font-bold text-teal-400 tracking-wide uppercase mb-6">
+            {personal.title}
+          </PreviewEditableField>
           
           <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-300">
               {personal.phone && <span>{personal.phone}</span>}
@@ -181,9 +188,14 @@ const Modern = ({ data }) => {
               {personal.summary && (
                   <section>
                       <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Profile</h3>
-                      <p className="text-sm leading-7 text-slate-700 font-medium text-justify">
-                          {personal.summary}
-                      </p>
+                      <FormattedTextBlock
+                        text={personal.summary}
+                        editablePath="personal.summary"
+                        editableLabel="Professional Summary"
+                        plainClassName="text-sm leading-7 text-slate-700 font-medium text-justify whitespace-pre-wrap"
+                        unorderedListClassName="ml-4 list-disc space-y-2 text-sm leading-7 text-slate-700 font-medium marker:text-slate-400"
+                        orderedListClassName="ml-4 list-decimal space-y-2 text-sm leading-7 text-slate-700 font-medium marker:text-slate-400"
+                      />
                   </section>
               )}
 
@@ -192,23 +204,32 @@ const Modern = ({ data }) => {
                   <section>
                       <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-8">Experience</h3>
                       <div className="space-y-10 border-l-2 border-teal-500/20 pl-8 ml-2">
-                          {experience.map(exp => (
+                          {experience.map((exp, index) => (
                               <div key={exp.id} className="relative">
                                   {/* Timeline Dot */}
                                   <div className="absolute -left-[37px] top-1.5 w-4 h-4 rounded-full bg-teal-500 border-4 border-white shadow-sm"></div>
                                   
                                   <div className="flex justify-between items-baseline mb-1">
-                                      <h4 className="font-bold text-lg text-slate-900">{exp.role}</h4>
-                                      <span className="text-xs font-bold text-slate-400">{exp.date}</span>
+                                      <PreviewEditableField path={`experience[${index}].role`} label="Experience Role" as="h4" className="font-bold text-lg text-slate-900">
+                                        {exp.role}
+                                      </PreviewEditableField>
+                                      <PreviewEditableField path={`experience[${index}].date`} label="Experience Date" className="text-xs font-bold text-slate-400">
+                                        {exp.date}
+                                      </PreviewEditableField>
                                   </div>
-                                  <div className="text-sm font-bold text-teal-600 mb-3">{exp.company}</div>
+                                  <PreviewEditableField path={`experience[${index}].company`} label="Experience Company" as="div" className="text-sm font-bold text-teal-600 mb-3">
+                                    {exp.company}
+                                  </PreviewEditableField>
                                   
                                   {/* Description List */}
-                                  <ul className="list-disc ml-4 text-sm text-slate-600 space-y-2 leading-relaxed marker:text-slate-400">
-                                      {exp.desc.split('\n').map((line, i) => (
-                                          line.trim() && <li key={i}>{line}</li>
-                                      ))}
-                                  </ul>
+                                  <FormattedTextBlock
+                                    text={exp.desc}
+                                    editablePath={`experience[${index}].desc`}
+                                    editableLabel="Experience Description"
+                                    plainClassName="text-sm text-slate-600 space-y-2 leading-relaxed whitespace-pre-wrap"
+                                    unorderedListClassName="ml-4 list-disc space-y-2 text-sm text-slate-600 leading-relaxed marker:text-slate-400"
+                                    orderedListClassName="ml-4 list-decimal space-y-2 text-sm text-slate-600 leading-relaxed marker:text-slate-400"
+                                  />
                               </div>
                           ))}
                       </div>
@@ -220,10 +241,19 @@ const Modern = ({ data }) => {
                   <section>
                       <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-6">Projects</h3>
                       <div className="grid grid-cols-1 gap-6">
-                          {projects.map(p => (
+                          {projects.map((p, index) => (
                               <div key={p.id} className="bg-slate-50 p-5 rounded-lg border border-slate-100">
-                                  <h4 className="font-bold text-slate-900 text-sm mb-2">{p.name}</h4>
-                                  <p className="text-sm text-slate-600 leading-relaxed">{p.desc}</p>
+                                  <PreviewEditableField path={`projects[${index}].name`} label="Project Name" as="h4" className="font-bold text-slate-900 text-sm mb-2">
+                                    {p.name}
+                                  </PreviewEditableField>
+                                  <FormattedTextBlock
+                                    text={p.desc}
+                                    editablePath={`projects[${index}].desc`}
+                                    editableLabel="Project Description"
+                                    plainClassName="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"
+                                    unorderedListClassName="ml-4 list-disc space-y-1.5 text-sm text-slate-600 leading-relaxed"
+                                    orderedListClassName="ml-4 list-decimal space-y-1.5 text-sm text-slate-600 leading-relaxed"
+                                  />
                               </div>
                           ))}
                       </div>
