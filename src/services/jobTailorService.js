@@ -95,22 +95,15 @@
 //   return tailoredData;
 // };
 
-import Groq from "groq-sdk";
+import { getOpenAIClient, OPENAI_MODEL } from "./openaiClient";
 import { recordAiTokenUsage } from "./resumeRepositoryService";
 
-// Initialize 3 separate Groq clients with 3 separate keys to distribute load and bypass rate limits
-const groqExtract = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY_1, dangerouslyAllowBrowser: true });
-const groqAnalyzeJD = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY_2, dangerouslyAllowBrowser: true });
-const groqTailor = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY_4, dangerouslyAllowBrowser: true }); // <--- NOW USING KEY 4
-
-const MODEL = "llama-3.3-70b-versatile";
-
-const recordGroqUsage = (operation, completion, metadata = {}) => {
+const recordOpenAIUsage = (operation, completion, metadata = {}) => {
   recordAiTokenUsage({
-    provider: 'groq',
-    source: 'jobTailorService',
+    provider: 'openai',
+    source: 'openaiJobTailorService',
     operation,
-    model: completion?.model || MODEL,
+    model: completion?.model || OPENAI_MODEL,
     usage: completion?.usage,
     metadata,
   });
@@ -118,6 +111,7 @@ const recordGroqUsage = (operation, completion, metadata = {}) => {
 
 // PHASE 1: Extract Resume to JSON
 export const phase1_ExtractResume = async (rawText) => {
+  const openai = getOpenAIClient();
   const prompt = `
     You are an expert resume parser. Extract the info from the text below into this EXACT JSON schema.
     {
@@ -133,18 +127,19 @@ export const phase1_ExtractResume = async (rawText) => {
     Resume Text: ${rawText.substring(0, 15000)}
   `;
 
-  const completion = await groqExtract.chat.completions.create({
+  const completion = await openai.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
-    model: MODEL,
+    model: OPENAI_MODEL,
     temperature: 0,
     response_format: { type: "json_object" }
   });
-  recordGroqUsage('tailor_phase_extract_resume', completion);
+  recordOpenAIUsage('tailor_phase_extract_resume', completion);
   return JSON.parse(completion.choices[0].message.content);
 };
 
 // PHASE 2: Analyze Job Description
 export const phase2_AnalyzeJD = async (jdText) => {
+  const openai = getOpenAIClient();
   const prompt = `
     Analyze this Job Description. Extract the core requirements, mandatory technical skills, required soft skills, and the tone/industry focus. Return ONLY valid JSON.
     Schema:
@@ -158,18 +153,19 @@ export const phase2_AnalyzeJD = async (jdText) => {
     Job Description: ${jdText.substring(0, 10000)}
   `;
 
-  const completion = await groqAnalyzeJD.chat.completions.create({
+  const completion = await openai.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
-    model: MODEL,
+    model: OPENAI_MODEL,
     temperature: 0.1,
     response_format: { type: "json_object" }
   });
-  recordGroqUsage('tailor_phase_analyze_jd', completion);
+  recordOpenAIUsage('tailor_phase_analyze_jd', completion);
   return JSON.parse(completion.choices[0].message.content);
 };
 
 // PHASE 3: Tailor Resume to JD
 export const phase3_TailorResume = async (resumeJson, jdAnalysisJson) => {
+  const openai = getOpenAIClient();
   const prompt = `
     You are an elite Executive Resume Writer. Your task is to rewrite the candidate's resume to perfectly align with the targeted Job Description analysis, while maintaining absolute truthfulness (do not invent jobs or degrees).
 
@@ -187,13 +183,13 @@ export const phase3_TailorResume = async (resumeJson, jdAnalysisJson) => {
     ${JSON.stringify(resumeJson)}
   `;
 
-  const completion = await groqTailor.chat.completions.create({
+  const completion = await openai.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
-    model: MODEL,
+    model: OPENAI_MODEL,
     temperature: 0.3,
     response_format: { type: "json_object" }
   });
-  recordGroqUsage('tailor_phase_rewrite_resume', completion);
+  recordOpenAIUsage('tailor_phase_rewrite_resume', completion);
   
   const tailoredData = JSON.parse(completion.choices[0].message.content);
 
