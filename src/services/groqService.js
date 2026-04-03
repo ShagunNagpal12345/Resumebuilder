@@ -1,35 +1,23 @@
-import Groq from "groq-sdk";
 import { applyResumeSourceCorrections } from "../utils/resumeSourceCorrections";
+import { getOpenAIClient, OPENAI_MODEL } from "./openaiClient";
 import { recordAiTokenUsage } from "./resumeRepositoryService";
 
-// --- API KEY 1: EXTRACTION ---
-const groqExtract = new Groq({
-  apiKey: import.meta.env.VITE_GROQ_API_KEY_1,
-  dangerouslyAllowBrowser: true
-});
-
-// --- API KEY 2: ENHANCEMENT ---
-const groqEnhance = new Groq({
-  apiKey: import.meta.env.VITE_GROQ_API_KEY_2,
-  dangerouslyAllowBrowser: true
-});
-
-const recordGroqCompletionUsage = (operation, completion, metadata = {}) => {
+const recordOpenAICompletionUsage = (operation, completion, metadata = {}) => {
   recordAiTokenUsage({
-    provider: 'groq',
-    source: 'groqService',
+    provider: 'openai',
+    source: 'openaiService',
     operation,
-    model: completion?.model || 'llama-3.3-70b-versatile',
+    model: completion?.model || OPENAI_MODEL,
     usage: completion?.usage,
     metadata,
   });
 };
 
-
 // ===============================
 // 1. EXTRACT DATA
 // ===============================
 export const extractResumeData = async (rawText) => {
+  const openai = getOpenAIClient();
   const prompt = `
 You are an expert resume parser. Extract the following information from the text below and return it as a VALID JSON object matching this schema exactly.
 
@@ -51,14 +39,14 @@ Resume Text:
 ${rawText.substring(0, 15000)}
 `;
 
-  const completion = await groqExtract.chat.completions.create({
+  const completion = await openai.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
-    model: "llama-3.3-70b-versatile",
+    model: OPENAI_MODEL,
     temperature: 0,
     response_format: { type: "json_object" }
   });
 
-  recordGroqCompletionUsage('extract_resume_data', completion, {
+  recordOpenAICompletionUsage('extract_resume_data', completion, {
     variant: 'standard',
   });
 
@@ -70,6 +58,7 @@ ${rawText.substring(0, 15000)}
 // 1B. EXACT / VERBATIM EXTRACTION
 // ===============================
 export const extractResumeDataVerbatim = async (rawText) => {
+  const openai = getOpenAIClient();
   const prompt = `
 You are an expert resume parser performing STRUCTURE-ONLY extraction.
 
@@ -111,14 +100,14 @@ Resume Text:
 ${rawText.substring(0, 18000)}
 `;
 
-  const completion = await groqExtract.chat.completions.create({
+  const completion = await openai.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
-    model: "llama-3.3-70b-versatile",
+    model: OPENAI_MODEL,
     temperature: 0,
     response_format: { type: "json_object" }
   });
 
-  recordGroqCompletionUsage('extract_resume_data_verbatim', completion, {
+  recordOpenAICompletionUsage('extract_resume_data_verbatim', completion, {
     variant: 'verbatim',
   });
 
@@ -155,13 +144,12 @@ ${rawText.substring(0, 18000)}
   return applyResumeSourceCorrections(exactData, rawText);
 };
 
-
-
 // ===============================
 // 2. ENHANCE RESUME DATA
 // ===============================
 export const enhanceResumeData = async (jsonData) => {
   try {
+    const openai = getOpenAIClient();
     const prompt = `
 You are an elite resume strategist specializing in ATS-optimized resumes.
 
@@ -213,20 +201,17 @@ Candidate Resume JSON:
 ${JSON.stringify(jsonData, null, 2)}
 `;
 
-    const completion = await groqEnhance.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "llama-3.3-70b-versatile",
+      model: OPENAI_MODEL,
       temperature: 0.3,
       response_format: { type: "json_object" }
     });
 
-    recordGroqCompletionUsage('enhance_resume_data', completion);
+    recordOpenAICompletionUsage('enhance_resume_data', completion);
 
     const enhancedData = JSON.parse(completion.choices[0].message.content);
 
-    // ===============================
-    // NORMALIZE EXPERIENCE DESC
-    // ===============================
     if (enhancedData.experience) {
       enhancedData.experience = enhancedData.experience.map((exp) => ({
         ...exp,
@@ -244,12 +229,12 @@ ${JSON.stringify(jsonData, null, 2)}
   }
 };
 
-
 // ===============================
 // 3. ENHANCE SPECIFIC TEXT (Variations)
 // ===============================
 export const generateTextVariations = async (currentText, contextType, jobTitle = "Professional") => {
   try {
+    const openai = getOpenAIClient();
     const prompt = `
 You are an expert Resume Writer. The user wants to improve a specific piece of text from their resume.
 Context: This text is for a "${contextType}" section for a "${jobTitle}" role.
@@ -274,15 +259,14 @@ Original Text:
 "${currentText}"
 `;
 
-    // Using the same enhancement client (API KEY 2)
-    const completion = await groqEnhance.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.5, 
+      model: OPENAI_MODEL,
+      temperature: 0.5,
       response_format: { type: "json_object" }
     });
 
-    recordGroqCompletionUsage('generate_text_variations', completion, {
+    recordOpenAICompletionUsage('generate_text_variations', completion, {
       contextType,
       jobTitle,
     });
@@ -295,21 +279,23 @@ Original Text:
     throw error;
   }
 };
+
 // ===============================
 // 4. LIVE ATS SCORE & KEYWORD CHECKER
 // ===============================
 export const calculateATSScore = async (resumeData, jdText) => {
   try {
+    const openai = getOpenAIClient();
     const prompt = `
-You are an expert Applicant Tracking System (ATS) algorithm. 
+You are an expert Applicant Tracking System (ATS) algorithm.
 Compare the Candidate's Resume to the Target Job Description.
 
 Analyze the match and return exactly this JSON structure:
 {
-  "score": 0, // A number between 0 and 100 representing the match percentage
-  "feedback": "", // 2-3 sentences of overall strategic advice
-  "matched_keywords": [], // Array of important hard/soft skills found in BOTH
-  "missing_keywords": [] // Array of critical skills in the JD that are MISSING from the resume
+  "score": 0,
+  "feedback": "",
+  "matched_keywords": [],
+  "missing_keywords": []
 }
 
 Target Job Description:
@@ -319,14 +305,14 @@ Candidate Resume:
 ${JSON.stringify(resumeData)}
 `;
 
-    const completion = await groqEnhance.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.1, // Low temperature for analytical precision
+      model: OPENAI_MODEL,
+      temperature: 0.1,
       response_format: { type: "json_object" }
     });
 
-    recordGroqCompletionUsage('calculate_ats_score', completion);
+    recordOpenAICompletionUsage('calculate_ats_score', completion);
 
     return JSON.parse(completion.choices[0].message.content);
   } catch (error) {
@@ -340,6 +326,7 @@ ${JSON.stringify(resumeData)}
 // ===============================
 export const generateInterviewPrep = async (resumeData, jdText) => {
   try {
+    const openai = getOpenAIClient();
     const prompt = `
 You are an elite Executive Interview Coach.
 Based on the Candidate's Resume and the Target Job Description, predict the 5 most difficult or likely interview questions they will be asked.
@@ -362,14 +349,14 @@ Candidate Resume:
 ${JSON.stringify(resumeData)}
 `;
 
-    const completion = await groqEnhance.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.4, 
+      model: OPENAI_MODEL,
+      temperature: 0.4,
       response_format: { type: "json_object" }
     });
 
-    recordGroqCompletionUsage('generate_interview_prep', completion);
+    recordOpenAICompletionUsage('generate_interview_prep', completion);
 
     return JSON.parse(completion.choices[0].message.content);
   } catch (error) {
