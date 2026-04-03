@@ -1,19 +1,21 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Sparkles, Menu, X, FolderOpen, Coins, ReceiptText } from 'lucide-react';
+import { Menu, X, FolderOpen, Coins, ReceiptText } from 'lucide-react';
 import { scrollToLandingSection } from './scrollToLandingSection';
 import ThemeToggleButton from '../ui/ThemeToggleButton';
 import { getRepositoryStats } from '../../services/resumeRepositoryService';
+import careerSenseLogo from '../../assets/CareerSense.svg';
 
-const Navbar = ({ onStart, onOpenRepository }) => {
+const Navbar = ({
+  onStart,
+  onOpenRepository,
+  onOpenPricing,
+  onOpenHome,
+  onNavigateLandingSection,
+  currentPage = 'landing',
+}) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [repositoryStats, setRepositoryStats] = useState(() => getRepositoryStats());
-  const navItems = [
-    { id: 'features', label: 'Features' },
-    { id: 'templates', label: 'Templates' },
-    { id: 'reviews', label: 'Reviews' },
-    { id: 'faq', label: 'FAQ' },
-  ];
 
   const formatNumber = (value) => new Intl.NumberFormat().format(Number(value || 0));
 
@@ -21,8 +23,35 @@ const Navbar = ({ onStart, onOpenRepository }) => {
     setRepositoryStats(getRepositoryStats());
   }, []);
 
-  const handleNavClick = (sectionId) => {
+  const navigateToSection = useCallback((sectionId) => {
+    if (onNavigateLandingSection) {
+      onNavigateLandingSection(sectionId);
+      return;
+    }
+
     scrollToLandingSection(sectionId);
+  }, [onNavigateLandingSection]);
+
+  const navItems = currentPage === 'pricing'
+    ? [
+        { id: 'home', label: 'Home', action: () => (onOpenHome ? onOpenHome() : navigateToSection('top')) },
+        { id: 'features', label: 'Features', action: () => navigateToSection('features') },
+        { id: 'templates', label: 'Templates', action: () => navigateToSection('templates') },
+        { id: 'faq', label: 'FAQ', action: () => navigateToSection('faq') },
+        { id: 'pricing', label: 'Pricing', action: onOpenPricing, active: true },
+      ]
+    : [
+        { id: 'features', label: 'Features', action: () => navigateToSection('features') },
+        { id: 'templates', label: 'Templates', action: () => navigateToSection('templates') },
+        { id: 'reviews', label: 'Reviews', action: () => navigateToSection('reviews') },
+        { id: 'faq', label: 'FAQ', action: () => navigateToSection('faq') },
+        { id: 'pricing', label: 'Pricing', action: onOpenPricing },
+      ];
+
+  const handleNavClick = (action) => {
+    if (action) {
+      action();
+    }
     setMobileMenuOpen(false);
   };
 
@@ -69,17 +98,24 @@ const Navbar = ({ onStart, onOpenRepository }) => {
           : 'border-transparent py-2'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto flex items-center justify-between pl-1 pr-6 sm:pl-2 sm:pr-6 lg:pl-0 lg:pr-6">
         
         {/* Logo */}
         <div 
-          className="flex items-center gap-2 font-black text-xl tracking-tight cursor-pointer text-[color:var(--theme-nav-link)]"
-          onClick={() => handleNavClick('top')}
+          className="-ml-1 flex items-center cursor-pointer sm:ml-0"
+          onClick={() => handleNavClick(() => {
+            if (currentPage === 'pricing' && onOpenHome) {
+              onOpenHome();
+              return;
+            }
+            navigateToSection('top');
+          })}
         >
-          <div className="w-8 h-8 bg-gradient-to-tr from-teal-300 to-emerald-400 rounded-lg flex items-center justify-center text-white shadow-sm shadow-black/10">
-            <Sparkles size={18} fill="white" />
-          </div>
-          <span>CareerSense</span>
+          <img
+            src={careerSenseLogo}
+            alt="CareerSense"
+            className="h-10 shrink-0 object-contain sm:h-10 md:h-8 lg:h-12"
+          />
         </div>
 
         {/* Desktop Links */}
@@ -88,8 +124,8 @@ const Navbar = ({ onStart, onOpenRepository }) => {
             <button
               key={item.id}
               type="button"
-              onClick={() => handleNavClick(item.id)}
-              className="theme-nav-link transition-colors"
+              onClick={() => handleNavClick(item.action)}
+              className={`transition-colors ${item.active ? 'text-[color:var(--theme-nav-link)]' : 'theme-nav-link'}`}
             >
               {item.label}
             </button>
@@ -150,8 +186,8 @@ const Navbar = ({ onStart, onOpenRepository }) => {
             <button
               key={item.id}
               type="button"
-              onClick={() => handleNavClick(item.id)}
-              className="theme-nav-link text-left"
+              onClick={() => handleNavClick(item.action)}
+              className={`text-left ${item.active ? 'text-[color:var(--theme-nav-link)]' : 'theme-nav-link'}`}
             >
               {item.label}
             </button>
@@ -159,7 +195,7 @@ const Navbar = ({ onStart, onOpenRepository }) => {
           <hr className="my-2 border-white/10" />
           <button
             type="button"
-            onClick={() => handleNavClick('templates')}
+            onClick={() => handleNavClick(() => navigateToSection('templates'))}
             className="theme-nav-link text-left font-bold"
           >
             View Templates

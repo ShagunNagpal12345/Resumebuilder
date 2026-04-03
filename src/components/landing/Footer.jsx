@@ -2,19 +2,28 @@ import React from 'react';
 import { Sparkles, Github, Twitter, Linkedin, Mail } from 'lucide-react';
 import { scrollToLandingSection } from './scrollToLandingSection';
 
-const Footer = ({ onStart }) => {
+const Footer = ({ onStart, onOpenPricing, onNavigateLandingSection }) => {
+  const navigateToSection = (sectionId) => {
+    if (onNavigateLandingSection) {
+      onNavigateLandingSection(sectionId);
+      return;
+    }
+
+    scrollToLandingSection(sectionId);
+  };
+
   const productLinks = [
-    { label: 'Resume Templates', action: () => scrollToLandingSection('templates') },
-    { label: 'AI Job Tailoring', action: () => scrollToLandingSection('features') },
-    { label: 'Cover Letter Builder', action: onStart || (() => scrollToLandingSection('features')) },
-    { label: 'Resume Examples', action: () => scrollToLandingSection('examples') },
+    { label: 'Resume Templates', action: () => navigateToSection('templates') },
+    { label: 'AI Job Tailoring', action: () => navigateToSection('features') },
+    { label: 'Pricing Plans', action: onOpenPricing },
+    { label: 'Resume Examples', action: () => navigateToSection('examples') },
   ];
 
   const resourceLinks = [
-    { label: 'Career Blog', action: () => scrollToLandingSection('faq') },
-    { label: 'Interview Prep', action: () => scrollToLandingSection('features') },
-    { label: 'ATS Scanner', action: () => scrollToLandingSection('features') },
-    { label: 'Help Center', action: () => scrollToLandingSection('faq') },
+    { label: 'Career Blog', action: () => navigateToSection('faq') },
+    { label: 'Interview Prep', action: () => navigateToSection('features') },
+    { label: 'ATS Scanner', action: () => navigateToSection('features') },
+    { label: 'Help Center', action: () => navigateToSection('faq') },
   ];
 
   const legalLinks = [
@@ -38,9 +47,9 @@ const Footer = ({ onStart }) => {
               The AI-powered resume builder designed to beat the ATS and help you land your dream job faster.
             </p>
             <div className="flex gap-4">
-                <button type="button" onClick={() => scrollToLandingSection('reviews')} className="transition-colors hover:text-[color:var(--theme-accent-strong)]" aria-label="Go to reviews"><Twitter size={18} /></button>
-                <button type="button" onClick={() => scrollToLandingSection('templates')} className="transition-colors hover:text-[color:var(--theme-accent-strong)]" aria-label="Go to templates"><Github size={18} /></button>
-                <button type="button" onClick={() => scrollToLandingSection('features')} className="transition-colors hover:text-[color:var(--theme-accent-strong)]" aria-label="Go to features"><Linkedin size={18} /></button>
+                <button type="button" onClick={() => navigateToSection('reviews')} className="transition-colors hover:text-[color:var(--theme-accent-strong)]" aria-label="Go to reviews"><Twitter size={18} /></button>
+                <button type="button" onClick={() => navigateToSection('templates')} className="transition-colors hover:text-[color:var(--theme-accent-strong)]" aria-label="Go to templates"><Github size={18} /></button>
+                <button type="button" onClick={() => navigateToSection('features')} className="transition-colors hover:text-[color:var(--theme-accent-strong)]" aria-label="Go to features"><Linkedin size={18} /></button>
             </div>
           </div>
 

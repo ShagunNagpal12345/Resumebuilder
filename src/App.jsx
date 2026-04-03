@@ -311,6 +311,7 @@ import { FolderOpen, Loader2 } from 'lucide-react';
 // --- LANDING COMPONENTS (The Dark UI) ---
 // Adjust these paths if your file names are different
 import ResumeBuilderLanding from './components/landing/ResumeBuilderLanding';
+import PricingPage from './components/landing/PricingPage';
 import ResumeSelection from './components/builder/ResumeSelection'; 
 import ResumeUpload from './components/landing/ResumeUpload'; 
 import JDUpload from './components/landing/JDUpload';
@@ -331,6 +332,7 @@ import ThemeToggleButton from './components/ui/ThemeToggleButton';
 import { enhanceResumeData, extractResumeData, extractResumeDataVerbatim } from './services/groqService';
 import { upsertProfileFromResume } from './services/resumeRepositoryService';
 import { extractTextFromFile } from './utils/fileParser';
+import { scrollToLandingSection } from './components/landing/scrollToLandingSection';
 
 const App = () => {
   const [view, setView] = useState('landing');
@@ -358,6 +360,14 @@ const App = () => {
     setView('repository');
   };
 
+  const navigateToLandingSection = (sectionId = 'top') => {
+    setView('landing');
+
+    window.setTimeout(() => {
+      scrollToLandingSection(sectionId);
+    }, 80);
+  };
+
   // 1. Navigation Helpers
   const handleBack = () => {
     if (view === 'repository') {
@@ -383,6 +393,7 @@ const App = () => {
       'gallery': 'landing', // Changed this so "Back" from Gallery goes to Landing instead of 'review' (since you can skip directly to gallery now)
       'review': 'upload', // Or 'tailor' depending on how they got here, but keeping original for now
       'upload': 'selection',
+      'pricing': 'landing',
       'tailor': 'selection', // Added mapping for the new tailor view
       'selection': 'landing'
     };
@@ -440,7 +451,7 @@ const App = () => {
 
   return (
     <div className="theme-app-shell min-h-screen font-sans text-slate-900 relative">
-      {view !== 'landing' && view !== 'builder' && (
+      {view !== 'landing' && view !== 'builder' && view !== 'pricing' && (
         <div className="fixed right-4 top-4 z-[9998] flex items-center gap-2 sm:right-6 sm:top-6">
           {view !== 'repository' && view !== 'builder' && (
             <button
@@ -474,6 +485,29 @@ const App = () => {
             setView('gallery');
           }}
           onOpenRepository={() => openRepository('landing')}
+          onOpenPricing={() => setView('pricing')}
+        />
+      )}
+
+      {view === 'pricing' && (
+        <PricingPage
+          onStart={() => {
+            resetRepositoryTracking();
+            setResumeData(null);
+            setSelectedMode(null);
+            setView('selection');
+          }}
+          onOpenRepository={() => openRepository('pricing')}
+          onOpenHome={() => navigateToLandingSection('top')}
+          onOpenPricing={() => setView('pricing')}
+          onNavigateLandingSection={navigateToLandingSection}
+          onViewTemplates={() => {
+            resetRepositoryTracking();
+            setResumeData(null);
+            setSelectedMode('scratch');
+            setResumeImportMode('ai-enhanced');
+            setView('gallery');
+          }}
         />
       )}
 

@@ -644,7 +644,7 @@ const EXAMPLE_CATEGORIES = [
     "Nursing Student", "Coaching", "Sales", "Project Manager", "Software Developer", "Marketing"
 ];
 
-const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRepository }) => {
+const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRepository, onOpenPricing }) => {
   const scrollRef = useRef(null);
   const reviewScrollRef = useRef(null);
   const [activeCategory, setActiveCategory] = useState("Information Technology");
@@ -661,7 +661,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
     <div className="theme-app-shell min-h-screen overflow-y-auto custom-scrollbar scroll-smooth font-sans text-slate-900">
       
       {/* 1. NAVBAR */}
-      <Navbar onStart={onStart} onOpenRepository={onOpenRepository} />
+      <Navbar onStart={onStart} onOpenRepository={onOpenRepository} onOpenPricing={onOpenPricing} currentPage="landing" />
 
       {/* 2. SEO META TAGS */}
       <SEO 
@@ -980,7 +980,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
       </div>
 
       {/* --- FOOTER --- */}
-      <Footer onStart={onStart} />
+      <Footer onStart={onStart} onOpenPricing={onOpenPricing} />
 
     </div>
   );
