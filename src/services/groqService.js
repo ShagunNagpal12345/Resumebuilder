@@ -2,6 +2,9 @@ import { applyResumeSourceCorrections } from "../utils/resumeSourceCorrections";
 import { getOpenAIClient, OPENAI_MODEL } from "./openaiClient";
 import { recordAiTokenUsage } from "./resumeRepositoryService";
 
+const MAX_RESUME_TEXT_CHARS = 50000;
+const prepareResumeTextForModel = (rawText = "") => rawText.slice(0, MAX_RESUME_TEXT_CHARS);
+
 const recordOpenAICompletionUsage = (operation, completion, metadata = {}) => {
   recordAiTokenUsage({
     provider: 'openai',
@@ -22,6 +25,14 @@ export const extractResumeData = async (rawText) => {
 You are an expert resume parser. Extract the following information from the text below and return it as a VALID JSON object matching this schema exactly.
 
 Do not add markdown formatting.
+Process the full resume text, including later pages and final education sections.
+
+Important parsing guidance:
+- Section headings may appear as SUMMARY, PROFESSIONAL SUMMARY, FUNCTIONAL AREAS, TECHNICAL SKILLS, WORK EXPERIENCE, and EDUCATION.
+- "FUNCTIONAL AREAS" should be treated as skill/expertise content, not summary text.
+- Keep each work experience entry grouped correctly with its own company, title, dates, and bullets.
+- Do not drop entries from later pages.
+- Do not merge multiple jobs into one.
 
 Schema:
 {
@@ -36,7 +47,7 @@ Schema:
 }
 
 Resume Text:
-${rawText.substring(0, 15000)}
+${prepareResumeTextForModel(rawText)}
 `;
 
   const completion = await openai.chat.completions.create({
@@ -91,13 +102,16 @@ Return ONLY valid JSON matching this schema:
 
 Extra extraction guidance:
 - "summary" should contain only the summary/objective/profile text from the resume, not invented text.
+- If the resume has a separate "FUNCTIONAL AREAS" or expertise section, map it into skills/core rather than summary.
+- If the resume contains a later "Professional Summary" heading that is actually career highlights or achievement bullets, do not let it swallow unrelated sections or duplicate later work experience entries.
 - "skills" arrays should only contain skills literally present in the source text.
 - Prefer grouping generic competency words into "core" and interpersonal skills into "soft" only when clearly listed that way; otherwise keep concrete tools/technologies in "technical" and place remaining listed skills in "core".
 - For experience and projects, preserve bullet order.
 - For awards, certifications, education, and volunteering, create one object per real entry from the source and do not duplicate lines across multiple objects.
+- Process the full resume text, including later pages and the final education section.
 
 Resume Text:
-${rawText.substring(0, 18000)}
+${prepareResumeTextForModel(rawText)}
 `;
 
   const completion = await openai.chat.completions.create({

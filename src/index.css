@@ -429,6 +429,9 @@ body {
   .codex-print-root.is-active,
   .codex-print-root.is-active * {
     visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
   .codex-print-root.is-active {
@@ -455,7 +458,6 @@ body {
     min-height: auto !important;
     height: auto !important;
     margin: 0 auto !important;
-    background: #ffffff !important;
     box-shadow: none !important;
     overflow: visible !important;
     position: relative !important;
@@ -470,14 +472,14 @@ body {
   .codex-print-pages {
     width: 210mm !important;
     margin: 0 auto !important;
-    background: #ffffff !important;
+    background: transparent !important;
   }
 
   .codex-print-page {
     width: 210mm !important;
     height: 297mm !important;
     margin: 0 auto !important;
-    background: #ffffff !important;
+    background: transparent !important;
     position: relative !important;
     overflow: hidden !important;
     page-break-after: always !important;
@@ -494,13 +496,12 @@ body {
     width: 210mm !important;
     height: 297mm !important;
     overflow: hidden !important;
-    background: #ffffff !important;
+    background: transparent !important;
   }
 
   .codex-print-page-viewport > * {
     width: 210mm !important;
     min-height: auto !important;
     box-shadow: none !important;
-    background: #ffffff !important;
   }
 }

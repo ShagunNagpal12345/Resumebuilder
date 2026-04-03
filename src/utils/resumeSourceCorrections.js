@@ -3,6 +3,9 @@ const KNOWN_SECTION_HEADINGS = new Map([
   ['professional summary', 'summary'],
   ['profile', 'summary'],
   ['career summary', 'summary'],
+  ['functional area', 'area_of_expertise'],
+  ['functional areas', 'area_of_expertise'],
+  ['functional expertise', 'area_of_expertise'],
   ['experience', 'experience'],
   ['professional experience', 'experience'],
   ['work experience', 'experience'],
@@ -32,6 +35,7 @@ const normalizeHeading = (line = '') =>
 const cleanLine = (line = '') =>
   line
     .replace(/^[-*•·▪◦]\s*/, '')
+    .replace(/^o\s+/i, '')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -94,13 +98,24 @@ const extractSummaryFromSections = (sections) => {
     .filter(Boolean)
     .filter((line) => !isHeadingLine(line));
 
+  const firstBulletIndex = lines.findIndex((line) => /^[-*•·▪◦o]\s+/i.test(line) || /^Developed\b|^Built\b|^Spearheaded\b|^Engineered\b|^Designed\b|^Applied\b|^Implemented\b/i.test(line));
+
+  if (firstBulletIndex > 0) {
+    return lines.slice(0, firstBulletIndex).join('\n');
+  }
+
   return lines.join('\n');
 };
 
+const splitSkillLine = (line = '') =>
+  line
+    .split(/[•|]|(?<!\w)·|▪|◦|,\s*|\s+and\s+/i)
+    .map((item) => cleanLine(item))
+    .filter(Boolean);
+
 const extractExpertiseSkills = (sections) =>
   (sections.area_of_expertise || [])
-    .map((line) => cleanLine(line))
-    .filter(Boolean)
+    .flatMap((line) => splitSkillLine(line))
     .filter((line) => !isHeadingLine(line));
 
 const stripTechnicalLeadIn = (line = '') =>
@@ -110,6 +125,12 @@ const stripTechnicalLeadIn = (line = '') =>
     .replace(/^advance knowledge of\s*/i, '')
     .replace(/^accounting tools including\s*/i, '')
     .replace(/^accounting tools\s*/i, '')
+    .replace(/^programming\s*/i, '')
+    .replace(/^etl tools\s*[-:]?\s*/i, '')
+    .replace(/^big data\s*[-:]?\s*/i, '')
+    .replace(/^python libraries\s*[-:]?\s*/i, '')
+    .replace(/^nlp\s*[-:]?\s*/i, '')
+    .replace(/^mlops\s*[-:]?\s*/i, '')
     .trim();
 
 const extractTechnicalSkills = (sections) => {

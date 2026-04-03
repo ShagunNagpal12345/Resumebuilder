@@ -5071,13 +5071,19 @@ const Editor = ({
     setIsPreviewModalOpen(true);
   };
 
-  const buildPrintClone = () => {
+  const getPrintSourceNode = () => {
     if (!exportPreviewRef.current) return null;
 
     const sourceNode = getPreviewMeasurementRoot(
       exportPreviewRef.current.firstElementChild || exportPreviewRef.current
     );
+
+    return sourceNode instanceof HTMLElement ? sourceNode : null;
+  };
+
+  const buildPrintClone = (sourceNode = getPrintSourceNode()) => {
     if (!(sourceNode instanceof HTMLElement)) return null;
+
     const printClone = sourceNode.cloneNode(true);
     printClone.classList.add('codex-print-document');
     printClone.style.width = '210mm';
@@ -5085,13 +5091,57 @@ const Editor = ({
     printClone.style.height = 'auto';
     printClone.style.transform = 'none';
     printClone.style.boxShadow = 'none';
-    printClone.style.background = '#ffffff';
     printClone.style.overflow = 'visible';
+    printClone.style.setProperty('-webkit-print-color-adjust', 'exact');
+    printClone.style.setProperty('print-color-adjust', 'exact');
     printClone.querySelectorAll('[data-codex-spacer="true"]').forEach((node) => {
       node.style.display = 'block';
     });
+    printClone.querySelectorAll('.manual-page-break').forEach((node) => {
+      node.style.display = 'none';
+      node.style.breakBefore = 'auto';
+      node.style.pageBreakBefore = 'auto';
+    });
 
     return printClone;
+  };
+
+  const buildPaginatedPrintDocument = (sourceNode) => {
+    if (!(sourceNode instanceof HTMLElement)) return null;
+
+    const pageHeightPx = getPageHeightPx(sourceNode.offsetWidth);
+    const contentHeight = sourceNode.scrollHeight;
+    const breaks = calculatePageBreaks(sourceNode, pageHeightPx, manualPageBreaks, 1, contentHeight);
+    const boundaries = [0, ...breaks, contentHeight]
+      .map((value) => Math.max(0, Math.round(value)))
+      .filter((value, index, values) => index === 0 || value >= values[index - 1]);
+
+    const pagesRoot = document.createElement('div');
+    pagesRoot.className = 'codex-print-pages';
+
+    boundaries.slice(0, -1).forEach((start, index) => {
+      const pageClone = buildPrintClone(sourceNode);
+      if (!(pageClone instanceof HTMLElement)) return;
+
+      pageClone.style.position = 'relative';
+      pageClone.style.left = '0';
+      pageClone.style.top = '0';
+      pageClone.style.margin = '0';
+      pageClone.style.transform = `translateY(-${start}px)`;
+
+      const pageShell = document.createElement('div');
+      pageShell.className = 'codex-print-page';
+
+      const pageViewport = document.createElement('div');
+      pageViewport.className = 'codex-print-page-viewport';
+      pageViewport.dataset.pageIndex = String(index + 1);
+
+      pageViewport.appendChild(pageClone);
+      pageShell.appendChild(pageViewport);
+      pagesRoot.appendChild(pageShell);
+    });
+
+    return pagesRoot;
   };
 
   const ensureTempPrintRoot = () => {
@@ -5109,8 +5159,11 @@ const Editor = ({
 
   // --- PDF / PRINT GENERATION ---
   const handleDownload = async () => {
-    const sourceClone = buildPrintClone();
-    if (!sourceClone) return;
+    const sourceNode = getPrintSourceNode();
+    if (!(sourceNode instanceof HTMLElement)) return;
+
+    const paginatedDocument = buildPaginatedPrintDocument(sourceNode);
+    if (!(paginatedDocument instanceof HTMLElement)) return;
 
     const printRoot = ensureTempPrintRoot();
     printRoot.innerHTML = '';
@@ -5130,26 +5183,8 @@ const Editor = ({
     });
 
     try {
-      await waitForEmbeddedAssets(sourceClone);
-      sourceClone.classList.add('codex-print-document--continuous');
-      sourceClone.style.width = '210mm';
-      sourceClone.style.maxWidth = '210mm';
-      sourceClone.style.minHeight = 'auto';
-      sourceClone.style.height = 'auto';
-      sourceClone.style.margin = '0 auto';
-      sourceClone.style.transform = 'none';
-      sourceClone.style.position = 'relative';
-      sourceClone.style.left = '0';
-      sourceClone.style.top = '0';
-      sourceClone.style.overflow = 'visible';
-
-      sourceClone.querySelectorAll('.manual-page-break').forEach((node) => {
-        node.style.display = 'none';
-        node.style.breakBefore = 'auto';
-        node.style.pageBreakBefore = 'auto';
-      });
-
-      printRoot.appendChild(sourceClone);
+      await waitForEmbeddedAssets(paginatedDocument);
+      printRoot.appendChild(paginatedDocument);
 
       await waitForEmbeddedAssets(printRoot);
 
