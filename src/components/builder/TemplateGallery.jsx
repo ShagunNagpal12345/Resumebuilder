@@ -117,6 +117,12 @@ export const TEMPLATES = [
   { id: 'formal', name: 'Structured Formal', hasHeadshot: false, graphics: 'Low', columns: '1', color: '#334155', recommended: false },
   { id: 'Academic', name: 'Academic Scholar', hasHeadshot: false, graphics: 'Low', columns: '1', color: '#27272a', recommended: false },
   { id: 'ocean-ats', name: 'Deep Ocean', hasHeadshot: false, graphics: 'Low', columns: '1', color: '#004B8D', recommended: false },
+  { id: 'career-launch', name: 'Career Launch', hasHeadshot: true, graphics: 'Low', columns: '1', color: '#0f766e', recommended: true },
+  { id: 'associate-prime', name: 'Associate Prime', hasHeadshot: true, graphics: 'Low', columns: '1', color: '#2563eb', recommended: true },
+  { id: 'consulting-line', name: 'Consulting Line', hasHeadshot: false, graphics: 'Low', columns: '1', color: '#334155', recommended: true },
+  { id: 'leadership-signature', name: 'Leadership Signature', hasHeadshot: false, graphics: 'Low', columns: '1', color: '#7c2d12', recommended: true },
+  { id: 'boardroom-one', name: 'Boardroom One', hasHeadshot: false, graphics: 'Low', columns: '1', color: '#1e3a8a', recommended: true },
+  { id: 'ceo-brief', name: 'CEO Brief', hasHeadshot: false, graphics: 'Low', columns: '1', color: '#b45309', recommended: true },
   
   // ==========================================
   // 2. TECH, DATA & DEVELOPMENT (Structured, skill-focused, terminal aesthetics)

@@ -3408,7 +3408,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { 
   Download, ChevronLeft, Trash2, User, Briefcase, 
   GraduationCap, CheckCircle, Award, Globe, Layers,
-  Cpu, FileText, PanelLeftClose, PanelLeftOpen, Camera, X, Eye, LayoutGrid, Sparkles, Target, ScanLine, MessageSquare, PencilLine, Scissors, ZoomIn, ZoomOut, Maximize2, RotateCcw, Save, FolderOpen
+  Cpu, FileText, PanelLeftClose, PanelLeftOpen, Camera, X, Eye, LayoutGrid, Sparkles, Target, ScanLine, MessageSquare, PencilLine, Scissors, ZoomIn, ZoomOut, Maximize2, RotateCcw, Save, FolderOpen, Gauge, ChevronDown, ChevronUp
 } from 'lucide-react';
 
 import ResumePreview from "../resume/ResumePreview";
@@ -4021,6 +4021,123 @@ const WorkspaceIconButton = ({
     </div>
   </div>
 );
+
+const ResumeScorePanel = ({ score = 0, label = 'Needs Work', breakdown = [], tip = '' }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const toneClassName = score >= 85
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    : score >= 70
+      ? 'border-teal-200 bg-teal-50 text-teal-700'
+      : score >= 55
+        ? 'border-amber-200 bg-amber-50 text-amber-700'
+        : 'border-rose-200 bg-rose-50 text-rose-700';
+
+  const progressClassName = score >= 85
+    ? 'from-emerald-500 to-teal-500'
+    : score >= 70
+      ? 'from-teal-500 to-cyan-500'
+      : score >= 55
+        ? 'from-amber-500 to-orange-500'
+        : 'from-rose-500 to-pink-500';
+
+  return (
+    <div className="mt-4 overflow-hidden rounded-[1.55rem] border border-slate-200 bg-white/95 shadow-sm shadow-slate-200/70">
+      <div className={`px-4 py-4 ${isExpanded ? 'border-b border-slate-100 bg-slate-50/80' : ''}`}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-2 rounded-full border border-teal-100 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-teal-700">
+              <Gauge size={12} />
+              Resume Score
+            </div>
+            <div className="mt-3 flex items-end gap-2">
+              <div className="text-[2.4rem] font-black leading-none tracking-tight text-slate-900">{score}</div>
+              <div className="pb-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">/ 100</div>
+            </div>
+            {!isExpanded ? (
+              <p className="mt-1.5 text-[12px] leading-relaxed text-slate-500">
+                Live score updates as you write and use AI Enhance.
+              </p>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-2">
+            {isExpanded ? (
+              <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${toneClassName}`}>
+                {label}
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => setIsExpanded((current) => !current)}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-600 transition-all hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700"
+            >
+              {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              {isExpanded ? 'Hide Detail' : 'View Detail'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {isExpanded ? (
+        <div className="space-y-4 px-4 py-4">
+          <div className="grid grid-cols-[auto_1fr] items-center gap-4">
+            <div className="min-w-0">
+              <div className="text-sm font-bold text-slate-900">Live quality signal</div>
+              <p className="mt-1 text-[12px] leading-relaxed text-slate-500">
+                Updates as you write, restructure content, and use AI Enhance on summary, experience, or projects.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+              <span>Overall strength</span>
+              <span>{score}%</span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+              <div
+                className={`h-full rounded-full bg-gradient-to-r ${progressClassName} transition-all duration-300`}
+                style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50/70 px-3 py-3">
+            <div className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+              Quality Breakdown
+            </div>
+            <div className="space-y-2.5">
+              {breakdown.map((item) => (
+                <div key={item.key} className="grid grid-cols-[minmax(0,1fr)_56px] items-center gap-3">
+                  <div className="min-w-0">
+                    <div className="mb-1.5 flex items-center justify-between gap-2">
+                      <span className="text-[12px] font-bold text-slate-700">{item.label}</span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+                        {item.score >= 85 ? 'Strong' : item.score >= 70 ? 'Solid' : item.score >= 55 ? 'Build' : 'Low'}
+                      </span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-white">
+                      <div
+                        className={`h-full rounded-full bg-gradient-to-r ${progressClassName}`}
+                        style={{ width: `${Math.max(0, Math.min(100, item.score))}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-white px-2 py-2 text-center text-base font-black tracking-tight text-slate-900">
+                    {item.score}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[1.15rem] border border-teal-100 bg-teal-50/70 px-3.5 py-3 text-[12px] leading-relaxed text-teal-900">
+            {tip}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+};
 
 const Input = ({ label, value, onChange, placeholder }) => (
   <div className="mb-4">
@@ -5432,7 +5549,7 @@ const Editor = ({
                     <ChevronLeft size={20} />
                   </button>
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <h1 className="truncate text-[1.55rem] font-black tracking-tight text-slate-900 leading-none">Editor Workspace</h1>
+                    <h1 className="truncate text-[1.55rem] font-black tracking-tight text-slate-900 leading-none">My Workspace</h1>
                     <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
                       {selectedTemplateMeta?.name || 'Template'}
                     </span>
@@ -5685,6 +5802,12 @@ const Editor = ({
                 </div>
                 <h2 className="text-[1.65rem] font-black tracking-tight text-slate-900 leading-tight">{sectionOverview.heading}</h2>
                 <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{sectionOverview.description}</p>
+                <ResumeScorePanel
+                  score={resumeInsights.resumeScore}
+                  label={resumeInsights.resumeScoreLabel}
+                  breakdown={resumeInsights.resumeScoreBreakdown}
+                  tip={resumeInsights.resumeScoreTip}
+                />
                 <div className="mt-3 grid grid-cols-2 gap-2.5">
                   <div className="rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-2.5">
                     <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{sectionOverview.primaryLabel}</div>

@@ -41,9 +41,9 @@ const Navbar = ({
         { id: 'pricing', label: 'Pricing', action: onOpenPricing, active: true },
       ]
     : [
+        { id: 'how-it-works', label: 'How It Works', action: () => navigateToSection('how-it-works') },
         { id: 'features', label: 'Features', action: () => navigateToSection('features') },
         { id: 'templates', label: 'Templates', action: () => navigateToSection('templates') },
-        { id: 'reviews', label: 'Reviews', action: () => navigateToSection('reviews') },
         { id: 'faq', label: 'FAQ', action: () => navigateToSection('faq') },
         { id: 'pricing', label: 'Pricing', action: onOpenPricing },
       ];

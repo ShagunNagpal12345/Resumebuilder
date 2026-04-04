@@ -1187,12 +1187,11 @@
 // export default ResumeBuilderLanding;
 
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { 
-  Sparkles, ArrowRight, CheckCircle, Cpu, MousePointer2,
-  PenTool, Download, CheckCircle2, Zap, Brain, Layout, FileText, HelpCircle,
-  ChevronLeft, ChevronRight, UploadCloud, Monitor, Smartphone, Tablet, Briefcase, GraduationCap, FolderOpen,
-  Coins, UserRound, BarChart3, ScanLine, MessageSquare, Clock3
+  Sparkles, ArrowRight, CheckCircle, Cpu, MousePointer2, 
+  PenTool, Download, CheckCircle2, Star, Zap, Brain, Layout, FileText, HelpCircle,
+  ChevronLeft, ChevronRight, UploadCloud, File, Monitor, Smartphone, Tablet, Briefcase, GraduationCap, FolderOpen
 } from 'lucide-react';
 
 // --- SEO & FOOTER COMPONENTS ---
@@ -1208,12 +1207,6 @@ import ResumeAnatomy from './ResumeAnatomy';
 import ResumePreview from "../resume/ResumePreview"; 
 import AIFeatures from './AIFeatures'; 
 import ResumeExamples from './ResumeExamples'; 
-import {
-  getRepositoryStats,
-  getResumeProfile,
-  getTokenUsageAnalytics,
-  listResumeRecords,
-} from '../../services/resumeRepositoryService';
 
 // --- IMPORT VIDEOS ---
 import resumeVideo from '../../assets/Resume.mp4';
@@ -1293,20 +1286,33 @@ const PREVIEW_DATA = {
     ]
   };
 
-const LIVE_TEMPLATE_COUNT = 100;
-
 // --- FAQ DATA ---
 const FAQ_DATA = [
-  { q: "Which files can I upload into CareerSense?", a: "You can currently upload PDF, DOCX, DOC, and TXT files. The builder extracts those files into editable resume sections before you choose a template." },
-  { q: "What is the difference between Exact Import and AI Optimized?", a: "Exact Import preserves the wording from your existing resume as closely as possible. AI Optimized builds a stronger editable draft from the same source content, but you still review and edit every section before export." },
-  { q: "Do I need a job description to use the builder?", a: "No. A job description is only needed when you want role tailoring, ATS score checks, or interview prep tied to a specific opportunity." },
-  { q: "Can I switch templates after importing my resume?", a: "Yes. Your content stays editable while you move across templates, so you can compare different visual directions without starting over." },
-  { q: "Can I edit the resume directly on the preview?", a: "Yes. The editor supports both form-based editing and live editing on the resume preview, so you can refine wording where you see it." },
-  { q: "What does My Repository save for me?", a: "My Repository stores saved resumes, profile basics, ATS scan history, interview prep history, operation analysis, and Career Point usage so you can reopen work later." },
-  { q: "Can I reopen ATS scans and interview prep later?", a: "Yes. If you already ran an ATS scan or interview prep for a saved resume, you can reopen the latest result in the editor or from My Repository before deciding to run it again." },
-  { q: "Does the mobile builder work for editing and PDF export?", a: "Yes. You can edit sections, preview templates, and use Print or Save PDF from mobile as well as desktop." },
-  { q: "Is the AI output final?", a: "No. AI output is always treated as a draft. You can review, edit, replace, or ignore suggestions before saving or exporting the final resume." },
-  { q: "How does PDF export work?", a: "The builder uses the same live A4 preview you see in the editor, then opens the browser print engine so you can save a selectable PDF when the layout looks right." }
+  { q: "How do I use the Resume Builder app?", a: "Simply choose a template, auto-import your existing resume or start from scratch, and let our AI guide you through each section. Once done, download in your preferred format." },
+  { q: "Do I need to download an app to use the resume builder on mobile?", a: "No downloads required! Our platform is fully responsive and works perfectly in your mobile browser (Chrome, Safari, etc.) on iOS and Android." },
+  { q: "What makes Resume Builder the best resume tool?", a: "We combine recruiter-approved templates with advanced AI writing assistance and real-time ATS scoring to ensure your resume actually gets read." },
+  { q: "What is the main purpose of a resume builder?", a: "To automate formatting, structure content professionally, and optimize keywords so you can focus on your achievements rather than margins and fonts." },
+  { q: "What are the advantages of using a resume builder tool?", a: "You save hours of formatting time, avoid common design errors, get AI-suggested content, and ensure your document passes Applicant Tracking Systems (ATS)." },
+  { q: "Does the mobile resume builder have the same features as desktop?", a: "Yes, you get full functionality on mobile, including AI writing, template switching, and PDF export." },
+  { q: "Can resume builders help with ATS optimization?", a: "Absolutely. Our templates use standard headings and clean code structures that ATS software can easily parse, preventing your resume from being auto-rejected." },
+  { q: "Is my information secure and compliant with data privacy laws?", a: "Yes, we use 256-bit encryption and strictly adhere to GDPR and CCPA regulations. Your data is yours alone." },
+  { q: "Does Resume Builder have resume examples that I can look at?", a: "Yes, we offer a library of hundreds of resume examples across various industries to inspire your own writing." },
+  { q: "What is an AI resume builder?", a: "It is a tool that uses artificial intelligence to generate role-specific bullet points, summaries, and skills based on your job title." },
+  { q: "Should I download my new resume as a PDF or text file?", a: "PDF is best for emailing and uploading to preserve formatting. Text files are useful for copying content into online application forms." },
+  { q: "Can I build my resume from my phone?", a: "Yes, our interface is optimized for touchscreens, allowing you to build, edit, and download resumes directly from your smartphone." },
+  { q: "How can I use Resume Builder for free?", a: "You can build your resume and download a TXT version for free. Premium design downloads may require a subscription." },
+  { q: "What is the cost of the Resume Builder tool?", a: "We offer a free tier and premium plans starting at a low monthly rate for unlimited PDF downloads and advanced AI features." },
+  { q: "I can’t log into my account. What should I do?", a: "Ensure you are using the correct email. If you forgot your password, click the 'Forgot Password' link on the login screen to reset it." },
+  { q: "How do I change my password?", a: "Log into your dashboard, go to 'Account Settings,' and select 'Change Password' under the Security tab." },
+  { q: "Does Resume Builder provide customer support?", a: "Yes, our support team is available via email and live chat to assist you with any technical issues or billing questions." }
+];
+
+const GOOGLE_REVIEWS = [
+    { name: "David Chen", img: "https://i.pravatar.cc/150?img=68", date: "2 days ago", rating: 5, text: "Incredible AI suggestions. It rewrote my bullet points to be so much more impactful. Got a call back from Google within a week!" },
+    { name: "Sarah Jenkins", img: "https://i.pravatar.cc/150?img=44", date: "3 days ago", rating: 5, text: "The templates are beautiful and professional. The ATS checker gave me confidence that my resume would actually be seen." },
+    { name: "Michael O.", img: "https://i.pravatar.cc/150?img=12", date: "4 days ago", rating: 5, text: "Worth every penny for the premium download. The PDF quality is top-notch, and the cover letter builder is a huge time-saver." },
+    { name: "Priya Sharma", img: "https://i.pravatar.cc/150?img=32", date: "1 week ago", rating: 5, text: "As a new grad, I was lost. This builder guided me through every section and helped me highlight my projects effectively. Highly recommended!" },
+    { name: "Alex T.", img: "https://i.pravatar.cc/150?img=59", date: "2 weeks ago", rating: 4, text: "Great tool. The AI is very smart. Would love to see a few more creative templates, but the current ones are solid." }
 ];
 
 const SCROLLER_TEMPLATES = [
@@ -1359,32 +1365,32 @@ const AFTER_UPLOAD_ACTIONS = [
   {
     icon: FileText,
     title: 'Review extracted content',
-    description: 'Check Exact Import or AI Optimized drafts field by field before you move into the final design.',
+    description: 'Check your summary, experience, education, and skills before the final design is locked in.',
   },
   {
     icon: Layout,
     title: 'Switch templates instantly',
-    description: `Try all ${LIVE_TEMPLATE_COUNT} templates without re-entering your content. Your sections and edits stay with you.`,
+    description: 'Try dozens of different resume styles seamlessly without ever re-entering your content.',
   },
   {
     icon: Brain,
     title: 'Enhance with AI',
-    description: 'Use targeted AI generation for stronger summaries and bullet points only when you want help.',
+    description: 'Use targeted AI generation for stronger summaries and bullet points that capture attention.',
   },
   {
     icon: Briefcase,
     title: 'Tailor to the Job Description',
-    description: 'Generate a role-focused draft, run ATS checks, and open interview prep against the role you are targeting.',
+    description: 'Generate a role-focused draft to ensure your resume perfectly aligns with specific opportunities.',
   },
   {
     icon: FolderOpen,
     title: 'Keep versions organized',
-    description: 'Save resumes, profile details, ATS history, interview prep, operation analysis, and Career Point usage in My Repository.',
+    description: 'Save your resumes, ATS results, and interview prep in one secure, unified workspace.',
   },
   {
     icon: Download,
-    title: 'Export a polished PDF',
-    description: 'Review the live A4 preview on desktop or mobile, then use Print or Save PDF when the layout looks right.',
+    title: 'Export a flawless PDF',
+    description: 'Download the final, pixel-perfect resume once the content and layout meet your standards.',
   },
 ];
 
@@ -1392,94 +1398,45 @@ const ENTRY_PATHS = [
   {
     icon: PenTool,
     title: 'Build from scratch',
-    description: 'Go straight into template selection and write every section yourself while keeping full control of structure and wording.',
-    note: 'Best when you want to build directly in the editor from a blank starting point.',
+    description: 'Go straight into template selection and craft each section yourself with absolute formatting control.',
+    note: 'Perfect for first-time job seekers or complete career pivots.',
   },
   {
     icon: UploadCloud,
     title: 'Import an existing resume',
-    description: 'Upload PDF, DOCX, DOC, or TXT files and choose between Exact Import or an AI Optimized starting draft.',
-    note: 'Best when you want to redesign or upgrade an existing resume without retyping it.',
+    description: 'Upload your old PDF or DOCX. Choose a direct import or an AI-optimized starting draft.',
+    note: 'Ideal when you want a rapid redesign without retyping your history.',
   },
   {
     icon: Briefcase,
     title: 'Tailor to a job description',
-    description: 'Combine your base resume with a target job description to build a more aligned draft before editing.',
-    note: 'Best when you are applying to a specific opening and want ATS checks and interview prep too.',
+    description: 'Combine your current resume with a target Job Description to generate a highly aligned variant.',
+    note: 'Crucial for passing ATS filters on highly competitive applications.',
   },
 ];
 
 const PRODUCT_NOTES = [
   {
-    title: 'Supported file types',
-    description: 'Upload PDF, DOCX, DOC, or TXT files. The builder parses those files into editable resume fields before template selection.',
+    title: 'Broad File Support',
+    description: 'Upload your existing PDF, DOCX, or TXT files. Our advanced parser will organize your data automatically.',
   },
   {
-    title: 'Job description is optional',
-    description: 'You only need a job description when you want JD tailoring, ATS score checks, or interview prep against a specific role.',
+    title: 'JD Not Required',
+    description: 'You only need a Job Description if you wish to utilize our advanced ATS match scans and role-tailoring features.',
   },
   {
-    title: 'AI output stays editable',
-    description: 'Exact Import preserves your wording as closely as possible. AI suggestions stay editable drafts until you decide what to keep.',
+    title: 'You Remain in Control',
+    description: 'Direct imports preserve your exact wording. All AI-assisted suggestions remain fully editable drafts until you say so.',
   },
   {
-    title: 'Repository storage is local to this browser',
-    description: 'Saved resumes, profile details, and usage history currently live in this browser workspace, and AI runs only when you request it.',
+    title: 'Secure Data Handling',
+    description: 'Your saved repository data lives securely in your workspace, and AI actions only process the data you explicitly request.',
   },
 ];
-
-const REPOSITORY_SHOWCASE_VIEWS = [
-  { id: 'resumes', label: 'Resumes', icon: FolderOpen },
-  { id: 'history', label: 'Analysis', icon: ScanLine },
-  { id: 'usage', label: 'My Usage', icon: Coins },
-  { id: 'operations', label: 'Operations', icon: BarChart3 },
-  { id: 'profile', label: 'Profile', icon: UserRound },
-];
-
-const LANDING_MODE_LABELS = {
-  scratch: 'From Scratch',
-  upload: 'Using Old Resume',
-  tailor: 'Resume + JD',
-};
-
-const formatLandingNumber = (value) => new Intl.NumberFormat().format(Number(value || 0));
-
-const formatLandingDate = (value) => {
-  if (!value) return 'Just now';
-
-  try {
-    return new Date(value).toLocaleDateString([], {
-      month: 'short',
-      day: 'numeric',
-    });
-  } catch (error) {
-    return value;
-  }
-};
-
-const formatLandingDateTime = (value) => {
-  if (!value) return 'Not yet';
-
-  try {
-    return new Date(value).toLocaleString([], {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-  } catch (error) {
-    return value;
-  }
-};
 
 const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRepository, onOpenPricing }) => {
   const scrollRef = useRef(null);
-  const [repositoryStats, setRepositoryStats] = useState(() => getRepositoryStats());
-  const [repositoryProfile, setRepositoryProfile] = useState(() => getResumeProfile());
-  const [repositoryRecords, setRepositoryRecords] = useState(() => listResumeRecords());
-  const [repositoryAnalytics, setRepositoryAnalytics] = useState(() => getTokenUsageAnalytics());
-  const [showcaseView, setShowcaseView] = useState('resumes');
-  const [lastRepositorySync, setLastRepositorySync] = useState(() => new Date());
+  const reviewScrollRef = useRef(null);
 
   const scroll = (direction, ref) => {
     if(ref.current) {
@@ -1488,85 +1445,6 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
         current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
     }
   };
-
-  useEffect(() => {
-    const refreshRepositoryPreview = () => {
-      setRepositoryStats(getRepositoryStats());
-      setRepositoryProfile(getResumeProfile());
-      setRepositoryRecords(listResumeRecords());
-      setRepositoryAnalytics(getTokenUsageAnalytics());
-      setLastRepositorySync(new Date());
-    };
-
-    refreshRepositoryPreview();
-
-    const refreshIntervalId = window.setInterval(refreshRepositoryPreview, 15000);
-    const cycleIntervalId = window.setInterval(() => {
-      setShowcaseView((currentView) => {
-        const currentIndex = REPOSITORY_SHOWCASE_VIEWS.findIndex((view) => view.id === currentView);
-        const nextIndex = (currentIndex + 1) % REPOSITORY_SHOWCASE_VIEWS.length;
-        return REPOSITORY_SHOWCASE_VIEWS[nextIndex].id;
-      });
-    }, 3600);
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        refreshRepositoryPreview();
-      }
-    };
-
-    const handleStorageChange = () => {
-      refreshRepositoryPreview();
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.clearInterval(refreshIntervalId);
-      window.clearInterval(cycleIntervalId);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
-  const latestAtsEntry = useMemo(
-    () =>
-      repositoryRecords
-        .flatMap((record) =>
-          (record.atsHistory || []).map((entry) => ({
-            ...entry,
-            resumeTitle: entry.resumeTitle || record.title,
-          }))
-        )
-        .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())[0] || null,
-    [repositoryRecords]
-  );
-
-  const latestInterviewEntry = useMemo(
-    () =>
-      repositoryRecords
-        .flatMap((record) =>
-          (record.interviewPrepHistory || []).map((entry) => ({
-            ...entry,
-            resumeTitle: entry.resumeTitle || record.title,
-          }))
-        )
-        .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())[0] || null,
-    [repositoryRecords]
-  );
-
-  const topOperationUsage = useMemo(
-    () => (repositoryAnalytics.operationUsage || []).slice(0, 4),
-    [repositoryAnalytics]
-  );
-
-  const recentResumes = useMemo(
-    () => repositoryRecords.slice(0, 3),
-    [repositoryRecords]
-  );
-
-  const showcaseIndex = REPOSITORY_SHOWCASE_VIEWS.findIndex((view) => view.id === showcaseView);
 
   return (
     <div className="theme-app-shell min-h-screen overflow-y-auto custom-scrollbar scroll-smooth font-sans text-slate-900">
@@ -1577,7 +1455,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
       {/* 2. SEO META TAGS */}
       <SEO 
         title="Free AI Resume Builder | Create a Professional CV in Minutes - CareerSense"
-        description="Upload PDF, DOCX, DOC, or TXT resumes, choose Exact Import or AI Optimized drafting, switch across 100 templates, and export a polished PDF with CareerSense."
+        description="Build an ATS-friendly resume instantly with our AI-powered builder."
         keywords="resume builder, AI resume, CV maker"
       />
 
@@ -1592,7 +1470,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-500">Resume Builder</span>
             </h1>
             <p className="mb-8 max-w-xl text-base leading-relaxed text-[color:var(--theme-text-secondary)] sm:text-lg">
-              Upload PDF, DOCX, DOC, or TXT resumes, choose Exact Import or AI Optimized drafting, review every section, switch across {LIVE_TEMPLATE_COUNT} templates, and export when the final resume is ready.
+              Use our professional, field-tested resume templates that follow the exact rules employers look for. Easily construct an ATS-optimized profile in under 15 minutes.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
@@ -1613,17 +1491,16 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
               </button>
             </div>
 
-            <div className="flex flex-col items-start gap-3 text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--theme-text-muted)] sm:flex-row sm:flex-wrap sm:items-center">
-              {[
-                'Exact or AI import',
-                'Live edit + template switching',
-                'Desktop and mobile PDF export',
-              ].map((item) => (
-                <div key={item} className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/85 px-3 py-2 shadow-sm">
-                  <CheckCircle size={14} className="text-teal-600" />
-                  <span>{item}</span>
+            <div className="flex flex-col items-start gap-4 text-xs font-bold uppercase tracking-widest text-[color:var(--theme-text-muted)] sm:flex-row sm:items-center sm:gap-6">
+              <div className="flex -space-x-3">
+                {[1,2,3,4].map(i => <div key={i} className="h-10 w-10 rounded-full border-2 border-white bg-slate-200 bg-cover shadow-sm" style={{backgroundImage: `url(https://i.pravatar.cc/100?img=${i+10})`}} />)}
+              </div>
+              <div className="flex flex-col">
+                <div className="flex text-yellow-500 mb-1">
+                    {[1,2,3,4,5].map(i => <Star key={i} size={12} fill="currentColor" />)}
                 </div>
-              ))}
+                <span>Trusted by 45k+ Job Seekers</span>
+              </div>
             </div>
           </div>
           <div className="relative hidden lg:block perspective-1000 h-[600px] w-full">
@@ -1683,19 +1560,10 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
       {/* 5. LOGO STRIP */}
       <div className="border-b border-slate-100 bg-white py-10">
           <div className="max-w-7xl mx-auto px-6 text-center">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">What stays consistent in every workflow</p>
-              <div className="flex flex-wrap justify-center gap-4 md:gap-5">
-                  {[
-                    'Exact Import',
-                    'AI Optimized Drafts',
-                    `${LIVE_TEMPLATE_COUNT} Templates`,
-                    'Live Editing',
-                    'ATS + Interview Prep',
-                    'My Repository',
-                  ].map(company => (
-                      <span key={company} className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-slate-600">
-                        {company}
-                      </span>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">Candidates hired by top companies</p>
+              <div className="flex flex-wrap justify-center gap-12 md:gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+                  {['Google', 'Amazon', 'Microsoft', 'Spotify', 'Tesla', 'Netflix'].map(company => (
+                      <span key={company} className="text-xl font-black text-slate-900 tracking-tighter">{company}</span>
                   ))}
               </div>
           </div>
@@ -1711,7 +1579,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
                     How CareerSense Resume Builder <span className="text-[#0d9488]">works</span>
                   </h2>
                   <p className="text-base sm:text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
-                    See the two strongest AI-assisted flows: import an existing resume with the mode you want, or align a base resume against a target job description before editing.
+                    Watch how our AI-powered engine seamlessly transforms your existing profile or aligns it perfectly with your target job description.
                   </p>
               </div>
 
@@ -1720,7 +1588,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
                   <div className="flex flex-col bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 hover:border-teal-300 transition-all duration-500 shadow-lg hover:shadow-xl group">
                       <div className="h-16 flex items-center justify-center mb-6">
                         <h3 className="text-lg font-bold text-slate-800 text-center leading-snug">
-                            Import with Exact or AI Optimized mode
+                            Enhance using your existing Resume
                         </h3>
                       </div>
                       <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-black aspect-video group-hover:shadow-teal-900/10 transition-all duration-500">
@@ -1739,7 +1607,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
                   <div className="flex flex-col bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 hover:border-emerald-300 transition-all duration-500 shadow-lg hover:shadow-xl group">
                       <div className="h-16 flex items-center justify-center mb-6">
                         <h3 className="text-lg font-bold text-slate-800 text-center leading-snug">
-                            Tailor with a target job description
+                            Customize for specific Job Requirements
                         </h3>
                       </div>
                       <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-black aspect-video group-hover:shadow-emerald-900/10 transition-all duration-500">
@@ -1766,7 +1634,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
                   <div className="theme-section-glass relative rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-8">
                       <div className="bg-white rounded-2xl border border-slate-100 p-5 sm:p-8 text-center shadow-inner">
                           <h3 className="text-xl font-bold text-slate-800 mb-2">Import Your Resume</h3>
-                          <p className="text-slate-500 text-sm mb-8">Drag and drop PDF, DOCX, DOC, or TXT files to start.</p>
+                          <p className="text-slate-500 text-sm mb-8">Drag and drop or upload your existing resume to start.</p>
                           <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 sm:p-10 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 hover:border-teal-400 transition-colors cursor-pointer group/drop relative">
                                 <input 
                                     type="file" 
@@ -1789,15 +1657,8 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-teal-600">Without Losing Your Momentum</span>
                   </h2>
                   <p className="text-base sm:text-lg text-slate-600 mb-8 leading-relaxed">
-                    Start from an existing draft, choose Exact Import or AI Optimized, review every section, and continue editing on desktop or mobile before exporting the final PDF.
+                    Already have a draft? Upload it to our platform in seconds from your preferred device and let our AI parser instantly organize your data into a fully editable format.
                   </p>
-                  <div className="mb-8 flex flex-wrap gap-3 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">
-                    {['PDF, DOCX, DOC, TXT', 'Exact or AI Optimized', 'Desktop + mobile editing'].map((item) => (
-                      <div key={item} className="rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                        {item}
-                      </div>
-                    ))}
-                  </div>
                   <div className="relative inline-block">
                     <input 
                         type="file" 
@@ -1833,8 +1694,8 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
               <div className="flex flex-col gap-6 sm:flex-row sm:justify-between sm:items-end mb-10 sm:mb-16">
                   <div className="max-w-xl">
-                      <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4 uppercase tracking-tight">Choose from our <span className="text-[#0d9488]">{LIVE_TEMPLATE_COUNT} Professional Templates</span></h2>
-                      <p className="text-slate-500 text-base sm:text-lg">Explore recruiter-friendly, executive, modern, data, creative, and specialist layouts, then switch styles without rebuilding the resume itself.</p>
+                      <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4 uppercase tracking-tight">Choose from our <span className="text-[#0d9488]">70+ Professional Templates</span></h2>
+                      <p className="text-slate-500 text-base sm:text-lg">Explore ATS-friendly, modern, executive, and creative layouts, then switch styles without ever needing to rebuild the resume itself.</p>
                   </div>
                   <div className="flex gap-2 self-start sm:self-auto">
                       <button onClick={() => scroll('left', scrollRef)} className="p-3 bg-white rounded-full shadow-md hover:bg-slate-100 border border-slate-200 transition-all active:scale-95"><ChevronLeft size={20}/></button>
@@ -1865,8 +1726,8 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
         <div className="pointer-events-none absolute right-0 top-8 h-72 w-72 rounded-full bg-emerald-100/20 blur-[120px]" />
         <div className="mx-auto max-w-[1320px]">
           <div className="max-w-[960px]">
-            <h2 className="text-3xl sm:text-3xl font-black text-slate-900 mb-4 uppercase tracking-tight">What you can do after the <span className="text-[#0d9488]">first upload.</span></h2>
-            <p className="text-slate-500 text-base sm:text-lg">The builder does more than parse a file. You can refine the draft, compare templates, run role checks, save history, and export when the A4 layout is ready.</p>
+            <h2 className="text-3xl sm:text-3xl font-black text-slate-900 mb-4 uppercase tracking-tight">Complete your profile, <span className="text-[#0d9488]">command your career.</span></h2>
+            <p className="text-slate-500 text-base sm:text-lg">Your workflow doesn't stop at data entry. Take advantage of our advanced editor suite to refine, tailor, and perfectly format your professional history.</p>
           </div>
 
           <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -1899,14 +1760,14 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
          <div className="max-w-7xl mx-auto">
             <div className="grid md:grid-cols-2 gap-10 lg:gap-16 items-center">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <FeatureCard icon={UploadCloud} title="Exact or AI import" desc="Start from the same resume in two ways: preserve wording closely or build a stronger editable draft with AI." />
-                    <FeatureCard icon={MousePointer2} title="Live preview editing" desc="Edit by section or click directly on the resume preview when you want to adjust the wording in context." />
-                    <FeatureCard icon={Briefcase} title="ATS and interview prep" desc="Use a target job description only when you want role matching, ATS scoring, or interview prep guidance." />
-                    <FeatureCard icon={FolderOpen} title="Repository analytics" desc="Reopen resumes, profile details, ATS history, interview prep, operation analysis, and Career Point usage later." />
+                    <FeatureCard icon={Brain} title="AI-Powered Text" desc="Instantly generate impactful bullet points for your role using our advanced AI algorithms." />
+                    <FeatureCard icon={Layout} title="ATS Optimized" desc="Templates meticulously designed to pass the Applicant Tracking Systems used by major companies." />
+                    <FeatureCard icon={FileText} title="Real-time Preview" desc="See changes instantly as you edit. No more guessing how your final document will render." />
+                    <FeatureCard icon={CheckCircle2} title="Pre-written Examples" desc="Access thousands of pre-written examples tailored for every job title and industry." />
                 </div>
                 <div>
-                    <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-6 leading-tight">One builder, <br/><span className="text-[#0d9488]">multiple real workflows.</span></h2>
-                    <p className="text-slate-500 mb-8 leading-relaxed text-base sm:text-lg">CareerSense is not just a template picker. It is a working resume studio that supports imports, job-specific tailoring, live editing, repository history, and final A4 PDF export from the same workspace.</p>
+                    <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-6 leading-tight">Designed to get you <br/><span className="text-[#0d9488]">Hired Faster.</span></h2>
+                    <p className="text-slate-500 mb-8 leading-relaxed text-base sm:text-lg">Most resumes never reach a human eye. Our platform ensures your resume is not only visually striking but technically optimized for the robots that read it first.</p>
                     <button onClick={onStart} className="theme-primary-button rounded-xl px-8 py-4 font-bold text-sm transition shadow-lg hover:-translate-y-0.5">Start Building Now</button>
                 </div>
             </div>
@@ -1919,8 +1780,8 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
         <div className="mx-auto max-w-7xl">
           <div className="max-w-4xl">
             <div className="max-w-[960px]">
-              <h2 className="text-3xl sm:text-3xl font-black text-slate-900 mb-4 uppercase tracking-tight">Built with transparency <span className="text-[#0d9488]">and editable control.</span></h2>
-              <p className="text-slate-500 text-base sm:text-lg">These notes match the current builder behavior, file support, AI usage, and how My Repository works today.</p>
+              <h2 className="text-3xl sm:text-3xl font-black text-slate-900 mb-4 uppercase tracking-tight">Built with transparency <span className="text-[#0d9488]">and control.</span></h2>
+              <p className="text-slate-500 text-base sm:text-lg">Everything you need to know about how CareerSense handles your data, processes your files, and utilizes AI generation.</p>
             </div>
           </div>
 
@@ -1931,7 +1792,7 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
                 className="rounded-[1.8rem] border border-[#dbece7] bg-white px-6 py-6 shadow-[0_16px_40px_rgba(80,149,136,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-[#bfe4db] hover:shadow-[0_24px_56px_rgba(80,149,136,0.12)]"
               >
                 <div className="text-[0.78rem] font-black uppercase tracking-[0.24em] text-teal-700">
-                  Current Workspace Note
+                  Platform Standard
                 </div>
                 <h3 className="mt-5 text-[1.35rem] font-black tracking-[-0.04em] text-slate-900">
                   {item.title}
@@ -1945,279 +1806,50 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
         </div>
       </section>
 
-      {/* 15. LIVE REPOSITORY SHOWCASE */}
-      <section className="border-b border-slate-200 bg-white py-16 sm:py-20 lg:py-24 scroll-mt-28" id="reviews">
-        <div className="mx-auto max-w-[1600px] px-4 sm:px-6">
-          <div className="grid gap-8 xl:grid-cols-[0.9fr_1.1fr] xl:items-start">
-            <div className="max-w-xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50/80 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-teal-700 shadow-sm">
-                <Sparkles size={12} />
-                Live Repository Preview
-              </div>
-              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl lg:text-[3.2rem] lg:leading-[1.02]">
-                See what is happening in <span className="text-[#0d9488]">My Repository</span> right now.
-              </h2>
-              <p className="mt-5 text-base leading-8 text-slate-500 sm:text-lg">
-                This section now reflects the actual browser workspace instead of static marketing cards. It rotates through saved resumes, analysis history, profile details, operation analysis, and Career Point usage automatically.
-              </p>
-
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50 px-5 py-5 shadow-sm">
-                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Live sync</div>
-                  <div className="mt-3 flex items-center gap-2 text-base font-black text-slate-900">
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_0_6px_rgba(16,185,129,0.12)] motion-safe:animate-pulse" />
-                    Updated {formatLandingDateTime(lastRepositorySync)}
+      {/* 15. GOOGLE REVIEWS SECTION */}
+      <div className="py-16 sm:py-20 lg:py-24 bg-white border-b border-slate-200 overflow-hidden scroll-mt-28" id="reviews">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 sm:mb-16 gap-6 sm:gap-8">
+                  <div className="max-w-lg">
+                    <div className="flex flex-wrap items-center gap-3 text-2xl font-black text-slate-900 mb-2">
+                        <span>4.9</span>
+                        <div className="flex text-yellow-500">
+                            {[1,2,3,4,5].map(i => <Star key={i} size={24} fill="currentColor" />)}
+                        </div>
+                    </div>
+                    <p className="text-base sm:text-lg text-slate-500">Based on <strong>1,250+ reviews</strong> from recently hired job seekers.</p>
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">Refreshes from the same browser storage used by My Repository.</p>
-                </div>
-                <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50 px-5 py-5 shadow-sm">
-                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Current snapshot</div>
-                  <div className="mt-3 text-base font-black text-slate-900">
-                    {formatLandingNumber(repositoryStats.totalResumes)} resumes, {formatLandingNumber(repositoryStats.atsRuns)} ATS scans, {formatLandingNumber(repositoryStats.interviewPrepRuns)} prep runs
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">Counts update automatically as users save resumes or run AI actions.</p>
-                </div>
-              </div>
-
-              {onOpenRepository && (
-                <button
-                  type="button"
-                  onClick={onOpenRepository}
-                  className="theme-primary-button mt-8 inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-sm font-black uppercase tracking-[0.16em] transition-all hover:-translate-y-0.5"
-                >
-                  Open My Repository
-                  <ArrowRight size={16} />
-                </button>
-              )}
-            </div>
-
-            <div className="relative overflow-hidden rounded-[2rem] border border-[#dce9e4] bg-[linear-gradient(180deg,#f8fffc_0%,#ffffff_100%)] p-3 shadow-[0_26px_70px_rgba(72,138,124,0.12)]">
-              <div className="rounded-[1.65rem] border border-slate-200 bg-white p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] sm:p-6">
-                <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <div className="text-[10px] font-black uppercase tracking-[0.24em] text-teal-700">My Repository</div>
-                    <div className="mt-2 text-2xl font-black tracking-tight text-slate-900">Live workspace activity</div>
-                  </div>
-                  <div className="inline-flex items-center gap-2 self-start rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">
-                    <Clock3 size={14} className="text-teal-600" />
-                    Auto cycling
-                  </div>
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {REPOSITORY_SHOWCASE_VIEWS.map((view) => {
-                    const Icon = view.icon;
-                    const isActive = showcaseView === view.id;
-
-                    return (
-                      <button
-                        key={view.id}
-                        type="button"
-                        onClick={() => setShowcaseView(view.id)}
-                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] transition-all ${
-                          isActive
-                            ? 'border-teal-200 bg-teal-50 text-teal-700 shadow-sm'
-                            : 'border-slate-200 bg-white text-slate-500 hover:border-teal-200 hover:bg-teal-50/60 hover:text-teal-700'
-                        }`}
-                      >
-                        <Icon size={14} />
-                        {view.label}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full md:w-auto">
+                      <button className="w-full sm:w-auto px-6 sm:px-8 py-3 rounded-full bg-white text-slate-900 font-bold text-sm border-2 border-slate-200 hover:border-[#0d9488] hover:text-[#0d9488] transition-colors flex items-center justify-center gap-2">
+                          Review us on Google
                       </button>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-4 h-1.5 rounded-full bg-slate-100">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-500"
-                    style={{
-                      width: `${100 / REPOSITORY_SHOWCASE_VIEWS.length}%`,
-                      transform: `translateX(${showcaseIndex * 100}%)`,
-                    }}
-                  />
-                </div>
-
-                <div className="mt-6 min-h-[360px]">
-                  {showcaseView === 'resumes' && (
-                    <div className="space-y-5 transition-all duration-500">
-                      <div className="grid gap-4 sm:grid-cols-3">
-                        <LiveMetricCard label="Saved resumes" value={formatLandingNumber(repositoryStats.totalResumes)} hint="All versions in repository" accent="teal" />
-                        <LiveMetricCard label="From scratch" value={formatLandingNumber(repositoryStats.scratchCount)} hint="Started directly in builder" accent="sky" />
-                        <LiveMetricCard label="Resume + JD" value={formatLandingNumber(repositoryStats.tailorCount)} hint="Role-aligned drafts" accent="emerald" />
+                      <div className="flex gap-2 self-start sm:self-auto">
+                          <button onClick={() => scroll('left', reviewScrollRef)} className="p-3 bg-white rounded-full shadow-md hover:bg-slate-100 border border-slate-200 transition-all active:scale-95"><ChevronLeft size={20}/></button>
+                          <button onClick={() => scroll('right', reviewScrollRef)} className="p-3 bg-white rounded-full shadow-md hover:bg-slate-100 border border-slate-200 transition-all active:scale-95"><ChevronRight size={20}/></button>
                       </div>
-                      <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
-                        <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Recent resumes</div>
-                        <div className="mt-4 space-y-3">
-                          {recentResumes.length ? recentResumes.map((record) => (
-                            <div key={record.id} className="flex items-start justify-between gap-4 rounded-[1.2rem] border border-white bg-white px-4 py-3 shadow-sm">
-                              <div className="min-w-0">
-                                <div className="truncate text-sm font-black text-slate-900">{record.title}</div>
-                                <div className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-700">
-                                  {LANDING_MODE_LABELS[record.mode] || record.mode} · {record.selectedTemplate || 'Template selected'}
-                                </div>
-                              </div>
-                              <div className="shrink-0 text-xs font-medium text-slate-500">{formatLandingDate(record.updatedAt)}</div>
-                            </div>
-                          )) : (
-                            <div className="rounded-[1.2rem] border border-dashed border-slate-200 bg-white px-4 py-5 text-sm leading-7 text-slate-500">
-                              Save your first resume to see it animate here.
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {showcaseView === 'history' && (
-                    <div className="space-y-5 transition-all duration-500">
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <LiveMetricCard label="ATS runs" value={formatLandingNumber(repositoryStats.atsRuns)} hint="Saved against real resumes" accent="teal" />
-                        <LiveMetricCard label="Interview prep runs" value={formatLandingNumber(repositoryStats.interviewPrepRuns)} hint="Reopen later in editor" accent="violet" />
-                      </div>
-                      <div className="grid gap-4 lg:grid-cols-2">
-                        <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
-                          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-teal-700">
-                            <ScanLine size={14} />
-                            Latest ATS result
-                          </div>
-                          {latestAtsEntry ? (
-                            <>
-                              <div className="mt-4 text-3xl font-black tracking-tight text-slate-900">{latestAtsEntry.result?.score ?? '--'}%</div>
-                              <div className="mt-1 text-sm font-bold text-slate-700">{latestAtsEntry.resumeTitle}</div>
-                              <p className="mt-3 text-sm leading-7 text-slate-500">
-                                {latestAtsEntry.jdText ? 'Saved against a target job description.' : 'Saved without a JD snapshot.'}
-                              </p>
-                              <div className="mt-3 text-xs font-medium text-slate-400">{formatLandingDateTime(latestAtsEntry.createdAt)}</div>
-                            </>
-                          ) : (
-                            <p className="mt-4 text-sm leading-7 text-slate-500">Run your first ATS scan to start building analysis history.</p>
-                          )}
-                        </div>
-                        <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
-                          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-teal-700">
-                            <MessageSquare size={14} />
-                            Latest interview prep
-                          </div>
-                          {latestInterviewEntry ? (
-                            <>
-                              <div className="mt-4 text-3xl font-black tracking-tight text-slate-900">
-                                {latestInterviewEntry.result?.questions?.length || 0}
-                              </div>
-                              <div className="mt-1 text-sm font-bold text-slate-700">Questions saved for {latestInterviewEntry.resumeTitle}</div>
-                              <p className="mt-3 text-sm leading-7 text-slate-500">
-                                Reopen the latest prep set before deciding whether to generate a new one.
-                              </p>
-                              <div className="mt-3 text-xs font-medium text-slate-400">{formatLandingDateTime(latestInterviewEntry.createdAt)}</div>
-                            </>
-                          ) : (
-                            <p className="mt-4 text-sm leading-7 text-slate-500">Interview prep results will appear here once you generate them.</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {showcaseView === 'usage' && (
-                    <div className="space-y-5 transition-all duration-500">
-                      <div className="grid gap-4 sm:grid-cols-3">
-                        <LiveMetricCard label="Career Points" value={formatLandingNumber(repositoryStats.totalCareerPoints)} hint="Total used so far" accent="teal" />
-                        <LiveMetricCard label="Total bill" value={repositoryStats.totalBillUsdFormatted} hint="Single running total" accent="emerald" />
-                        <LiveMetricCard label="AI requests" value={formatLandingNumber(repositoryStats.totalAiCalls)} hint="Tracked requests" accent="sky" />
-                      </div>
-                      <div className="grid gap-4 lg:grid-cols-2">
-                        <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
-                          <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Current usage snapshot</div>
-                          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                            <UsageMiniStat label="Today" value={formatLandingNumber(repositoryAnalytics.todayTokens)} />
-                            <UsageMiniStat label="This month" value={formatLandingNumber(repositoryAnalytics.currentMonthTokens)} />
-                            <UsageMiniStat label="Average per AI request" value={formatLandingNumber(repositoryAnalytics.averageTokensPerCall)} />
-                            <UsageMiniStat label="Prompt + completion" value={`${formatLandingNumber(repositoryAnalytics.totalPromptTokens)} / ${formatLandingNumber(repositoryAnalytics.totalCompletionTokens)}`} />
-                          </div>
-                        </div>
-                        <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
-                          <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Recent daily usage</div>
-                          <div className="mt-4 space-y-3">
-                            {(repositoryAnalytics.dailyUsage || []).length ? repositoryAnalytics.dailyUsage.map((entry) => (
-                              <div key={entry.key} className="space-y-1.5">
-                                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-                                  <span>{entry.label}</span>
-                                  <span>{formatLandingNumber(entry.totalTokens)}</span>
-                                </div>
-                                <div className="h-2 rounded-full bg-white">
-                                  <div
-                                    className="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-500"
-                                    style={{
-                                      width: `${Math.max(10, Math.min(100, repositoryAnalytics.todayTokens ? (entry.totalTokens / repositoryAnalytics.todayTokens) * 100 : 18))}%`,
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            )) : (
-                              <p className="text-sm leading-7 text-slate-500">Career Point usage appears here after the first AI request.</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {showcaseView === 'operations' && (
-                    <div className="space-y-5 transition-all duration-500">
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <LiveMetricCard label="Tracked operations" value={formatLandingNumber(topOperationUsage.length)} hint="Top AI flows by Career Points" accent="teal" />
-                        <LiveMetricCard label="Calls recorded" value={formatLandingNumber(repositoryAnalytics.totalCalls)} hint="Across extract, ATS, prep, and rewrite flows" accent="sky" />
-                      </div>
-                      <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
-                        <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Operation analysis</div>
-                        <div className="mt-4 space-y-4">
-                          {topOperationUsage.length ? topOperationUsage.map((entry, index) => {
-                            const maxValue = topOperationUsage[0]?.totalTokens || 1;
-                            const width = Math.max(14, Math.round((entry.totalTokens / maxValue) * 100));
-                            return (
-                              <div key={`${entry.operation}-${index}`} className="space-y-1.5">
-                                <div className="flex items-center justify-between gap-4 text-sm">
-                                  <span className="font-bold text-slate-700 capitalize">{entry.operation.replace(/_/g, ' ')}</span>
-                                  <span className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{formatLandingNumber(entry.totalTokens)} pts</span>
-                                </div>
-                                <div className="h-2.5 rounded-full bg-white">
-                                  <div
-                                    className="h-full rounded-full bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 transition-all duration-500"
-                                    style={{ width: `${width}%` }}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          }) : (
-                            <p className="text-sm leading-7 text-slate-500">Operation analysis will populate after AI actions are recorded.</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {showcaseView === 'profile' && (
-                    <div className="space-y-5 transition-all duration-500">
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <LiveMetricCard label="Profile name" value={repositoryProfile?.name || 'Waiting for first upload'} hint="Filled from resume imports" accent="teal" compact />
-                        <LiveMetricCard label="Profile title" value={repositoryProfile?.title || 'Add a title in My Repository'} hint="Editable any time" accent="emerald" compact />
-                      </div>
-                      <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
-                        <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Profile snapshot</div>
-                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                          <ProfileSnapshot label="Email" value={repositoryProfile?.email || 'Will appear after first import'} />
-                          <ProfileSnapshot label="Phone" value={repositoryProfile?.phone || 'Will appear after first import'} />
-                          <ProfileSnapshot label="Location" value={repositoryProfile?.location || 'Will appear after first import'} />
-                          <ProfileSnapshot label="Last updated" value={formatLandingDateTime(repositoryProfile?.updatedAt)} />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  </div>
               </div>
-            </div>
+              <div ref={reviewScrollRef} className="flex gap-6 overflow-x-auto pb-12 snap-x snap-mandatory hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                  {GOOGLE_REVIEWS.map((review, i) => (
+                      <div key={i} className="snap-start shrink-0 w-[300px] sm:w-[350px] bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center gap-4 mb-6">
+                              <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-200">
+                                  <img src={review.img} alt={review.name} className="w-full h-full object-cover" />
+                              </div>
+                              <div>
+                                  <div className="font-bold text-slate-900 flex items-center gap-2">{review.name}</div>
+                                  <div className="text-xs text-slate-500">{review.date}</div>
+                              </div>
+                          </div>
+                          <div className="flex text-yellow-500 mb-4">
+                              {[...Array(review.rating)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
+                          </div>
+                          <p className="text-slate-700 text-sm leading-relaxed">"{review.text}"</p>
+                      </div>
+                  ))}
+              </div>
           </div>
-        </div>
-      </section>
+      </div>
 
       {/* 16. FAQ SECTION */}
       <div id="faq" className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 max-w-7xl mx-auto scroll-mt-28">
@@ -2251,37 +1883,6 @@ const ResumeBuilderLanding = ({ onStart, onViewTemplates, onFileSelect, onOpenRe
     </div>
   );
 };
-
-const LiveMetricCard = ({ label, value, hint, accent = 'teal', compact = false }) => {
-  const accentClasses = {
-    teal: 'from-teal-500/12 to-emerald-500/5 text-teal-700',
-    emerald: 'from-emerald-500/12 to-lime-500/5 text-emerald-700',
-    sky: 'from-sky-500/12 to-cyan-500/5 text-sky-700',
-    violet: 'from-violet-500/12 to-fuchsia-500/5 text-violet-700',
-  };
-
-  return (
-    <div className={`rounded-[1.35rem] border border-slate-200 bg-gradient-to-br ${accentClasses[accent] || accentClasses.teal} p-4 shadow-sm`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</div>
-      <div className={`mt-3 font-black tracking-tight text-slate-900 ${compact ? 'text-xl' : 'text-2xl'}`}>{value}</div>
-      <div className="mt-2 text-sm leading-6 text-slate-500">{hint}</div>
-    </div>
-  );
-};
-
-const UsageMiniStat = ({ label, value }) => (
-  <div className="rounded-[1rem] border border-white bg-white px-4 py-3 shadow-sm">
-    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{label}</div>
-    <div className="mt-2 text-base font-black tracking-tight text-slate-900">{value}</div>
-  </div>
-);
-
-const ProfileSnapshot = ({ label, value }) => (
-  <div className="rounded-[1rem] border border-white bg-white px-4 py-3 shadow-sm">
-    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{label}</div>
-    <div className="mt-2 text-sm font-bold leading-6 text-slate-700">{value}</div>
-  </div>
-);
 
 const FeatureCard = ({ icon: Icon, title, desc }) => (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:border-teal-200 transition-colors">

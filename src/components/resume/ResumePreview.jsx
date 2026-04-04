@@ -117,6 +117,12 @@ const TEMPLATE_COMPONENT_MAP = {
   'info-teal': Templates.InfoTeal,
   'info-green': Templates.InfoGreen,
   'info-navy': Templates.InfoNavy,
+  'career-launch': Templates.CareerLaunch,
+  'associate-prime': Templates.AssociatePrime,
+  'consulting-line': Templates.ConsultingLine,
+  'leadership-signature': Templates.LeadershipSignature,
+  'boardroom-one': Templates.BoardroomOne,
+  'ceo-brief': Templates.CeoBrief,
 };
 
 export const normalizeDocumentSettings = (settings = {}) => ({

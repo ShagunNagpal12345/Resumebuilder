@@ -13,16 +13,17 @@ const Footer = ({ onStart, onOpenPricing, onNavigateLandingSection }) => {
   };
 
   const productLinks = [
+    { label: 'How It Works', action: () => navigateToSection('how-it-works') },
     { label: 'Resume Templates', action: () => navigateToSection('templates') },
-    { label: 'AI Job Tailoring', action: () => navigateToSection('features') },
+    { label: 'Exact or AI Import', action: () => navigateToSection('import') },
     { label: 'Pricing Plans', action: onOpenPricing },
     { label: 'Resume Examples', action: () => navigateToSection('examples') },
   ];
 
   const resourceLinks = [
-    { label: 'Career Blog', action: () => navigateToSection('faq') },
-    { label: 'Interview Prep', action: () => navigateToSection('features') },
-    { label: 'ATS Scanner', action: () => navigateToSection('features') },
+    { label: 'ATS and Interview Prep', action: () => navigateToSection('features') },
+    { label: 'Repository Workflow', action: () => navigateToSection('reviews') },
+    { label: 'Mobile PDF Export', action: () => navigateToSection('import') },
     { label: 'Help Center', action: () => navigateToSection('faq') },
   ];
 
@@ -44,7 +45,7 @@ const Footer = ({ onStart, onOpenPricing, onNavigateLandingSection }) => {
               CareerSense
             </div>
             <p className="text-sm leading-relaxed">
-              The AI-powered resume builder designed to beat the ATS and help you land your dream job faster.
+              CareerSense helps you import, edit, tailor, store, and export resumes from one connected builder workspace.
             </p>
             <div className="flex gap-4">
                 <button type="button" onClick={() => navigateToSection('reviews')} className="transition-colors hover:text-[color:var(--theme-accent-strong)]" aria-label="Go to reviews"><Twitter size={18} /></button>
